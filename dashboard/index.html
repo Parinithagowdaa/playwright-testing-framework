@@ -1,0 +1,757 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Automation Framework - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(to bottom right, #f8fafc 0%, #e0e7ff 50%, #fce7f3 100%);
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        /* Header with Gradient */
+        .header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+            color: white;
+            padding: 24px 48px;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-icon {
+            font-size: 42px;
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .logo-text h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .logo-text p {
+            font-size: 14px;
+            margin: 4px 0 0 0;
+            opacity: 0.95;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        /* Navigation Tabs */
+        .navigation-tabs {
+            background: white;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+            position: sticky;
+            top: 112px;
+            z-index: 90;
+            box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08);
+        }
+
+        .tabs-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 12px 48px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .tab-button {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border-radius: 12px;
+        }
+
+        .tab-button:hover {
+            color: #6366f1;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+
+        .tab-button.active {
+            color: white;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab-icon {
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px 48px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0 0 8px 0;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            font-size: 15px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .primary-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-card-title {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card-icon {
+            font-size: 24px;
+        }
+
+        .stat-card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card-subtitle {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Card Components */
+        .card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
+            transition: all 0.3s;
+            margin-bottom: 24px;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        /* Page Sections */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Action Buttons Grid */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .action-btn:hover {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .action-icon {
+            font-size: 32px;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+        }
+
+        .action-text {
+            flex: 1;
+        }
+
+        .action-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .action-desc {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .header {
+                padding: 16px 24px;
+            }
+
+            .logo-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 28px;
+            }
+
+            .logo-text h1 {
+                font-size: 20px;
+            }
+
+            .logo-text p {
+                font-size: 12px;
+            }
+
+            .tabs-container {
+                padding: 12px 24px;
+                overflow-x: auto;
+            }
+
+            .container {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">⚡</div>
+                <div class="logo-text">
+                    <h1>TestCraft Pro</h1>
+                    <p>Intelligent Test Automation & Quality Assurance Platform</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="navigation-tabs">
+        <div class="tabs-container">
+            <button class="tab-button active" onclick="showPage(0)">
+                <span class="tab-icon">📊</span>
+                <span>Dashboard</span>
+            </button>
+            <button class="tab-button" onclick="showPage(1)">
+                <span class="tab-icon">📹</span>
+                <span>Test Recorder</span>
+            </button>
+            <button class="tab-button" onclick="showPage(2)">
+                <span class="tab-icon">🧪</span>
+                <span>Test Suite</span>
+            </button>
+            <button class="tab-button" onclick="showPage(3)">
+                <span class="tab-icon">📈</span>
+                <span>Analytics</span>
+            </button>
+            <button class="tab-button" onclick="showPage(4)">
+                <span class="tab-icon">⚙️</span>
+                <span>Settings</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Dashboard Page -->
+        <div id="page0" class="page active">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Dashboard Overview</h1>
+                    <p class="page-subtitle">Monitoring your test automation framework</p>
+                </div>
+                <button class="primary-btn" onclick="alert('Running all tests...')">
+                    <span>▶</span> Run Tests
+                </button>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <h3 class="stat-card-title">Total Tests</h3>
+                        <span class="stat-card-icon">🧪</span>
+                    </div>
+                    <div class="stat-card-value">156</div>
+                    <p class="stat-card-subtitle">+12 this week</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <h3 class="stat-card-title">Pass Rate</h3>
+                        <span class="stat-card-icon">✅</span>
+                    </div>
+                    <div class="stat-card-value">94.2%</div>
+                    <p class="stat-card-subtitle">+2.3% improvement</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <h3 class="stat-card-title">Active Projects</h3>
+                        <span class="stat-card-icon">📁</span>
+                    </div>
+                    <div class="stat-card-value">8</div>
+                    <p class="stat-card-subtitle">2 archived</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <h3 class="stat-card-title">Avg Duration</h3>
+                        <span class="stat-card-icon">⏱️</span>
+                    </div>
+                    <div class="stat-card-value">2m 34s</div>
+                    <p class="stat-card-subtitle">-15s faster</p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-title">Quick Actions</div>
+                <div class="card-content">
+                    <div class="action-grid">
+                        <button class="action-btn" onclick="alert('Opening Test Recorder...')">
+                            <span class="action-icon">📹</span>
+                            <div class="action-text">
+                                <div class="action-title">Record Test</div>
+                                <div class="action-desc">Create new test by recording</div>
+                            </div>
+                        </button>
+                        <button class="action-btn" onclick="alert('Running Test Suite...')">
+                            <span class="action-icon">🧪</span>
+                            <div class="action-text">
+                                <div class="action-title">Run Suite</div>
+                                <div class="action-desc">Execute full test suite</div>
+                            </div>
+                        </button>
+                        <button class="action-btn" onclick="alert('Opening Reports...')">
+                            <span class="action-icon">📊</span>
+                            <div class="action-text">
+                                <div class="action-title">View Reports</div>
+                                <div class="action-desc">Analyze test results</div>
+                            </div>
+                        </button>
+                        <button class="action-btn" onclick="showPage(4)">
+                            <span class="action-icon">⚙️</span>
+                            <div class="action-text">
+                                <div class="action-title">Settings</div>
+                                <div class="action-desc">Configure framework</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Recorder Page -->
+        <div id="page1" class="page">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Test Recorder</h1>
+                    <p class="page-subtitle">Record browser interactions and generate test code</p>
+                </div>
+                <button class="primary-btn" onclick="alert('Starting recording...')">
+                    <span>⏺</span> Start Recording
+                </button>
+            </div>
+            <div class="card">
+                <div class="card-title">Recording Controls</div>
+                <div class="card-content">
+                    <p style="color: #64748b;">Click "Start Recording" to begin capturing browser interactions.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Suite Page -->
+        <div id="page2" class="page">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Test Suite Execution</h1>
+                    <p class="page-subtitle">Run and monitor test suites</p>
+                </div>
+                <button class="primary-btn" onclick="alert('Running all suites...')">
+                    <span>▶</span> Run All Suites
+                </button>
+            </div>
+            <div class="card">
+                <div class="card-title">Available Test Suites</div>
+                <div class="card-content">
+                    <p style="color: #64748b;">Your test suites will appear here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Page -->
+        <div id="page3" class="page">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Analytics & Reports</h1>
+                    <p class="page-subtitle">Test execution insights and trends</p>
+                </div>
+                <button class="primary-btn" onclick="alert('Exporting report...')">
+                    <span>📥</span> Export Report
+                </button>
+            </div>
+            <div class="card">
+                <div class="card-title">Test Trends</div>
+                <div class="card-content">
+                    <p style="color: #64748b;">Analytics and charts will appear here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="page4" class="page">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Settings & Configuration</h1>
+                    <p class="page-subtitle">Configure your test automation framework</p>
+                </div>
+                <button class="primary-btn" onclick="alert('Settings saved!')">
+                    <span>💾</span> Save Changes
+                </button>
+            </div>
+            <div class="card">
+                <div class="card-title">General Settings</div>
+                <div class="card-content">
+                    <p style="color: #64748b;">Configuration options will appear here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPage(pageIndex) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            // Remove active from all tabs
+            const tabs = document.querySelectorAll('.tab-button');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected page
+            document.getElementById('page' + pageIndex).classList.add('active');
+            
+            // Activate selected tab
+            tabs[pageIndex].classList.add('active');
+        }
+    </script>
+</body>
+</html>
+
+                <button class="btn" onclick="alert('Paused')"> Pause</button>
+                
+                <h2 style="margin-top: 30px;">AI Chatbot Assistant</h2>
+                <div class="chatbot" id="chatbox">
+                    <div class="message bot-msg"> Hello! I can help you with test automation, code generation, and debugging. Ask me anything!</div>
+                </div>
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button class="btn" onclick="sendMessage()"> Send</button>
+            </div>
+        </div>
+
+        <!-- Test Scenarios Page -->
+        <div id="page2" class="page">
+            <div class="panel">
+                <h2> UI Test Scenarios (8 tests)</h2>
+                <div class="test-item"><strong>TC01:</strong> Valid Login - Login with valid credentials</div>
+                <div class="test-item"><strong>TC02:</strong> Invalid Login - Verify error message</div>
+                <div class="test-item"><strong>TC03:</strong> Create Account - Register new user</div>
+                <div class="test-item"><strong>TC04:</strong> Contact Us - Submit contact form</div>
+                <button class="btn" onclick="alert('Running UI tests...')">Run UI Tests</button>
+            </div>
+            <div class="panel">
+                <h2> REST API Test Scenarios (5 tests)</h2>
+                <div class="test-item"><strong>TC01:</strong> Add New User - POST /users</div>
+                <div class="test-item"><strong>TC02:</strong> Get All Users - GET /users</div>
+                <div class="test-item"><strong>TC03:</strong> Update User - PUT /users/:id</div>
+                <button class="btn" onclick="alert('Running REST API tests...')">Run REST Tests</button>
+            </div>
+        </div>
+
+        <!-- Configuration Page -->
+        <div id="page3" class="page">
+            <div class="panel">
+                <h2>Framework Configuration</h2>
+                <p><strong>Browser:</strong> Chrome (default)</p>
+                <p><strong>Headless:</strong> false</p>
+                <p><strong>Parallel Workers:</strong> 3</p>
+                <p><strong>Timeout:</strong> 20 minutes</p>
+                <p><strong>Base URL:</strong> advantageonlineshopping.com</p>
+                <p><strong>REST API:</strong> fakestoreapi.com</p>
+                <h2 style="margin-top: 30px;">Quick Commands</h2>
+                <button class="btn" onclick="copyCommand('npm run test')"> Copy: npm run test</button>
+                <button class="btn" onclick="copyCommand('npm run local:test:ui')"> Copy: UI Mode</button>
+                <button class="btn" onclick="copyCommand('npm run report')"> Copy: Allure Report</button>
+            </div>
+        </div>
+
+        <!-- Reports Page -->
+        <div id="page4" class="page">
+            <div class="panel">
+                <h2>Available Reports</h2>
+                <div class="test-item">
+                     <strong>Playwright HTML Report</strong><br>
+                    Interactive HTML test report<br>
+                    <button class="btn" onclick="alert('Run: npx playwright show-report')">Open Report</button>
+                </div>
+                <div class="test-item">
+                     <strong>Allure Report</strong><br>
+                    Comprehensive test analytics<br>
+                    <button class="btn" onclick="alert('Run: npm run report')">Generate & Open</button>
+                </div>
+                <div class="test-item">
+                     <strong>Execution Logs</strong><br>
+                    Detailed test execution logs<br>
+                    <button class="btn" onclick="alert('Location: test-results/logs/')">View Logs</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPage(index) {
+            const pages = document.querySelectorAll('.page');
+            const buttons = document.querySelectorAll('.nav-btn');
+            pages.forEach((page, i) => {
+                page.classList.toggle('active', i === index);
+            });
+            buttons.forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+        }
+
+        function handleFileSelect() {
+            const file = document.getElementById('fileInput').files[0];
+            if (file) {
+                const validExtensions = ['.ts', '.js', '.spec.ts'];
+                const isValid = validExtensions.some(ext => file.name.endsWith(ext));
+                
+                if (isValid) {
+                    document.getElementById('fileName').textContent = file.name;
+                    document.getElementById('filePath').textContent = `Path: ${file.webkitRelativePath || file.name}`;
+                    document.getElementById('fileInfo').style.display = 'block';
+                    alert(' File selected: ' + file.name);
+                    addBotMessage(`Great! I detected "${file.name}". Would you like help recording test actions?`);
+                } else {
+                    alert(' Invalid file type. Please select a .ts or .js file.');
+                }
+            }
+        }
+
+        function startRecording() {
+            alert(' Recording started! Perform your test steps...');
+            addBotMessage('Recording started! I\'m capturing your actions. Let me know when you\'re done.');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addUserMessage(message);
+            input.value = '';
+
+            setTimeout(() => {
+                if (message.toLowerCase().includes('generate') || message.toLowerCase().includes('code')) {
+                    addBotMessage('I can generate test code from your recording! Here\'s a sample:\n\ntest("Auto-generated test", async ({ page }) => {\n  await page.goto("https://example.com");\n  await page.click("#button");\n});');
+                } else if (message.toLowerCase().includes('assert')) {
+                    addBotMessage('Suggested assertions:\n- await expect(page).toHaveTitle("Expected Title");\n- await expect(element).toBeVisible();\n- await expect(element).toHaveText("Expected Text");');
+                } else {
+                    addBotMessage(`You asked: "${message}". I can help with code generation, assertions, optimization, and debugging. What would you like to know?`);
+                }
+            }, 500);
+        }
+
+        function addUserMessage(text) {
+            const chatbox = document.getElementById('chatbox');
+            const msg = document.createElement('div');
+            msg.className = 'message user-msg';
+            msg.textContent = ' ' + text;
+            chatbox.appendChild(msg);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        function addBotMessage(text) {
+            const chatbox = document.getElementById('chatbox');
+            const msg = document.createElement('div');
+            msg.className = 'message bot-msg';
+            msg.innerHTML = ' ' + text.replace(/\n/g, '<br>');
+            chatbox.appendChild(msg);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        function copyCommand(cmd) {
+            navigator.clipboard.writeText(cmd).then(() => {
+                alert(' Copied to clipboard: ' + cmd);
+            });
+        }
+    </script>
+</body>
+</html>

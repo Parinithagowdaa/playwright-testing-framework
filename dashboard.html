@@ -1,0 +1,4281 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playwright Testing Framework Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(to bottom right, #f8fafc 0%, #e0e7ff 50%, #fce7f3 100%);
+            color: #1e293b;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            color: white;
+            padding: 32px 40px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+        }
+
+        header h1 {
+            color: white;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .logo {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 32px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        header p {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            position: relative;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.12);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .stat-card .label {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .stat-card.ui::before {
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+        }
+
+        .stat-card.rest::before {
+            background: linear-gradient(90deg, #ec4899 0%, #f472b6 100%);
+        }
+
+        .stat-card.soap::before {
+            background: linear-gradient(90deg, #06b6d4 0%, #22d3ee 100%);
+        }
+
+        .stat-card.db::before {
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .panel:hover {
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.12);
+        }
+
+        .panel h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .panel-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+        }
+
+        .panel-icon.ui { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); }
+        .panel-icon.rest { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
+        .panel-icon.soap { background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); }
+        .panel-icon.db { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+        .panel-icon.config { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+        .panel-icon.reports { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
+
+        /* Test Items */
+        .test-item {
+            padding: 16px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
+            border: 1px solid #ede9fe;
+            border-radius: 10px;
+            border-left: 3px solid #6366f1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .test-item:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+            transform: translateX(4px);
+            border-color: #6366f1;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
+        }
+
+        .test-item h4 {
+            color: #1e293b;
+            margin-bottom: 6px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .test-item p {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .test-item .test-id {
+            display: inline-block;
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+            box-shadow: 0 2px 6px rgba(99, 102, 241, 0.25);
+        }
+
+        /* Tree Structure Styles for Test Scenarios */
+        .tree-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .module-row {
+            margin-bottom: 16px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .module-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .module-header:hover {
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .module-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .module-expand-icon {
+            font-size: 16px;
+            transition: transform 0.3s;
+        }
+
+        .module-expand-icon.expanded {
+            transform: rotate(90deg);
+        }
+
+        .module-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .module-count {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-left: 8px;
+        }
+
+        .module-content {
+            display: none;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            padding: 16px;
+        }
+
+        .module-content.expanded {
+            display: block;
+        }
+
+        .test-case-row {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .test-case-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .test-case-header:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .test-case-info {
+            flex: 1;
+        }
+
+        .test-case-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .test-case-desc {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .test-case-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .test-case-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-update, .btn-save, .btn-cancel, .btn-delete-test-case {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+        }
+
+        .btn-update:hover {
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-delete-test-case {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-delete-test-case:hover {
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+        }
+
+        .btn-save:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        .btn-cancel:hover {
+            background: #cbd5e1;
+        }
+
+        .test-steps-container {
+            display: none;
+            padding: 16px;
+            background: #fafafa;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .test-steps-container.expanded {
+            display: block;
+        }
+
+        .test-step-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            margin-left: 24px;
+        }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            flex: 1;
+            font-size: 14px;
+            color: #1e293b;
+        }
+
+        .step-text-editable {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #6366f1;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .step-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .icon-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .icon-btn.edit {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+        }
+
+        .icon-btn.edit:hover {
+            background: #6366f1;
+            color: white;
+        }
+
+        .icon-btn.delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .icon-btn.delete:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .icon-btn.check {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .icon-btn.check:hover {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-add-step {
+            margin-left: 24px;
+            margin-top: 8px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 2px dashed #6366f1;
+            border-radius: 6px;
+            color: #6366f1;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-add-step:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            transform: translateY(-2px);
+        }
+
+        /* Config Items */
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
+            border: 1px solid #ede9fe;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .config-item:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+            border-color: #6366f1;
+        }
+
+        .config-item .key {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+
+        .config-item .value {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 100%);
+            box-shadow: 0 4px 16px rgba(148, 163, 184, 0.25);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 24px rgba(148, 163, 184, 0.35);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 6px 24px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
+        /* Commands Section */
+        .command-box {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            position: relative;
+            border: 1px solid #6366f1;
+            transition: all 0.3s;
+        }
+
+        .command-box:hover {
+            border-color: #8b5cf6;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+
+        .command-box::before {
+            content: '$';
+            color: #10b981;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 12px;
+        }
+
+        .status-badge.active {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%);
+            color: #047857;
+            border: 1px solid rgba(5, 150, 105, 0.25);
+        }
+
+        .status-badge.ready {
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(14, 165, 233, 0.15) 100%);
+            color: #0369a1;
+            border: 1px solid rgba(2, 132, 199, 0.25);
+        }
+
+        .status-badge.configured {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%);
+            color: #c2410c;
+            border: 1px solid rgba(217, 119, 6, 0.25);
+        }
+
+        /* Scrollable Content */
+        .scrollable-content {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .scrollable-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 10px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+
+        /* Footer */
+        footer {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            color: #64748b;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
+        }
+
+        footer p {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        footer p:first-child strong {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .footer-links {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .footer-links a {
+            color: #6366f1;
+            text-decoration: none;
+            margin: 0 12px;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            color: #64748b;
+            text-decoration: underline;
+        }
+
+        /* Navigation Tabs */
+        .navigation-tabs {
+            background: white;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08);
+            margin-bottom: 32px;
+            border-radius: 12px;
+        }
+
+        .tabs-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 12px 20px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border-radius: 12px;
+        }
+
+        .tab-button:hover {
+            color: #6366f1;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
+        }
+
+        .tab-button.active {
+            color: white;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .tab-icon {
+            font-size: 18px;
+        }
+
+        /* Page Sections */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* File Selection */
+        .file-selection {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
+            border: 2px dashed #6366f1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 600px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        /* Recording Controls */
+        .recording-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        /* Browser Select Dropdown */
+        .browser-select {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-image: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
+        }
+
+        .browser-select:hover {
+            border-color: #6366f1;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .browser-select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .browser-select option {
+            padding: 10px;
+            font-weight: 600;
+        }
+
+        /* Chatbot */
+        .chatbot {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            max-width: 90%;
+            line-height: 1.5;
+            word-wrap: break-word;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .typing-indicator {
+            opacity: 0.7;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .bot-msg {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            color: #1e293b;
+            margin-right: auto;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .bot-msg code {
+            display: block;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 12px 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            border: 1px solid #6366f1;
+        }
+
+        .bot-msg b {
+            color: #6366f1;
+            font-weight: 600;
+        }
+
+        .user-msg {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            margin-left: auto;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .chatbot::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chatbot::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        .chatbot::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 20px;
+            }
+
+            .logo {
+                width: 48px;
+                height: 48px;
+                font-size: 24px;
+            }
+
+            header {
+                padding: 24px;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+
+            .stat-card .number {
+                font-size: 28px;
+            }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #64748b;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #1e293b;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn-cancel {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-cancel:hover {
+            background: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>
+                <div class="logo">P</div>
+                Playwright Testing Framework Dashboard
+            </h1>
+            <p>Comprehensive Test Automation - UI | REST API | SOAP API | Database Testing</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="navigation-tabs">
+            <div class="tabs-container">
+                <button class="tab-button active" onclick="showPage(0)">
+                    <span class="tab-icon">📊</span>
+                    <span>Dashboard</span>
+                </button>
+                <button class="tab-button" onclick="showPage(1)">
+                    <span class="tab-icon">📹</span>
+                    <span>Record & Play</span>
+                </button>
+                <button class="tab-button" onclick="showPage(2)">
+                    <span class="tab-icon">�</span>
+                    <span>Test Scenarios</span>
+                </button>
+                <button class="tab-button" onclick="showPage(5)">
+                    <span class="tab-icon">🌐</span>
+                    <span>API Tests</span>
+                </button>
+                <button class="tab-button" onclick="showPage(3)">
+                    <span class="tab-icon">📊</span>
+                    <span>Reports</span>
+                </button>
+                <button class="tab-button" onclick="showPage(4)">
+                    <span class="tab-icon">⚙️</span>
+                    <span>Configuration</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Dashboard Page -->
+        <div id="page0" class="page active">
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card ui">
+                <h3>Total Test Cases</h3>
+                <div class="number">23</div>
+                <div class="label">Test Scenarios</div>
+            </div>
+            <div class="stat-card rest">
+                <h3>Executed</h3>
+                <div class="number">18</div>
+                <div class="label">Tests Run</div>
+            </div>
+            <div class="stat-card soap">
+                <h3>Passed (83%)</h3>
+                <div class="number">15</div>
+                <div class="label">Successful</div>
+            </div>
+            <div class="stat-card db">
+                <h3>Failed</h3>
+                <div class="number">2</div>
+                <div class="label">Need Attention</div>
+            </div>
+            <div class="stat-card ui">
+                <h3>Skipped</h3>
+                <div class="number">1</div>
+                <div class="label">Not Executed</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Panel -->
+        <div class="panel">
+            <h2>
+                <span class="panel-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">⚡</span>
+                Quick Actions
+            </h2>
+            
+            <!-- Configuration Options Row -->
+            <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; padding: 16px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div style="flex: 1; min-width: 140px;">
+                    <label style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">
+                        🔄 Retries Count:
+                    </label>
+                    <select id="retriesCount" class="browser-select" style="width: 100%;">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+                
+                <div style="flex: 1; min-width: 140px;">
+                    <label style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">
+                        🧵 Parallel Threads:
+                    </label>
+                    <select id="parallelThreads" class="browser-select" style="width: 100%;">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+                
+                <div style="flex: 1; min-width: 140px;">
+                    <label style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">
+                        🌐 Browser Type:
+                    </label>
+                    <select id="browserType" class="browser-select" style="width: 100%;">
+                        <option value="chromium">Chrome</option>
+                        <option value="msedge" selected>Edge</option>
+                        <option value="firefox">Firefox</option>
+                    </select>
+                </div>
+                
+                <div style="flex: 1; min-width: 140px;">
+                    <label style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">
+                        👁️ Headless Mode:
+                    </label>
+                    <select id="headlessMode" class="browser-select" style="width: 100%;">
+                        <option value="false" selected>False</option>
+                        <option value="true">True</option>
+                    </select>
+                </div>
+                
+                <div style="flex: 1; min-width: 180px;">
+                    <label style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">
+                        📊 Report Option:
+                    </label>
+                    <select id="reportOption" class="browser-select" style="width: 100%;">
+                        <option value="allure" selected>Allure</option>
+                        <option value="html">Playwright HTML Report</option>
+                        <option value="logs">Execution Logs</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <button class="btn" onclick="runAllTests()">▶ Run All Tests</button>
+                <button class="btn btn-secondary" onclick="viewReports()">📊 View Reports</button>
+                <button class="btn btn-success" onclick="openPlaywrightUI()">🎭 Playwright UI</button>
+                <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="showPage(4)">📈 Allure Report</button>
+            </div>
+        </div>
+
+        <!-- Test Summary Overview -->
+        <div class="main-grid">
+            <div class="panel">
+                <h2>
+                    <span class="panel-icon ui">�</span>
+                    Test Scenarios
+                </h2>
+                <p style="color: #64748b; margin-bottom: 16px;">20 comprehensive test scenarios: UI (8), Functional (4), Integration (3), System (2), Database (3)</p>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-small" onclick="showPage(2)">View All Tests</button>
+                    <button class="btn btn-small" onclick="runTest('All')">▶ Run All Tests</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>
+                    <span class="panel-icon rest">🌐</span>
+                    REST API Tests
+                </h2>
+                <p style="color: #64748b; margin-bottom: 16px;">5 REST API tests for user management and data operations</p>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-secondary btn-small" onclick="showPage(5)">View Tests</button>
+                    <button class="btn btn-secondary btn-small" onclick="runTest('REST')">▶ Run Tests</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>
+                    <span class="panel-icon soap">📡</span>
+                    SOAP API Tests
+                </h2>
+                <p style="color: #64748b; margin-bottom: 16px;">5 SOAP API tests for account services and workflows</p>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-small" onclick="showPage(5)" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);">View Tests</button>
+                    <button class="btn btn-small" onclick="runTest('SOAP')" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);">▶ Run Tests</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>
+                    <span class="panel-icon db">🗄️</span>
+                    Database Tests
+                </h2>
+                <p style="color: #64748b; margin-bottom: 16px;">5 database validation tests for data integrity</p>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-success btn-small" onclick="showPage(2)">View All Tests</button>
+                    <button class="btn btn-success btn-small" onclick="runTest('Database')">▶ Run Tests</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="panel">
+            <h2>
+                <span class="panel-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">📈</span>
+                Recent Activity
+            </h2>
+            <div style="color: #64748b;">
+                <p>✅ Last test run: Successfully executed 18 test cases</p>
+                <p>📊 Success rate: 83% (15 passed, 2 failed, 1 skipped)</p>
+                <p>⏱️ Average execution time: 2m 45s</p>
+                <p>🎯 Coverage: UI, REST API, SOAP API, Database</p>
+            </div>
+        </div>
+        </div>
+        <!-- End Dashboard Page -->
+
+        <!-- Record & Play Page -->
+        <div id="page1" class="page">
+            <div class="main-grid">
+                <!-- File Selection Panel (Left) -->
+                <div class="panel">
+                    <h2>
+                        <span class="panel-icon rest">📹</span>
+                        File Selection
+                    </h2>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
+                            📄 Upload PROJECT_CONTEXT.md:
+                        </label>
+                        <div class="file-selection">
+                            <div class="file-input-wrapper">
+                                <button class="btn btn-small" onclick="document.getElementById('projectContextInput').click()">📁 Select PROJECT_CONTEXT.md</button>
+                                <input type="file" id="projectContextInput" accept=".md" onchange="handleProjectContextSelect(event)" style="display: none;">
+                            </div>
+                            <p id="selectedProjectContext" style="margin: 0; color: #475569; font-weight: 600; font-size: 14px; flex-grow: 1;"></p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
+                            🌐 Upload HTML File:
+                        </label>
+                        <div class="file-selection">
+                            <div class="file-input-wrapper">
+                                <button class="btn btn-small" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="document.getElementById('htmlFileInput').click()">📁 Select HTML File</button>
+                                <input type="file" id="htmlFileInput" accept=".html" onchange="handleHtmlFileSelect(event)" style="display: none;">
+                            </div>
+                            <p id="selectedHtmlFile" style="margin: 0; color: #475569; font-weight: 600; font-size: 14px; flex-grow: 1;"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Chatbot Panel (Right) -->
+                <div class="panel">
+                    <h2>
+                        <span class="panel-icon db">🤖</span>
+                        AI Chatbot Assistant
+                    </h2>
+                    <div class="chatbot" id="chatbox">
+                        <div class="message bot-msg">🤖 <b>Hello! I'm your AI Test Automation Assistant!</b><br><br>
+                        I can help you with:<br>
+                        • <b>Code generation</b> - Tests, Page Objects, fixtures<br>
+                        • <b>Element interactions</b> - Click, type, drag & drop<br>
+                        • <b>Form handling</b> - Fill, select, upload files<br>
+                        • <b>Debugging</b> - Traces, screenshots, network<br>
+                        • <b>Advanced topics</b> - Iframes, alerts, tables, API mocking<br>
+                        • <b>Best practices</b> - Performance, CI/CD, patterns<br><br>
+                        💡 <b>Quick start - Try asking:</b><br>
+                        • "How to record tests?"<br>
+                        • "Generate a login test"<br>
+                        • "How to fill forms?"<br>
+                        • "Handle alerts"<br>
+                        • "Extract table data"<br><br>
+                        I'll provide instant code examples and detailed explanations! 🚀</div>
+                    </div>
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything about test automation..." onkeypress="if(event.key==='Enter') sendMessage()">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn" onclick="sendMessage()">📤 Send</button>
+                        <button class="btn btn-secondary btn-small" onclick="quickAsk('Generate a login test')">💡 Example: Login Test</button>
+                        <button class="btn btn-small" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);" onclick="quickAsk('help')">❓ Help</button>
+                        <button class="btn btn-small" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="clearChat()">🗑️ Clear</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recording Controls Section (Full Width) -->
+            <div class="panel">
+                <h2>
+                    <span class="panel-icon soap">🎬</span>
+                    Recording Controls
+                </h2>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
+                        🌐 Select Browser:
+                    </label>
+                    <select id="browserSelect" class="browser-select">
+                        <option value="chromium">Chrome</option>
+                        <option value="msedge">Edge</option>
+                        <option value="firefox">Firefox</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
+                        🔗 Application URL:
+                    </label>
+                    <input type="text" id="appUrl" class="browser-select" style="width: 100%; max-width: 600px;" value="http://advantageonlineshopping.com/" placeholder="Enter application URL (e.g., http://advantageonlineshopping.com)">
+                </div>
+                <div class="recording-controls">
+                    <button class="btn" onclick="startRecording()">⏺ Start Recording</button>
+                    <button class="btn btn-secondary" onclick="stopRecording()">⏹ Stop</button>
+                    <button class="btn" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);" onclick="showToast('Playing recording')">▶ Play</button>
+                    <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="showToast('Recording paused')">⏸ Pause</button>
+                </div>
+
+                <!-- Recording Results Section -->
+                <div id="recordingResults" style="display: none; margin-top: 24px; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px solid #0ea5e9; border-radius: 12px;">
+                    <h3 style="color: #0369a1; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; justify-content: space-between;">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <span>✅</span> Recording Session Completed
+                        </span>
+                        <button class="btn btn-small" onclick="viewRecordedTests()" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%); box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);">📊 View Results</button>
+                    </h3>
+                    <div id="recordingResultsContent" style="color: #0c4a6e;">
+                        <!-- Results will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Scenarios Page -->
+        <div id="page2" class="page">
+            <div class="tree-container">
+                <h2 style="margin-bottom: 20px; color: #1e293b;">
+                    <span style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">📋 Test Scenarios</span>
+                </h2>
+                <p style="color: #64748b; margin-bottom: 24px;">Hierarchical test case structure with expandable modules and editable test steps</p>
+
+                <div id="testScenariosTree"></div>
+            </div>
+        </div>
+
+        <!-- API Tests Page -->
+        <div id="page5" class="page">
+            <div style="margin-bottom: 20px;">
+                <p style="color: #64748b; font-size: 14px;">Hierarchical test case structure with expandable modules and editable test steps for REST API, SOAP API, and Database tests</p>
+            </div>
+            
+            <div id="apiTestsTree"></div>
+
+            <div class="panel" style="margin-top: 24px;">
+                <h2>
+                    <span class="panel-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">📚</span>
+                    API Documentation
+                </h2>
+                <div style="color: #64748b;">
+                    <p><strong>REST API Base URL:</strong> https://fakestoreapi.com</p>
+                    <p><strong>SOAP API Base URL:</strong> http://www.advantageonlineshopping.com:80</p>
+                    <p><strong>WSDL:</strong> https://www.advantageonlineshopping.com/accountservice/ws/accountservice.wsdl</p>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-small" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="openFile('API_TESTING_CONTEXT.md')">📄 View API Documentation</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Page -->
+        <div id="page3" class="page">
+            <div class="panel">
+                <h2>
+                    <span class="panel-icon reports">📊</span>
+                    Available Reports
+                </h2>
+                <div class="scrollable-content">
+                    <div class="test-item">
+                        <h4>📄 Playwright HTML Report</h4>
+                        <p>Interactive HTML test report</p>
+                        <button class="btn btn-small" style="margin-top: 10px;" onclick="openHtmlReport()">Open Report</button>
+                    </div>
+                    <div class="test-item">
+                        <h4>📊 Allure Report</h4>
+                        <p>Comprehensive test analytics</p>
+                        <button class="btn btn-small" style="margin-top: 10px;" onclick="openAllureReport()">Generate & Open</button>
+                    </div>
+                    <div class="test-item">
+                        <h4>📝 Execution Logs</h4>
+                        <p>Detailed test execution logs</p>
+                        <button class="btn btn-small" style="margin-top: 10px;" onclick="openLogs()">View Logs</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Page -->
+        <div id="page4" class="page">
+            <div class="panel">
+                <h2>
+                    <span class="panel-icon config">⚙️</span>
+                    Framework Configuration
+                </h2>
+                <div class="scrollable-content">
+                    <div class="config-item">
+                        <span class="key">Browser:</span>
+                        <span class="value">chrome</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="key">Base URL:</span>
+                        <span class="value">advantageonlineshopping.com</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="key">REST API:</span>
+                        <span class="value">fakestoreapi.com</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="key">Test Timeout:</span>
+                        <span class="value">20 minutes</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="key">Parallel Threads:</span>
+                        <span class="value">3</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="key">Retries:</span>
+                        <span class="value">0</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="key">Headless:</span>
+                        <span class="value">false</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="key">Video:</span>
+                        <span class="value">retain-on-failure</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="key">Screenshot:</span>
+                        <span class="value">only-on-failure</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="key">Reporters:</span>
+                        <span class="value">HTML, Allure, JUnit, JSON</span>
+                    </div>
+                </div>
+
+                <h2 style="margin-top: 24px;">
+                    <span class="panel-icon reports">📋</span>
+                    Quick Commands
+                </h2>
+                <div style="margin-top: 15px;">
+                    <div class="command-box">
+                        $env:TEST_NAME="LoginTest"; npm run local:test
+                        <button class="copy-btn" onclick="copyCommand(this)">Copy</button>
+                    </div>
+                    <div class="command-box">
+                        npm run local:test:ui
+                        <button class="copy-btn" onclick="copyCommand(this)">Copy</button>
+                    </div>
+                    <div class="command-box">
+                        npm run report
+                        <button class="copy-btn" onclick="copyCommand(this)">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="panel" style="margin-top: 32px;">
+            <h2>
+                <span class="panel-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">🚀</span>
+                Quick Actions
+            </h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <button class="btn" onclick="runAllTests()">Run All Tests</button>
+                <button class="btn btn-secondary" onclick="viewReports()">View Reports</button>
+                <button class="btn btn-success" onclick="openPlaywrightUI()">Open Playwright UI</button>
+                <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="openProjectContext()">View Documentation</button>
+                <button class="btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);" onclick="openTerminal()">Open Terminal</button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p><strong>Playwright Sample Project</strong> - Version 1.0.0</p>
+            <p>Framework: Playwright + TypeScript | Architecture: Page Object Model</p>
+            <p>Last Updated: January 28, 2026 | Node.js v22+ Required</p>
+            <div class="footer-links">
+                <a href="README.md" onclick="event.preventDefault(); openFile('README.md')">README</a>
+                <a href="PROJECT_CONTEXT.md" onclick="event.preventDefault(); openFile('PROJECT_CONTEXT.md')">Project Context</a>
+                <a href="playwright.config.ts" onclick="event.preventDefault(); openFile('playwright.config.ts')">Playwright Config</a>
+                <a href="package.json" onclick="event.preventDefault(); openFile('package.json')">Package.json</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Page navigation
+        function showPage(pageIndex) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            // Remove active from all tabs
+            const tabs = document.querySelectorAll('.tab-button');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected page
+            document.getElementById('page' + pageIndex).classList.add('active');
+            
+            // Map page index to tab position
+            // Tab order: Dashboard(0), Record&Play(1), TestScenarios(2), APITests(5), Reports(3), Configuration(4)
+            const pageToTabMap = {
+                0: 0, // Dashboard
+                1: 1, // Record & Play
+                2: 2, // Test Scenarios
+                5: 3, // API Tests
+                3: 4, // Reports
+                4: 5  // Configuration
+            };
+            
+            // Activate the correct tab
+            tabs[pageToTabMap[pageIndex]].classList.add('active');
+        }
+
+        // Test Scenarios Tree Structure Data (UI Tests only)
+        let testScenariosData = {
+            "UI Test Scenarios": [
+                {
+                    id: "TC01",
+                    name: "Valid Login",
+                    description: "Login with valid credentials and verify success",
+                    steps: [
+                        "Launch application",
+                        "Click on User icon",
+                        "Enter valid username and password",
+                        "Click Sign In button",
+                        "Validate successful login with username display",
+                        "Logout from application"
+                    ]
+                },
+                {
+                    id: "TC02",
+                    name: "Invalid Login",
+                    description: "Login with invalid credentials and verify error message",
+                    steps: [
+                        "Launch application",
+                        "Click on User icon",
+                        "Enter invalid username and password",
+                        "Click Sign In button",
+                        "Validate invalid login error message"
+                    ]
+                },
+                {
+                    id: "TC03",
+                    name: "Login from Create Account Page",
+                    description: "Navigate to create account and then login",
+                    steps: [
+                        "Launch application",
+                        "Navigate to Create Account page",
+                        "Click 'Already have an account' link",
+                        "Enter login credentials",
+                        "Validate successful login",
+                        "Logout from application"
+                    ]
+                },
+                {
+                    id: "TC01-TCN",
+                    name: "Create Account",
+                    description: "Register new user account with complete details (Data-Driven)",
+                    steps: [
+                        "Launch application",
+                        "Navigate to Create Account page",
+                        "Fill registration form (Email, Password, Confirm Password, First Name, Last Name, Phone)",
+                        "Fill address details (Country, City, Address, State, Postal Code)",
+                        "Set Allow Offers/Promotion preference",
+                        "Save registration",
+                        "Validate successful login with created username",
+                        "Logout from application"
+                    ]
+                },
+                {
+                    id: "TC01-TC02",
+                    name: "Contact Us",
+                    description: "Submit contact form and verify success message (Data-Driven)",
+                    steps: [
+                        "Launch application",
+                        "Enter contact us details (Category, Product, Email, Subject)",
+                        "Click Send Message button",
+                        "Verify success message is displayed"
+                    ]
+                },
+                {
+                    id: "DownloadTest",
+                    name: "Download PDF File",
+                    description: "Download PDF file from application and verify PDF details",
+                    steps: [
+                        "Launch application",
+                        "Navigate to Management Console (new tab)",
+                        "Close original tab",
+                        "Download AOS Backend PDF file",
+                        "Verify PDF contains 4 pages",
+                        "Verify PDF content contains 'Advantage Online Shopping (AOS)'",
+                        "Compare PDF with baseline (excluding masked text)"
+                    ]
+                },
+                {
+                    id: "ImageCompare",
+                    name: "Image Comparison Test",
+                    description: "Visual regression testing with screenshot comparison",
+                    steps: [
+                        "Navigate to Applitools Demo URL",
+                        "Capture and validate Login Section screenshot",
+                        "Capture Login Section with masked elements (logo, buttons)",
+                        "Navigate to Applitools Demo v2 URL",
+                        "Compare Login Section with masked elements",
+                        "Compare with tolerance of 0.70 (theme variations allowed)",
+                        "Compare with tolerance of 0.00 (exact match required)"
+                    ]
+                }
+            ]
+        };
+
+        // API Tests Tree Structure Data (REST, SOAP, and Database)
+        let apiTestsData = {
+            "REST API Test Scenarios": [
+                {
+                    id: "TC01",
+                    name: "Get All Users",
+                    description: "Retrieve all users from REST API and verify response",
+                    steps: [
+                        "Send GET request to fetch all users",
+                        "Verify status code is as expected",
+                        "Verify response content is not null",
+                        "Extract user ID from JSON response using JSONPath",
+                        "Store user ID for subsequent tests"
+                    ]
+                },
+                {
+                    id: "TC02",
+                    name: "Get Single User",
+                    description: "Retrieve specific user by ID from REST API",
+                    steps: [
+                        "Format endpoint URL with user ID",
+                        "Send GET request to fetch single user",
+                        "Verify status code is as expected",
+                        "Verify response contains correct user ID using JSONPath"
+                    ]
+                },
+                {
+                    id: "TC03",
+                    name: "Add New User",
+                    description: "Create new user via REST API with random data",
+                    steps: [
+                        "Generate random username (5 alphabetic characters)",
+                        "Generate random password (5 alphanumeric characters)",
+                        "Generate random phone number (10 digits)",
+                        "Prepare request body with user data",
+                        "Send POST request to create user",
+                        "Verify status code is as expected",
+                        "Extract and store user ID, password, username for next test"
+                    ]
+                },
+                {
+                    id: "TC04",
+                    name: "Update User",
+                    description: "Update existing user details via REST API",
+                    steps: [
+                        "Format endpoint URL with stored user ID",
+                        "Generate new random phone number",
+                        "Prepare request body with updated data",
+                        "Send PUT request to update user",
+                        "Verify status code is as expected",
+                        "Verify response contains updated information"
+                    ]
+                }
+            ],
+            "SOAP API Test Scenarios": [
+                {
+                    id: "TC01",
+                    name: "Account Create Request",
+                    description: "Create new account via SOAP service",
+                    steps: [
+                        "Generate random username (5 alphabetic characters)",
+                        "Generate random password (1 uppercase + 4 lowercase + 3 digits)",
+                        "Generate random phone number (10 digits)",
+                        "Create email from username",
+                        "Prepare SOAP request with account data",
+                        "Send SOAP request to create account",
+                        "Verify response using XPath matches expected result",
+                        "Store username, password, email for login test"
+                    ]
+                },
+                {
+                    id: "TC02",
+                    name: "Account Login Request",
+                    description: "Login to account via SOAP service",
+                    steps: [
+                        "Prepare SOAP request with stored credentials",
+                        "Send SOAP login request",
+                        "Verify response using XPath matches expected result",
+                        "Extract and store authentication token from response",
+                        "Extract and store user ID from response"
+                    ]
+                },
+                {
+                    id: "TC03",
+                    name: "Account Logout Request",
+                    description: "Logout from account via SOAP service",
+                    steps: [
+                        "Prepare SOAP request with stored token and user ID",
+                        "Send SOAP logout request",
+                        "Verify response using XPath matches expected result",
+                        "Confirm successful logout"
+                    ]
+                }
+            ],
+            "Database Test Scenarios": [
+                {
+                    id: "TC01-TCN",
+                    name: "Database CRUD Operations",
+                    description: "Execute MSSQL queries and verify execution (Data-Driven)",
+                    steps: [
+                        "Read test data from Excel (DatabaseTest sheet)",
+                        "Initialize Database Step",
+                        "Execute MSSQL query from test data",
+                        "Verify query execution success",
+                        "Verify rows affected count matches expected result"
+                    ]
+                }
+            ]
+        };
+
+        let currentEditingTestCase = null;
+        let currentEditingApiTestCase = null;
+
+        // Render Test Scenarios Tree
+        function renderTestScenarios() {
+            const container = document.getElementById('testScenariosTree');
+            if (!container) return;
+
+            let html = '';
+            let moduleIndex = 0;
+
+            for (const [moduleName, testCases] of Object.entries(testScenariosData)) {
+                html += `
+                    <div class="module-row">
+                        <div class="module-header" onclick="toggleModule(${moduleIndex})">
+                            <div class="module-header-left">
+                                <span class="module-expand-icon" id="moduleIcon${moduleIndex}">▶</span>
+                                <span class="module-title">${moduleName}</span>
+                                <span class="module-count">(${testCases.length} tests)</span>
+                            </div>
+                        </div>
+                        <div class="module-content" id="moduleContent${moduleIndex}">
+                `;
+
+                testCases.forEach((testCase, tcIndex) => {
+                    const isEditing = currentEditingTestCase === `${moduleIndex}-${tcIndex}`;
+                    
+                    html += `
+                        <div class="test-case-row">
+                            <div class="test-case-header" onclick="toggleTestCase(${moduleIndex}, ${tcIndex})">
+                                <div class="test-case-info">
+                                    <div class="test-case-name">
+                                        <span class="test-case-badge">${testCase.id}</span>
+                                        ${testCase.name}
+                                    </div>
+                                    <div class="test-case-desc">${testCase.description}</div>
+                                </div>
+                                <div class="test-case-actions" onclick="event.stopPropagation()">
+                                    ${!isEditing ? 
+                                        `<button class="btn-update" onclick="editTestCase(${moduleIndex}, ${tcIndex})">Update</button>
+                                         <button class="btn-delete-test-case" onclick="deleteTestCase(${moduleIndex}, ${tcIndex})">Delete</button>` :
+                                        `<button class="btn-save" onclick="saveTestCase(${moduleIndex}, ${tcIndex})">Save</button>
+                                         <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>`
+                                    }
+                                </div>
+                            </div>
+                            <div class="test-steps-container" id="steps${moduleIndex}-${tcIndex}">
+                    `;
+
+                    testCase.steps.forEach((step, stepIndex) => {
+                        html += `
+                            <div class="test-step-item" id="step${moduleIndex}-${tcIndex}-${stepIndex}">
+                                <div class="step-number">${stepIndex + 1}</div>
+                                <div class="step-text" id="stepText${moduleIndex}-${tcIndex}-${stepIndex}">${step}</div>
+                                ${isEditing ? `
+                                    <div class="step-actions">
+                                        <button class="icon-btn edit" onclick="editStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Edit">✏️</button>
+                                        <button class="icon-btn delete" onclick="deleteStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Delete">🗑️</button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    });
+
+                    if (isEditing) {
+                        html += `<button class="btn-add-step" onclick="addTestStep(${moduleIndex}, ${tcIndex})">+ Add Step</button>`;
+                    }
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+                moduleIndex++;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Toggle module expand/collapse
+        function toggleModule(moduleIndex) {
+            const content = document.getElementById(`moduleContent${moduleIndex}`);
+            const icon = document.getElementById(`moduleIcon${moduleIndex}`);
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('expanded');
+            }
+        }
+
+        // Toggle test case expand/collapse
+        function toggleTestCase(moduleIndex, tcIndex) {
+            const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
+            
+            if (stepsContainer.classList.contains('expanded')) {
+                stepsContainer.classList.remove('expanded');
+            } else {
+                stepsContainer.classList.add('expanded');
+            }
+        }
+
+        // Edit test case (enable edit mode)
+        function editTestCase(moduleIndex, tcIndex) {
+            if (currentEditingTestCase) {
+                showToast('⚠️ Please save or cancel the current edit first');
+                return;
+            }
+            
+            currentEditingTestCase = `${moduleIndex}-${tcIndex}`;
+            renderTestScenarios();
+            
+            // Auto-expand the test case
+            const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
+            stepsContainer.classList.add('expanded');
+            
+            showToast('📝 Edit mode enabled. Add, edit, or delete steps.');
+        }
+
+        // Save test case changes
+        function saveTestCase(moduleIndex, tcIndex) {
+            currentEditingTestCase = null;
+            renderTestScenarios();
+            showToast('✅ Test case saved successfully!');
+        }
+
+        // Cancel edit mode
+        function cancelEdit() {
+            currentEditingTestCase = null;
+            renderTestScenarios();
+            showToast('❌ Edit cancelled');
+        }
+
+        // Add new test step
+        function addTestStep(moduleIndex, tcIndex) {
+            const modules = Object.keys(testScenariosData);
+            const moduleName = modules[moduleIndex];
+            const testCase = testScenariosData[moduleName][tcIndex];
+            
+            testCase.steps.push('New test step - click edit to modify');
+            renderTestScenarios();
+            
+            // Keep edit mode and expanded state
+            currentEditingTestCase = `${moduleIndex}-${tcIndex}`;
+            const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
+            stepsContainer.classList.add('expanded');
+            
+            showToast('✅ New step added');
+        }
+
+        // Edit a test step (inline editing)
+        function editStep(moduleIndex, tcIndex, stepIndex) {
+            const stepTextElement = document.getElementById(`stepText${moduleIndex}-${tcIndex}-${stepIndex}`);
+            const currentText = stepTextElement.textContent;
+            
+            stepTextElement.innerHTML = `
+                <input type="text" class="step-text-editable" value="${currentText}" id="editInput${moduleIndex}-${tcIndex}-${stepIndex}">
+                <button class="icon-btn check" onclick="saveStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Save">✓</button>
+            `;
+            
+            document.getElementById(`editInput${moduleIndex}-${tcIndex}-${stepIndex}`).focus();
+        }
+
+        // Save edited step
+        function saveStep(moduleIndex, tcIndex, stepIndex) {
+            const inputElement = document.getElementById(`editInput${moduleIndex}-${tcIndex}-${stepIndex}`);
+            const newText = inputElement.value;
+            
+            const modules = Object.keys(testScenariosData);
+            const moduleName = modules[moduleIndex];
+            testScenariosData[moduleName][tcIndex].steps[stepIndex] = newText;
+            
+            renderTestScenarios();
+            
+            // Restore edit mode
+            currentEditingTestCase = `${moduleIndex}-${tcIndex}`;
+            const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
+            stepsContainer.classList.add('expanded');
+            
+            showToast('✅ Step updated');
+        }
+
+        // Delete a test step
+        function deleteStep(moduleIndex, tcIndex, stepIndex) {
+            if (!confirm('Are you sure you want to delete this step?')) {
+                return;
+            }
+            
+            const modules = Object.keys(testScenariosData);
+            const moduleName = modules[moduleIndex];
+            testScenariosData[moduleName][tcIndex].steps.splice(stepIndex, 1);
+            
+            renderTestScenarios();
+            
+            // Restore edit mode
+            currentEditingTestCase = `${moduleIndex}-${tcIndex}`;
+            const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
+            stepsContainer.classList.add('expanded');
+            
+            showToast('🗑️ Step deleted');
+        }
+
+        // Delete entire test case
+        function deleteTestCase(moduleIndex, tcIndex) {
+            const modules = Object.keys(testScenariosData);
+            const moduleName = modules[moduleIndex];
+            const testCase = testScenariosData[moduleName][tcIndex];
+            
+            if (!confirm(`Are you sure you want to delete the test case "${testCase.name}" (${testCase.id})?\n\nThis will remove the entire test case including all its steps.`)) {
+                return;
+            }
+            
+            // Remove the test case from the array
+            testScenariosData[moduleName].splice(tcIndex, 1);
+            
+            // Clear edit mode if this test case was being edited
+            if (currentEditingTestCase === `${moduleIndex}-${tcIndex}`) {
+                currentEditingTestCase = null;
+            }
+            
+            renderTestScenarios();
+            showToast(`🗑️ Test case "${testCase.name}" deleted successfully`);
+        }
+
+        // Render API Tests Tree (same structure as Test Scenarios)
+        function renderApiTests() {
+            const container = document.getElementById('apiTestsTree');
+            if (!container) return;
+
+            let html = '';
+            let moduleIndex = 0;
+
+            for (const [moduleName, testCases] of Object.entries(apiTestsData)) {
+                html += `
+                    <div class="module-row">
+                        <div class="module-header" onclick="toggleApiModule(${moduleIndex})">
+                            <div class="module-header-left">
+                                <span class="module-expand-icon" id="apiModuleIcon${moduleIndex}">▶</span>
+                                <span class="module-title">${moduleName}</span>
+                                <span class="module-count">(${testCases.length} tests)</span>
+                            </div>
+                        </div>
+                        <div class="module-content" id="apiModuleContent${moduleIndex}">
+                `;
+
+                testCases.forEach((testCase, tcIndex) => {
+                    const isEditing = currentEditingApiTestCase === `${moduleIndex}-${tcIndex}`;
+                    
+                    html += `
+                        <div class="test-case-row">
+                            <div class="test-case-header" onclick="toggleApiTestCase(${moduleIndex}, ${tcIndex})">
+                                <div class="test-case-info">
+                                    <div class="test-case-name">
+                                        <span class="test-case-badge">${testCase.id}</span>
+                                        ${testCase.name}
+                                    </div>
+                                    <div class="test-case-desc">${testCase.description}</div>
+                                </div>
+                                <div class="test-case-actions" onclick="event.stopPropagation()">
+                                    ${!isEditing ? 
+                                        `<button class="btn-update" onclick="editApiTestCase(${moduleIndex}, ${tcIndex})">Update</button>
+                                         <button class="btn-delete-test-case" onclick="deleteApiTestCase(${moduleIndex}, ${tcIndex})">Delete</button>` :
+                                        `<button class="btn-save" onclick="saveApiTestCase(${moduleIndex}, ${tcIndex})">Save</button>
+                                         <button class="btn-cancel" onclick="cancelApiEdit()">Cancel</button>`
+                                    }
+                                </div>
+                            </div>
+                            <div class="test-steps-container" id="apiSteps${moduleIndex}-${tcIndex}">
+                    `;
+
+                    testCase.steps.forEach((step, stepIndex) => {
+                        html += `
+                            <div class="test-step-item" id="apiStep${moduleIndex}-${tcIndex}-${stepIndex}">
+                                <div class="step-number">${stepIndex + 1}</div>
+                                <div class="step-text" id="apiStepText${moduleIndex}-${tcIndex}-${stepIndex}">${step}</div>
+                                ${isEditing ? `
+                                    <div class="step-actions">
+                                        <button class="icon-btn edit" onclick="editApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Edit">✏️</button>
+                                        <button class="icon-btn delete" onclick="deleteApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Delete">🗑️</button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    });
+
+                    if (isEditing) {
+                        html += `<button class="btn-add-step" onclick="addApiTestStep(${moduleIndex}, ${tcIndex})">+ Add Step</button>`;
+                    }
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+                moduleIndex++;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // API Tests Tree Functions
+        function toggleApiModule(moduleIndex) {
+            const content = document.getElementById(`apiModuleContent${moduleIndex}`);
+            const icon = document.getElementById(`apiModuleIcon${moduleIndex}`);
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('expanded');
+            }
+        }
+
+        function toggleApiTestCase(moduleIndex, tcIndex) {
+            const stepsContainer = document.getElementById(`apiSteps${moduleIndex}-${tcIndex}`);
+            
+            if (stepsContainer.classList.contains('expanded')) {
+                stepsContainer.classList.remove('expanded');
+            } else {
+                stepsContainer.classList.add('expanded');
+            }
+        }
+
+        function editApiTestCase(moduleIndex, tcIndex) {
+            if (currentEditingApiTestCase) {
+                showToast('⚠️ Please save or cancel the current edit first');
+                return;
+            }
+            
+            currentEditingApiTestCase = `${moduleIndex}-${tcIndex}`;
+            renderApiTests();
+            
+            const stepsContainer = document.getElementById(`apiSteps${moduleIndex}-${tcIndex}`);
+            stepsContainer.classList.add('expanded');
+            
+            showToast('📝 Edit mode enabled. Add, edit, or delete steps.');
+        }
+
+        function saveApiTestCase(moduleIndex, tcIndex) {
+            currentEditingApiTestCase = null;
+            renderApiTests();
+            showToast('✅ Test case saved successfully!');
+        }
+
+        function cancelApiEdit() {
+            currentEditingApiTestCase = null;
+            renderApiTests();
+            showToast('❌ Edit cancelled');
+        }
+
+        function addApiTestStep(moduleIndex, tcIndex) {
+            const modules = Object.keys(apiTestsData);
+            const moduleName = modules[moduleIndex];
+            const testCase = apiTestsData[moduleName][tcIndex];
+            
+            testCase.steps.push('New test step - click edit to modify');
+            renderApiTests();
+            
+            currentEditingApiTestCase = `${moduleIndex}-${tcIndex}`;
+            const stepsContainer = document.getElementById(`apiSteps${moduleIndex}-${tcIndex}`);
+            stepsContainer.classList.add('expanded');
+            
+            showToast('✅ New step added');
+        }
+
+        function editApiStep(moduleIndex, tcIndex, stepIndex) {
+            const stepTextElement = document.getElementById(`apiStepText${moduleIndex}-${tcIndex}-${stepIndex}`);
+            const currentText = stepTextElement.textContent;
+            
+            stepTextElement.innerHTML = `
+                <input type="text" class="step-text-editable" value="${currentText}" id="apiEditInput${moduleIndex}-${tcIndex}-${stepIndex}">
+                <button class="icon-btn check" onclick="saveApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Save">✓</button>
+            `;
+            
+            document.getElementById(`apiEditInput${moduleIndex}-${tcIndex}-${stepIndex}`).focus();
+        }
+
+        function saveApiStep(moduleIndex, tcIndex, stepIndex) {
+            const inputElement = document.getElementById(`apiEditInput${moduleIndex}-${tcIndex}-${stepIndex}`);
+            const newText = inputElement.value;
+            
+            const modules = Object.keys(apiTestsData);
+            const moduleName = modules[moduleIndex];
+            apiTestsData[moduleName][tcIndex].steps[stepIndex] = newText;
+            
+            renderApiTests();
+            
+            currentEditingApiTestCase = `${moduleIndex}-${tcIndex}`;
+            const stepsContainer = document.getElementById(`apiSteps${moduleIndex}-${tcIndex}`);
+            stepsContainer.classList.add('expanded');
+            
+            showToast('✅ Step updated');
+        }
+
+        function deleteApiStep(moduleIndex, tcIndex, stepIndex) {
+            if (!confirm('Are you sure you want to delete this step?')) {
+                return;
+            }
+            
+            const modules = Object.keys(apiTestsData);
+            const moduleName = modules[moduleIndex];
+            apiTestsData[moduleName][tcIndex].steps.splice(stepIndex, 1);
+            
+            renderApiTests();
+            
+            currentEditingApiTestCase = `${moduleIndex}-${tcIndex}`;
+            const stepsContainer = document.getElementById(`apiSteps${moduleIndex}-${tcIndex}`);
+            stepsContainer.classList.add('expanded');
+            
+            showToast('🗑️ Step deleted');
+        }
+
+        function deleteApiTestCase(moduleIndex, tcIndex) {
+            const modules = Object.keys(apiTestsData);
+            const moduleName = modules[moduleIndex];
+            const testCase = apiTestsData[moduleName][tcIndex];
+            
+            if (!confirm(`Are you sure you want to delete the test case "${testCase.name}" (${testCase.id})?\n\nThis will remove the entire test case including all its steps.`)) {
+                return;
+            }
+            
+            apiTestsData[moduleName].splice(tcIndex, 1);
+            
+            if (currentEditingApiTestCase === `${moduleIndex}-${tcIndex}`) {
+                currentEditingApiTestCase = null;
+            }
+            
+            renderApiTests();
+            showToast(`🗑️ Test case "${testCase.name}" deleted successfully`);
+        }
+
+        // Initialize test scenarios on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTestScenarios();
+            renderApiTests();
+        });
+
+        // File selection handlers
+        function handleProjectContextSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (!file.name.endsWith('.md')) {
+                    showToast('⚠️ Please select a Markdown (.md) file');
+                    return;
+                }
+                document.getElementById('selectedProjectContext').textContent = `✅ ${file.name}`;
+                showToast(`PROJECT_CONTEXT.md file selected: ${file.name}`);
+                addBotMessage(`📄 <b>PROJECT_CONTEXT.md uploaded!</b>\n\nFile: "${file.name}"\n\nThis file contains:\n• Page Object Models\n• Test scenarios\n• Recorded test cases\n• Element locators\n\nYou can now reference this for creating new test cases!`);
+            }
+        }
+        
+        function handleHtmlFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (!file.name.endsWith('.html')) {
+                    showToast('⚠️ Please select an HTML file');
+                    return;
+                }
+                document.getElementById('selectedHtmlFile').textContent = `✅ ${file.name}`;
+                showToast(`HTML file selected: ${file.name}`);
+                addBotMessage(`🌐 <b>HTML file uploaded!</b>\n\nFile: "${file.name}"\n\nYou can now:\n• Analyze the HTML structure\n• Extract element selectors\n• Create Page Object Models\n• Generate test scenarios\n\nWould you like help extracting elements from this page?`);
+            }
+        }
+
+        // Recording session tracking
+        let recordingSession = {
+            isRecording: false,
+            browser: '',
+            url: '',
+            startTime: null,
+            browserName: ''
+        };
+
+        // Recording controls
+        async function startRecording() {
+            const browser = document.getElementById('browserSelect').value;
+            const url = document.getElementById('appUrl').value.trim();
+            const browserNames = {
+                'chromium': 'Chrome',
+                'msedge': 'Edge',
+                'firefox': 'Firefox'
+            };
+            const browserName = browserNames[browser] || browser;
+            
+            if (!url) {
+                showToast('⚠️ Please enter an application URL');
+                return;
+            }
+            
+            // Hide previous recording results
+            document.getElementById('recordingResults').style.display = 'none';
+            
+            const command = `npx playwright codegen --browser=${browser} ${url}`;
+            
+            // Show loading message
+            showToast(`🚀 Launching ${browserName}...`);
+            addBotMessage(`🎬 <b>Launching ${browserName} for recording...</b>\n\nURL: <b>${url}</b>\nBrowser: <b>${browserName}</b>\n\nPlease wait while the browser opens...`);
+            
+            try {
+                // Send request to dashboard server to launch browser
+                const response = await fetch('http://localhost:3456/start-recording', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ browser, url })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Track recording session
+                    recordingSession = {
+                        isRecording: true,
+                        browser: browser,
+                        url: url,
+                        startTime: new Date(),
+                        browserName: browserName
+                    };
+                    
+                    showToast(`✅ Browser launched successfully!`);
+                    addBotMessage(`✅ <b>Success!</b> ${browserName} is now launching with Playwright Codegen.\n\n<b>What happens next:</b>\n1. 🌐 Browser window will open with your URL\n2. 🎯 Playwright Inspector will appear\n3. ⏺️ Click the "Record" button to start capturing\n4. 🖱️ Perform your test actions (click, type, navigate)\n5. ⏹️ Click "Stop" button in dashboard when done\n\n<b>Command executed:</b>\n<code>${command}</code>\n\n💡 <b>Tip:</b> After recording, you'll be asked to save your test case to PROJECT_CONTEXT.md!`);
+                } else {
+                    throw new Error(result.message || 'Failed to launch browser');
+                }
+            } catch (error) {
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage(`⚠️ <b>Could not launch browser automatically.</b>\n\n<b>Possible reasons:</b>\n• Dashboard server is not running\n• Playwright is not installed\n\n<b>Solution - Run this command in your terminal:</b>\n\n<code>${command}</code>\n\n<b>Or start the dashboard server first:</b>\n<code>node dashboard-server.js</code>\n\nThen try clicking "Start Recording" again.`);
+            }
+        }
+
+        // Report functions
+        async function openHtmlReport() {
+            showToast('📄 Opening Playwright HTML Report...');
+            
+            try {
+                const response = await fetch('http://localhost:3456/open-html-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('✅ HTML Report opened successfully!');
+                    addBotMessage('📄 <b>Playwright HTML Report</b> is now opening!\n\nThis interactive report shows:\n• Test execution results\n• Screenshots and videos\n• Error traces\n• Test timings\n\n💡 The report opens in your default browser automatically.');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage('⚠️ <b>Could not open HTML report.</b>\n\nMake sure:\n• Tests have been executed\n• Report exists in playwright-report folder\n• Dashboard server is running\n\n<b>Or run manually:</b>\n<code>npx playwright show-report</code>');
+            }
+        }
+
+        async function openAllureReport() {
+            showToast('📊 Generating Allure Report...');
+            
+            try {
+                const response = await fetch('http://localhost:3456/open-allure-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('✅ Allure Report is being generated!');
+                    addBotMessage('📊 <b>Allure Report</b> is being generated and will open automatically!\n\n<b>This comprehensive report includes:</b>\n• Test execution timeline\n• Test history trends\n• Categorized failures\n• Detailed test steps\n• Screenshots and attachments\n• Flaky test detection\n\n⏳ Please wait a moment while the report is generated...');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage('⚠️ <b>Could not generate Allure report.</b>\n\nMake sure:\n• Allure is installed: <code>npm install -g allure-commandline</code>\n• Test results exist in allure-results folder\n• Dashboard server is running\n\n<b>Or run manually:</b>\n<code>npx allure generate ./allure-results --clean -o ./allure-report</code>\n<code>npx allure open ./allure-report</code>');
+            }
+        }
+
+        async function openLogs() {
+            showToast('📝 Opening logs folder...');
+            
+            try {
+                const response = await fetch('http://localhost:3456/open-logs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('✅ Logs folder opened!');
+                    addBotMessage('📝 <b>Test execution logs</b> folder is now open!\n\n<b>You can find:</b>\n• Test trace files (.zip)\n• Screenshots\n• Videos\n• Console logs\n• Network data\n\n💡 <b>Tip:</b> Open trace files with:\n<code>npx playwright show-trace trace.zip</code>');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage('⚠️ <b>Could not open logs folder.</b>\n\nMake sure:\n• test-results folder exists\n• Dashboard server is running\n\n<b>Logs are usually in:</b> ./test-results/');
+            }
+        }
+
+        // Stop recording and open modal to save test case
+        function stopRecording() {
+            if (!recordingSession.isRecording) {
+                showToast('⚠️ No active recording session');
+                addBotMessage('⚠️ Please start a recording session first before stopping.');
+                return;
+            }
+
+            showToast('⏹️ Recording stopped');
+            addBotMessage('🎬 <b>Recording session stopped!</b>\n\nNow you can save your test case details to PROJECT_CONTEXT.md.\n\n📝 Please fill in the test case information in the form.');
+            
+            // Pre-fill modal with recording session data
+            document.getElementById('testCaseBrowser').value = recordingSession.browserName;
+            document.getElementById('testCaseUrl').value = recordingSession.url;
+            
+            // Show modal
+            document.getElementById('testCaseModal').classList.add('show');
+        }
+
+        // Extract test steps from Playwright code
+        function extractTestSteps() {
+            const code = document.getElementById('playwrightCode').value.trim();
+            const stepsTextarea = document.getElementById('testCaseSteps');
+            
+            if (!code) {
+                stepsTextarea.value = '';
+                return;
+            }
+            
+            const steps = [];
+            const lines = code.split('\n');
+            
+            for (let line of lines) {
+                line = line.trim();
+                
+                // Navigate/goto
+                if (line.includes('.goto(') || line.includes('goto(')) {
+                    const urlMatch = line.match(/goto\(['"](.*?)['"]/);
+                    if (urlMatch) {
+                        steps.push(`Navigate to ${urlMatch[1]}`);
+                    } else {
+                        steps.push('Navigate to application');
+                    }
+                }
+                
+                // Click actions
+                else if (line.includes('.click(')) {
+                    let element = extractElement(line);
+                    steps.push(`Click ${element}`);
+                }
+                
+                // Fill/Type actions
+                else if (line.includes('.fill(') || line.includes('.type(')) {
+                    let element = extractElement(line);
+                    const valueMatch = line.match(/[fill|type]\([^,]+,\s*['"](.*?)['"]/);
+                    if (valueMatch && valueMatch[1]) {
+                        steps.push(`Enter "${valueMatch[1]}" in ${element}`);
+                    } else {
+                        steps.push(`Enter data in ${element}`);
+                    }
+                }
+                
+                // Press key
+                else if (line.includes('.press(')) {
+                    const keyMatch = line.match(/press\(['"](.*?)['"]/);
+                    if (keyMatch) {
+                        steps.push(`Press ${keyMatch[1]} key`);
+                    }
+                }
+                
+                // Select dropdown
+                else if (line.includes('.selectOption(')) {
+                    let element = extractElement(line);
+                    const valueMatch = line.match(/selectOption\(['"](.*?)['"]/);
+                    if (valueMatch) {
+                        steps.push(`Select "${valueMatch[1]}" from ${element}`);
+                    } else {
+                        steps.push(`Select option from ${element}`);
+                    }
+                }
+                
+                // Check/Uncheck
+                else if (line.includes('.check(')) {
+                    let element = extractElement(line);
+                    steps.push(`Check ${element}`);
+                }
+                else if (line.includes('.uncheck(')) {
+                    let element = extractElement(line);
+                    steps.push(`Uncheck ${element}`);
+                }
+                
+                // Hover
+                else if (line.includes('.hover(')) {
+                    let element = extractElement(line);
+                    steps.push(`Hover over ${element}`);
+                }
+                
+                // Wait
+                else if (line.includes('.waitForSelector(') || line.includes('.waitFor(')) {
+                    let element = extractElement(line);
+                    steps.push(`Wait for ${element} to appear`);
+                }
+                
+                // Expect/Assert
+                else if (line.includes('expect(') && (line.includes('.toBeVisible') || line.includes('.toHaveText') || line.includes('.toContain'))) {
+                    let element = extractElement(line);
+                    if (line.includes('.toBeVisible')) {
+                        steps.push(`Verify ${element} is visible`);
+                    } else if (line.includes('.toHaveText')) {
+                        const textMatch = line.match(/toHaveText\(['"](.*?)['"]/);
+                        if (textMatch) {
+                            steps.push(`Verify ${element} has text "${textMatch[1]}"`);
+                        } else {
+                            steps.push(`Verify ${element} text`);
+                        }
+                    } else if (line.includes('.toContain')) {
+                        steps.push(`Verify ${element} contains expected value`);
+                    }
+                }
+            }
+            
+            // If no steps extracted, provide a helpful message
+            if (steps.length === 0) {
+                stepsTextarea.value = 'Paste valid Playwright code to see auto-generated steps';
+            } else {
+                stepsTextarea.value = steps.join('\n');
+            }
+        }
+        
+        // Helper function to extract element description from code line
+        function extractElement(line) {
+            // Try to extract from getByRole
+            if (line.includes('getByRole')) {
+                const roleMatch = line.match(/getByRole\(['"](.*?)['"]\s*,\s*\{[^}]*name:\s*['"](.*?)['"]/);
+                if (roleMatch) {
+                    return `${roleMatch[2]} ${roleMatch[1]}`;
+                }
+                const simpleRoleMatch = line.match(/getByRole\(['"](.*?)['"]/);
+                if (simpleRoleMatch) {
+                    return simpleRoleMatch[1];
+                }
+            }
+            
+            // Try to extract from getByText
+            if (line.includes('getByText')) {
+                const textMatch = line.match(/getByText\(['"](.*?)['"]/);
+                if (textMatch) {
+                    return `"${textMatch[1]}" element`;
+                }
+            }
+            
+            // Try to extract from getByLabel
+            if (line.includes('getByLabel')) {
+                const labelMatch = line.match(/getByLabel\(['"](.*?)['"]/);
+                if (labelMatch) {
+                    return `${labelMatch[1]} field`;
+                }
+            }
+            
+            // Try to extract from getByPlaceholder
+            if (line.includes('getByPlaceholder')) {
+                const placeholderMatch = line.match(/getByPlaceholder\(['"](.*?)['"]/);
+                if (placeholderMatch) {
+                    return `field with placeholder "${placeholderMatch[1]}"`;
+                }
+            }
+            
+            // Try to extract from locator
+            if (line.includes('.locator(') || line.includes('locator(')) {
+                const locatorMatch = line.match(/locator\(['"](.*?)['"]/);
+                if (locatorMatch) {
+                    let selector = locatorMatch[1];
+                    // Clean up selector for readability
+                    if (selector.startsWith('#')) {
+                        return `element with id "${selector.substring(1)}"`;
+                    } else if (selector.startsWith('.')) {
+                        return `element with class "${selector.substring(1)}"`;
+                    } else if (selector.includes('[name=')) {
+                        const nameMatch = selector.match(/\[name=['"]?(.*?)['"]?\]/);
+                        if (nameMatch) {
+                            return `${nameMatch[1]} field`;
+                        }
+                    }
+                    return `element "${selector}"`;
+                }
+            }
+            
+            return 'element';
+        }
+
+        // Close test case modal
+        function closeTestCaseModal() {
+            document.getElementById('testCaseModal').classList.remove('show');
+            // Reset form
+            document.getElementById('testCaseName').value = '';
+            document.getElementById('testCaseDescription').value = '';
+            document.getElementById('testCaseSteps').value = '';
+            document.getElementById('playwrightCode').value = '';
+        }
+
+        // Save test case to PROJECT_CONTEXT.md
+        async function saveTestCase(event) {
+            event.preventDefault();
+            
+            const testCaseName = document.getElementById('testCaseName').value.trim();
+            const description = document.getElementById('testCaseDescription').value.trim();
+            const testCaseType = document.getElementById('testCaseType').value.trim();
+            const stepsText = document.getElementById('testCaseSteps').value.trim();
+            const playwrightCode = document.getElementById('playwrightCode').value.trim();
+            
+            // Convert steps to arrow format
+            const steps = stepsText.split('\n')
+                .map(s => s.trim())
+                .filter(s => s.length > 0)
+                .join(' → ');
+            
+            const testCaseData = {
+                name: testCaseName,
+                description: description,
+                testCaseType: testCaseType,
+                steps: steps,
+                playwrightCode: playwrightCode,
+                browser: recordingSession.browserName,
+                url: recordingSession.url,
+                timestamp: new Date().toISOString()
+            };
+            
+            showToast('💾 Saving test case...');
+            
+            try {
+                const response = await fetch('http://localhost:3456/save-testcase', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testCaseData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('✅ Test case saved to PROJECT_CONTEXT.md!');
+                    
+                    // Display results above chatbot
+                    const resultsDiv = document.getElementById('recordingResults');
+                    const resultsContent = document.getElementById('recordingResultsContent');
+                    
+                    resultsContent.innerHTML = `
+                        <div style="display: grid; gap: 12px;">
+                            <div style="background: white; padding: 16px; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+                                <div style="font-weight: 700; font-size: 16px; color: #0369a1; margin-bottom: 8px;">
+                                    📝 ${testCaseName}
+                                </div>
+                                <div style="color: #64748b; margin-bottom: 12px;">
+                                    ${description}
+                                </div>
+                                <div style="display: grid; gap: 8px; font-size: 14px;">
+                                    <div><b>Type:</b> <span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">${testCaseType}</span></div>
+                                    <div><b>Browser:</b> ${recordingSession.browserName}</div>
+                                    <div><b>URL:</b> ${recordingSession.url}</div>
+                                    <div><b>Steps:</b> ${steps}</div>
+                                    <div><b>Saved to:</b> PROJECT_CONTEXT.md</div>
+                                    <div style="margin-top: 8px; padding: 12px; background: #f0f9ff; border-radius: 6px; color: #0369a1;">
+                                        ✅ <b>${result.message || 'Test case and page elements successfully documented!'}</b>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    resultsDiv.style.display = 'block';
+                    
+                    // Scroll to results
+                    resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    
+                    addBotMessage(`✅ <b>Test case saved successfully!</b>\n\n<b>${testCaseName}</b>: ${description}\n\nYour test case has been added to PROJECT_CONTEXT.md with:\n• Type: ${testCaseType}\n• Page Elements extracted from code\n• Test scenario: ${steps}\n• Browser: ${recordingSession.browserName}\n• URL: ${recordingSession.url}\n\n📄 Check the Recording Results section above and PROJECT_CONTEXT.md file!`);
+                    
+                    // Close modal and reset recording session
+                    closeTestCaseModal();
+                    recordingSession.isRecording = false;
+                } else {
+                    throw new Error(result.message || 'Failed to save test case');
+                }
+            } catch (error) {
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage(`⚠️ <b>Could not save test case.</b>\n\nError: ${error.message}\n\nMake sure the dashboard server is running.`);
+            }
+        }
+
+        // View Recorded Tests - Navigate to Test Scenarios page
+        function viewRecordedTests() {
+            showPage(2); // Navigate to Test Scenarios page
+            loadRecordedTests(); // Load recorded tests
+            showToast('📊 Viewing recorded test scenarios...');
+            
+            // Scroll to recorded tests section
+            setTimeout(() => {
+                const recordedPanel = document.getElementById('recordedTestsPanel');
+                if (recordedPanel) {
+                    recordedPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300);
+        }
+
+        // Load and display recorded tests from PROJECT_CONTEXT.md
+        async function loadRecordedTests() {
+            const recordedTestsContent = document.getElementById('recordedTestsContent');
+            const recordedTestCount = document.getElementById('recordedTestCount');
+            
+            // Show loading state
+            recordedTestsContent.innerHTML = '<div style="text-align: center; padding: 40px; color: #94a3b8;"><p>Loading recorded test scenarios...</p></div>';
+            
+            try {
+                // Fetch PROJECT_CONTEXT.md content
+                const response = await fetch('PROJECT_CONTEXT.md');
+                if (!response.ok) throw new Error('Could not load PROJECT_CONTEXT.md');
+                
+                const content = await response.text();
+                
+                // Parse recorded tests from PROJECT_CONTEXT.md
+                const recordedTests = parseRecordedTests(content);
+                
+                if (recordedTests.length === 0) {
+                    recordedTestsContent.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #94a3b8;">
+                            <p style="font-size: 16px; margin-bottom: 8px;">No recorded test scenarios found</p>
+                            <small>Record tests using the "Record & Play" feature to see them here</small>
+                        </div>
+                    `;
+                    recordedTestCount.textContent = '(0 tests)';
+                    return;
+                }
+                
+                // Update count
+                recordedTestCount.textContent = `(${recordedTests.length} tests)`;
+                
+                // Store all tests globally for filtering
+                window.allRecordedTests = recordedTests;
+                
+                // Generate HTML for recorded tests
+                displayRecordedTests(recordedTests);
+                
+            } catch (error) {
+                recordedTestsContent.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ef4444;">
+                        <p style="font-size: 16px; margin-bottom: 8px;">⚠️ Error loading recorded tests</p>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+                recordedTestCount.textContent = '(Error)';
+            }
+        }
+
+        // Display recorded tests with current filter
+        function displayRecordedTests(tests) {
+            const recordedTestsContent = document.getElementById('recordedTestsContent');
+            const recordedTestCount = document.getElementById('recordedTestCount');
+            
+            if (tests.length === 0) {
+                recordedTestsContent.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #94a3b8;">
+                        <p style="font-size: 16px; margin-bottom: 8px;">No test scenarios found for this filter</p>
+                        <small>Try selecting a different test type or record new tests</small>
+                    </div>
+                `;
+                recordedTestCount.textContent = '(0 tests)';
+                return;
+            }
+            
+            recordedTestCount.textContent = `(${tests.length} tests)`;
+            
+            let testsHtml = '<div style="display: grid; gap: 12px;">';
+            tests.forEach((test, index) => {
+                const testId = `REC-${String(index + 1).padStart(2, '0')}`;
+                const typeColors = {
+                    'System': { bg: '#fef3c7', color: '#92400e' },
+                    'Integration': { bg: '#ddd6fe', color: '#5b21b6' },
+                    'Functional': { bg: '#fce7f3', color: '#9f1239' },
+                    'UI': { bg: '#dbeafe', color: '#1e40af' }
+                };
+                const typeStyle = typeColors[test.type] || typeColors['UI'];
+                
+                testsHtml += `
+                    <div class="test-item" style="border-left-color: #10b981;" data-test-type="${test.type || 'UI'}">
+                        <h4>
+                            <span class="test-id" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%);">${testId}</span>
+                            ${test.name}
+                            <span style="background: ${typeStyle.bg}; color: ${typeStyle.color}; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 8px;">${test.type || 'UI'}</span>
+                        </h4>
+                        <p style="margin-bottom: 8px;">${test.description}</p>
+                        <div style="font-size: 13px; color: #64748b; display: grid; gap: 4px;">
+                            <div><b>Browser:</b> ${test.browser}</div>
+                            <div><b>URL:</b> ${test.url}</div>
+                            <div><b>Recorded:</b> ${test.timestamp}</div>
+                                <details style="margin-top: 8px;">
+                                    <summary style="cursor: pointer; color: #0369a1; font-weight: 600;">View Steps</summary>
+                                    <div style="margin-top: 8px; padding: 12px; background: #f8fafc; border-radius: 6px; font-size: 12px;">
+                                        ${test.steps.split('→').map(step => `• ${step.trim()}`).join('<br>')}
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+                    `;
+                });
+                testsHtml += '</div>';
+                
+            recordedTestsContent.innerHTML = testsHtml;
+        }
+
+        // Filter recorded tests by type
+        function filterRecordedTests() {
+            const filterValue = document.getElementById('testTypeFilter').value;
+            
+            if (!window.allRecordedTests) {
+                return;
+            }
+            
+            let filteredTests = window.allRecordedTests;
+            if (filterValue !== 'All') {
+                filteredTests = window.allRecordedTests.filter(test => (test.type || 'UI') === filterValue);
+            }
+            
+            displayRecordedTests(filteredTests);
+        }
+
+        // Parse recorded tests from PROJECT_CONTEXT.md content
+        function parseRecordedTests(content) {
+            const tests = [];
+            const lines = content.split('\\n');
+            
+            let currentTest = null;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                
+                // Look for test case headers like "### TestCaseName Test"
+                if (line.match(/^###\\s+(.+?)\\s+Test$/)) {
+                    if (currentTest) {
+                        tests.push(currentTest);
+                    }
+                    currentTest = { name: '', description: '', type: 'UI', steps: '', browser: '', url: '', timestamp: '' };
+                    continue;
+                }
+                
+                // Parse test details
+                if (currentTest) {
+                    // Test name and description line like "**TestName**: Description"
+                    const nameMatch = line.match(/^\\*\\*(.+?)\\*\\*:\\s*(.+)$/);
+                    if (nameMatch) {
+                        currentTest.name = nameMatch[1];
+                        currentTest.description = nameMatch[2];
+                        continue;
+                    }
+                    
+                    // Type line
+                    if (line.includes('- Type:')) {
+                        currentTest.type = line.split('Type:')[1].trim();
+                        continue;
+                    }
+                    
+                    // Steps line starting with "- "
+                    if (line.startsWith('- ') && !line.includes('Browser:') && !line.includes('URL:') && !line.includes('Recorded:') && !line.includes('Type:')) {
+                        currentTest.steps = line.substring(2).trim();
+                        continue;
+                    }
+                    
+                    // Browser line
+                    if (line.includes('- Browser:')) {
+                        currentTest.browser = line.split('Browser:')[1].trim();
+                        continue;
+                    }
+                    
+                    // URL line
+                    if (line.includes('- URL:')) {
+                        currentTest.url = line.split('URL:')[1].trim();
+                        continue;
+                    }
+                    
+                    // Timestamp line
+                    if (line.includes('- Recorded:')) {
+                        currentTest.timestamp = line.split('Recorded:')[1].trim();
+                    }
+                }
+            }
+            
+            // Add last test if exists
+            if (currentTest && currentTest.name) {
+                tests.push(currentTest);
+            }
+            
+            return tests;
+        }
+
+        // Load recorded tests when page loads and when Test Scenarios page is shown
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRecordedTests();
+        });
+
+        // Enhanced AI Chatbot with comprehensive test automation knowledge
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) {
+                showToast('⚠️ Please type a message first');
+                return;
+            }
+
+            addUserMessage(message);
+            input.value = '';
+
+            // Show typing indicator
+            const chatbox = document.getElementById('chatbox');
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'message bot-msg typing-indicator';
+            typingIndicator.innerHTML = '🤖 <i>Analyzing your question...</i>';
+            typingIndicator.id = 'typing-indicator';
+            chatbox.appendChild(typingIndicator);
+            chatbox.scrollTop = chatbox.scrollHeight;
+
+            // Process and respond
+            setTimeout(() => {
+                // Remove typing indicator
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) indicator.remove();
+                
+                const response = getAIResponse(message);
+                addBotMessage(response);
+            }, 400);
+        }
+
+        // AI Response Engine - Simulates GitHub Copilot-like intelligence
+        function getAIResponse(message) {
+            const msg = message.toLowerCase();
+
+            // Recording Issues
+            if (msg.includes('record') || msg.includes('recording') || msg.includes('not launching') || msg.includes('start recording')) {
+                return `<b>Playwright Test Recording Guide:</b>\n\nTo record tests in Playwright, use the codegen tool:\n\n<code>// Start recording in Chrome
+npx playwright codegen https://your-app.com
+
+// Record in specific browser
+npx playwright codegen --browser=firefox https://example.com
+
+// Record with device emulation
+npx playwright codegen --device="iPhone 13" https://example.com
+
+// Save to specific file
+npx playwright codegen --target javascript -o tests/my-test.spec.js
+
+// Record with authentication
+npx playwright codegen --save-storage=auth.json
+</code>\n\n<b>Common Recording Issues:</b>\n• Make sure Playwright is installed: <code>npm install @playwright/test</code>\n• Check if the URL is accessible\n• Try running with --headed flag to see the browser\n• Ensure no firewall blocking the browser\n\n<b>Alternative Method - Playwright Inspector:</b>\n<code>// Start your test in debug mode
+npx playwright test --debug
+
+// Or pause at a specific point
+await page.pause(); // Add this in your test
+</code>`;
+            }
+
+            // Code Generation
+            if (msg.includes('generate') || msg.includes('create test') || msg.includes('write test')) {
+                if (msg.includes('login')) {
+                    return `Here's a login test for Playwright:\n\n<code>test('user login test', async ({ page }) => {
+  await page.goto('https://your-app.com/login');
+  await page.fill('#username', 'testuser');
+  await page.fill('#password', 'password123');
+  await page.click('button[type="submit"]');
+  
+  // Verify successful login
+  await expect(page).toHaveURL(/.*dashboard/);
+  await expect(page.locator('.welcome-message')).toBeVisible();
+});</code>`;
+                } else if (msg.includes('api') || msg.includes('rest')) {
+                    return `Here's a REST API test example:\n\n<code>test('create user via API', async ({ request }) => {
+  const response = await request.post('/api/users', {
+    data: {
+      name: 'John Doe',
+      email: 'john@example.com',
+      password: 'secure123'
+    }
+  });
+  
+  expect(response.ok()).toBeTruthy();
+  expect(response.status()).toBe(201);
+  
+  const body = await response.json();
+  expect(body.name).toBe('John Doe');
+});</code>`;
+                } else {
+                    return `Here's a basic Playwright test structure:\n\n<code>import { test, expect } from '@playwright/test';
+
+test('your test description', async ({ page }) => {
+  // Navigate to page
+  await page.goto('https://example.com');
+  
+  // Perform actions
+  await page.click('#element');
+  await page.fill('input[name="field"]', 'value');
+  
+  // Add assertions
+  await expect(page.locator('#result')).toBeVisible();
+  await expect(page).toHaveTitle('Expected Title');
+});</code>`;
+                }
+            }
+
+            // Assertions Help
+            if (msg.includes('assert') || msg.includes('expect') || msg.includes('verify')) {
+                return `Common Playwright Assertions:\n\n<code>// Page assertions
+await expect(page).toHaveTitle('Title');
+await expect(page).toHaveURL(/pattern/);
+
+// Element assertions
+await expect(element).toBeVisible();
+await expect(element).toBeHidden();
+await expect(element).toBeEnabled();
+await expect(element).toBeDisabled();
+await expect(element).toHaveText('text');
+await expect(element).toContainText('partial');
+await expect(element).toHaveAttribute('attr', 'value');
+await expect(element).toHaveClass('className');
+
+// Count assertions
+await expect(page.locator('.item')).toHaveCount(5);</code>`;
+            }
+
+            // Locators Help
+            if (msg.includes('locator') || msg.includes('selector') || msg.includes('find element')) {
+                return `Playwright Locator Strategies:\n\n<code>// Recommended locators (in priority order)
+page.getByRole('button', { name: 'Submit' })
+page.getByText('Welcome')
+page.getByLabel('Email')
+page.getByPlaceholder('Search...')
+page.getByTestId('user-profile')
+
+// CSS selectors
+page.locator('#id')
+page.locator('.class')
+page.locator('button[type="submit"]')
+
+// XPath
+page.locator('xpath=//button[@type="submit"]')
+
+// Chaining
+page.locator('.container').locator('button')
+page.locator('button').filter({ hasText: 'Submit' })</code>`;
+            }
+
+            // Debugging Help
+            if (msg.includes('debug') || msg.includes('error') || msg.includes('fail')) {
+                return `Debugging Playwright Tests:\n\n<code>// Debug mode
+npx playwright test --debug
+
+// Headed mode to see browser
+npx playwright test --headed
+
+// Pause test execution
+await page.pause();
+
+// Screenshots
+await page.screenshot({ path: 'screenshot.png' });
+
+// Console logs
+page.on('console', msg => console.log(msg.text()));
+
+// Network debugging
+page.on('request', request => console.log(request.url()));
+page.on('response', response => console.log(response.status()));
+
+// Trace viewer
+npx playwright test --trace on
+npx playwright show-trace trace.zip</code>\n\nTip: Use --ui mode for interactive debugging!`;
+            }
+
+            // Wait/Timeout Help
+            if (msg.includes('wait') || msg.includes('timeout') || msg.includes('slow')) {
+                return `Handling Timeouts & Waits:\n\n<code>// Wait for element
+await page.waitForSelector('#element');
+await page.waitForLoadState('networkidle');
+
+// Custom timeout
+await page.locator('#slow').click({ timeout: 10000 });
+
+// Wait for response
+await page.waitForResponse(
+  response => response.url().includes('/api/')
+);
+
+// Set test timeout
+test.setTimeout(60000);
+
+// Auto-wait (built-in)
+// Playwright auto-waits for elements to be:
+// - attached to DOM
+// - visible
+// - stable (not animating)
+// - enabled
+// - receive events</code>`;
+            }
+
+            // Page Object Model
+            if (msg.includes('page object') || msg.includes('pom') || msg.includes('structure')) {
+                return `Page Object Model (POM) Pattern:\n\n<code>// pages/LoginPage.ts
+export class LoginPage {
+  constructor(private page: Page) {}
+
+  async navigate() {
+    await this.page.goto('/login');
+  }
+
+  async login(username: string, password: string) {
+    await this.page.fill('#username', username);
+    await this.page.fill('#password', password);
+    await this.page.click('button[type="submit"]');
+  }
+
+  async getErrorMessage() {
+    return await this.page.locator('.error').textContent();
+  }
+}
+
+// test file
+import { LoginPage } from './pages/LoginPage';
+
+test('login test', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  await loginPage.navigate();
+  await loginPage.login('user', 'pass');
+});</code>`;
+            }
+
+            // API Testing
+            if (msg.includes('api test') || msg.includes('rest api') || msg.includes('http')) {
+                return `REST API Testing with Playwright:\n\n<code>test('API testing examples', async ({ request }) => {
+  // GET request
+  const getResponse = await request.get('/api/users/1');
+  expect(getResponse.status()).toBe(200);
+  const userData = await getResponse.json();
+  
+  // POST request
+  const postResponse = await request.post('/api/users', {
+    data: { name: 'John', email: 'john@test.com' },
+    headers: { 'Authorization': 'Bearer token' }
+  });
+  expect(postResponse.ok()).toBeTruthy();
+  
+  // PUT/PATCH request
+  await request.patch('/api/users/1', {
+    data: { name: 'Updated Name' }
+  });
+  
+  // DELETE request
+  await request.delete('/api/users/1');
+  
+  // With authentication
+  const context = await request.newContext({
+    extraHTTPHeaders: {
+      'Authorization': 'Bearer YOUR_TOKEN'
+    }
+  });
+});</code>`;
+            }
+
+            // Fixtures
+            if (msg.includes('fixture') || msg.includes('before') || msg.includes('setup')) {
+                return `Test Fixtures & Hooks:\n\n<code>// Test hooks
+test.beforeEach(async ({ page }) => {
+  await page.goto('/');
+});
+
+test.afterEach(async ({ page }) => {
+  await page.close();
+});
+
+test.beforeAll(async () => {
+  // Setup database
+});
+
+test.afterAll(async () => {
+  // Cleanup
+});
+
+// Custom fixture
+import { test as base } from '@playwright/test';
+
+export const test = base.extend({
+  loggedInPage: async ({ page }, use) => {
+    await page.goto('/login');
+    await page.fill('#user', 'testuser');
+    await page.fill('#pass', 'testpass');
+    await page.click('button');
+    await use(page);
+  }
+});
+
+// Use custom fixture
+test('dashboard test', async ({ loggedInPage }) => {
+  await loggedInPage.click('#dashboard');
+});</code>`;
+            }
+
+            // Mobile Testing
+            if (msg.includes('mobile') || msg.includes('responsive') || msg.includes('device')) {
+                return `Mobile & Responsive Testing:\n\n<code>// Test on specific device
+import { devices } from '@playwright/test';
+
+test.use({
+  ...devices['iPhone 13'],
+});
+
+// Custom viewport
+test.use({
+  viewport: { width: 375, height: 667 }
+});
+
+// Geolocation
+test.use({
+  geolocation: { latitude: 37.7749, longitude: -122.4194 },
+  permissions: ['geolocation']
+});
+
+// Mobile emulation in test
+test('mobile test', async ({ browser }) => {
+  const iPhone = devices['iPhone 13'];
+  const context = await browser.newContext({ ...iPhone });
+  const page = await context.newPage();
+  await page.goto('https://example.com');
+});</code>`;
+            }
+
+            // Form Filling & Interaction
+            if (msg.includes('form') || msg.includes('fill') || msg.includes('input') || msg.includes('type')) {
+                return `<b>Form Filling & Input Handling:</b>\n\n<code>// Text input
+await page.fill('input[name="username"]', 'testuser');
+await page.fill('#email', 'test@example.com');
+
+// Alternative - type with delay
+await page.type('input', 'text', { delay: 100 });
+
+// Clear and fill
+await page.locator('input').clear();
+await page.locator('input').fill('new value');
+
+// Dropdown select
+await page.selectOption('select#country', 'USA');
+await page.selectOption('select', { label: 'United States' });
+await page.selectOption('select', { value: 'us' });
+
+// Checkbox
+await page.check('input[type="checkbox"]');
+await page.uncheck('input[type="checkbox"]');
+
+// Radio button
+await page.check('input[value="option1"]');
+
+// File upload
+await page.setInputFiles('input[type="file"]', 'path/to/file.pdf');
+
+// Submit form
+await page.click('button[type="submit"]');
+// or
+await page.press('input', 'Enter');
+</code>\n\n💡 <b>Tip:</b> Always wait for the form to be ready before filling!`;
+            }
+
+            // Clicking & Interaction
+            if (msg.includes('click') || msg.includes('button') || msg.includes('interact')) {
+                return `<b>Clicking Elements & Interactions:</b>\n\n<code>// Basic click
+await page.click('button');
+await page.click('#submit');
+
+// Click with options
+await page.click('button', {
+  button: 'right',  // right-click
+  clickCount: 2,    // double-click
+  delay: 100,       // delay in ms
+  force: true,      // skip actionability checks
+  timeout: 5000     // custom timeout
+});
+
+// Click position (x, y coordinates)
+await page.click('canvas', { position: { x: 100, y: 200 } });
+
+// Press and hold
+await page.locator('button').hover();
+await page.mouse.down();
+await page.waitForTimeout(1000);
+await page.mouse.up();
+
+// Drag and drop
+await page.dragAndDrop('#source', '#target');
+
+// Hover
+await page.hover('.menu-item');
+
+// Focus
+await page.focus('input#username');
+
+// Press keyboard keys
+await page.press('input', 'Enter');
+await page.keyboard.press('ArrowDown');
+await page.keyboard.type('Hello World');
+
+// Wait for element to be clickable
+await page.waitForSelector('button:enabled');
+await page.click('button');
+</code>`;
+            }
+
+            // Iframe Handling
+            if (msg.includes('iframe') || msg.includes('frame')) {
+                return `<b>Working with Iframes:</b>\n\n<code>// Access iframe by name or URL
+const frame = page.frame('frameName');
+const frame = page.frame({ url: /.*domain.com.*/ });
+
+// Find iframe by selector
+const frameElement = page.frameLocator('iframe#myframe');
+
+// Interact with elements inside iframe
+await frameElement.locator('button').click();
+await frameElement.locator('input').fill('text');
+
+// Wait for iframe to load
+await page.waitForSelector('iframe#myframe');
+const frame = await page.frame({ name: 'frameName' });
+await frame.waitForLoadState();
+
+// Multiple nested iframes
+const parentFrame = page.frameLocator('iframe.parent');
+const childFrame = parentFrame.frameLocator('iframe.child');
+await childFrame.locator('button').click();
+
+// Get all frames
+const frames = page.frames();
+console.log(frames.length);
+</code>\n\n💡 <b>Tip:</b> Use frameLocator for better auto-waiting!`;
+            }
+
+            // Alert/Dialog Handling
+            if (msg.includes('alert') || msg.includes('dialog') || msg.includes('popup') || msg.includes('confirm')) {
+                return `<b>Handling Alerts & Dialogs:</b>\n\n<code>// Accept alert/confirm
+page.on('dialog', dialog => dialog.accept());
+await page.click('#show-alert');
+
+// Dismiss dialog
+page.on('dialog', dialog => dialog.dismiss());
+
+// Get dialog message
+page.on('dialog', async dialog => {
+  console.log(dialog.message());
+  await dialog.accept();
+});
+
+// Handle prompt with input
+page.on('dialog', async dialog => {
+  await dialog.accept('User input text');
+});
+
+// One-time dialog handler
+page.once('dialog', dialog => dialog.accept());
+
+// Check dialog type
+page.on('dialog', async dialog => {
+  if (dialog.type() === 'confirm') {
+    await dialog.accept();
+  } else if (dialog.type() === 'prompt') {
+    await dialog.accept('answer');
+  } else {
+    await dialog.dismiss();
+  }
+});
+
+// Handle multiple dialogs
+let alertCount = 0;
+page.on('dialog', async dialog => {
+  alertCount++;
+  await dialog.accept();
+});
+</code>`;
+            }
+
+            // Table/Data Extraction
+            if (msg.includes('table') || msg.includes('extract') || msg.includes('scrape') || msg.includes('data')) {
+                return `<b>Extracting Table Data:</b>\n\n<code>// Get all table rows
+const rows = await page.locator('table tbody tr').all();
+
+// Extract data from table
+const tableData = await page.locator('table tbody tr').evaluateAll(rows => {
+  return rows.map(row => {
+    const cells = row.querySelectorAll('td');
+    return {
+      name: cells[0]?.textContent,
+      email: cells[1]?.textContent,
+      role: cells[2]?.textContent
+    };
+  });
+});
+
+// Get specific cell value
+const cellValue = await page.locator('table tr:nth-child(2) td:nth-child(3)').textContent();
+
+// Count rows
+const rowCount = await page.locator('table tbody tr').count();
+
+// Find row by text
+const row = page.locator('table tr:has-text("John Doe")');
+await row.locator('button').click();
+
+// Get all text from elements
+const names = await page.locator('.user-name').allTextContents();
+
+// Extract links
+const links = await page.$$eval('a', anchors => {
+  return anchors.map(a => ({
+    text: a.textContent,
+    href: a.href
+  }));
+});
+</code>`;
+            }
+
+            // Network Interception
+            if (msg.includes('network') || msg.includes('intercept') || msg.includes('request') || msg.includes('response')) {
+                return `<b>Network Interception & Mocking:</b>\n\n<code>// Listen to all requests
+page.on('request', request => {
+  console.log(request.url());
+});
+
+// Listen to responses
+page.on('response', response => {
+  console.log(response.status(), response.url());
+});
+
+// Wait for specific API call
+await page.waitForResponse(
+  response => response.url().includes('/api/users') && response.status() === 200
+);
+
+// Mock API response
+await page.route('**/api/users', route => {
+  route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify([
+      { id: 1, name: 'Mock User 1' },
+      { id: 2, name: 'Mock User 2' }
+    ])
+  });
+});
+
+// Abort specific requests (block images)
+await page.route('**/*.{png,jpg,jpeg}', route => route.abort());
+
+// Modify request
+await page.route('**/api/**', route => {
+  const headers = {
+    ...route.request().headers(),
+    'Authorization': 'Bearer mock-token'
+  };
+  route.continue({ headers });
+});
+
+// Continue with modified response
+await page.route('**/api/data', async route => {
+  const response = await route.fetch();
+  const json = await response.json();
+  json.modified = true;
+  route.fulfill({ response, json });
+});
+</code>`;
+            }
+
+            // CI/CD Integration
+            if (msg.includes('ci') || msg.includes('cd') || msg.includes('github actions') || msg.includes('jenkins')) {
+                return `<b>CI/CD Integration:</b>\n\n<code>// GitHub Actions (.github/workflows/tests.yml)
+name: Playwright Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - run: npx playwright test
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+
+// GitLab CI (.gitlab-ci.yml)
+test:
+  image: mcr.microsoft.com/playwright:v1.40.0
+  script:
+    - npm ci
+    - npx playwright test
+
+// Jenkins (Jenkinsfile)
+pipeline {
+  agent any
+  stages {
+    stage('Install') {
+      steps {
+        sh 'npm ci'
+        sh 'npx playwright install'
+      }
+    }
+    stage('Test') {
+      steps {
+        sh 'npx playwright test'
+      }
+    }
+  }
+}
+
+// Docker
+FROM mcr.microsoft.com/playwright:v1.40.0
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+CMD ["npx", "playwright", "test"]
+</code>`;
+            }
+
+            // Best Practices
+            if (msg.includes('best practice') || msg.includes('tips') || msg.includes('recommend')) {
+                return `Playwright Best Practices:\n\n✅ Use user-facing locators (getByRole, getByText)\n✅ Add data-testid for stable selectors\n✅ Use Page Object Model for reusability\n✅ Enable auto-waiting (built-in)\n✅ Use soft assertions for non-critical checks\n✅ Parallelize tests for speed\n✅ Use trace viewer for debugging\n✅ Test in multiple browsers\n✅ Use fixtures for common setup\n✅ Keep tests independent\n\n❌ Avoid XPath when possible\n❌ Don't use long waits (sleep)\n❌ Avoid brittle selectors\n❌ Don't share state between tests\n❌ Avoid testing implementation details`;
+            }
+
+            // Screenshot/Video
+            if (msg.includes('screenshot') || msg.includes('video') || msg.includes('capture')) {
+                return `Screenshots & Videos:\n\n<code>// Full page screenshot
+await page.screenshot({ path: 'page.png', fullPage: true });
+
+// Element screenshot
+await page.locator('#hero').screenshot({ path: 'hero.png' });
+
+// Configure in playwright.config.ts
+use: {
+  screenshot: 'only-on-failure',
+  video: 'retain-on-failure',
+  trace: 'on-first-retry'
+}
+
+// Manual video recording
+const context = await browser.newContext({
+  recordVideo: { dir: 'videos/' }
+});
+
+// View trace
+npx playwright show-trace trace.zip</code>`;
+            }
+
+            // Parallel Execution
+            if (msg.includes('parallel') || msg.includes('faster') || msg.includes('speed')) {
+                return `Running Tests in Parallel:\n\n<code>// playwright.config.ts
+export default {
+  workers: 4, // Number of parallel workers
+  fullyParallel: true,
+  retries: 2
+}
+
+// Command line
+npx playwright test --workers=4
+
+// Disable parallel for specific file
+test.describe.configure({ mode: 'serial' });
+
+// Run tests in same browser context
+test.describe.parallel('suite', () => {
+  test('test 1', async ({ page }) => {});
+  test('test 2', async ({ page }) => {});
+});
+
+// Performance tips:
+// - Use --shard for CI/CD distribution
+// - Maximize workers based on CPU cores
+// - Use beforeAll for expensive setup
+// - Share browser contexts when safe</code>`;
+            }
+
+            // Configuration
+            if (msg.includes('config') || msg.includes('setup') || msg.includes('playwright.config')) {
+                return `Playwright Configuration:\n\n<code>// playwright.config.ts
+export default defineConfig({
+  testDir: './tests',
+  timeout: 30000,
+  retries: 2,
+  workers: 4,
+  
+  use: {
+    baseURL: 'https://example.com',
+    headless: true,
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    trace: 'on-first-retry',
+  },
+  
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    { name: 'mobile', use: { ...devices['iPhone 13'] } },
+  ],
+  
+  reporter: [
+    ['html'],
+    ['json', { outputFile: 'results.json' }],
+    ['junit', { outputFile: 'results.xml' }]
+  ]
+});</code>`;
+            }
+
+            // Data-Driven Testing
+            if (msg.includes('data driven') || msg.includes('csv') || msg.includes('excel') || msg.includes('multiple data')) {
+                return `Data-Driven Testing:\n\n<code>// Using array of data
+const testData = [
+  { username: 'user1', password: 'pass1' },
+  { username: 'user2', password: 'pass2' },
+  { username: 'user3', password: 'pass3' }
+];
+
+testData.forEach(({ username, password }) => {
+  test(\`login with \${username}\`, async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('#username', username);
+    await page.fill('#password', password);
+    await page.click('button[type="submit"]');
+  });
+});
+
+// Using CSV file
+import fs from 'fs';
+import { parse } from 'csv-parse/sync';
+
+const records = parse(fs.readFileSync('data.csv'), {
+  columns: true,
+  skip_empty_lines: true
+});
+
+for (const record of records) {
+  test(\`test with \${record.name}\`, async ({ page }) => {
+    // Use record.field1, record.field2, etc.
+  });
+}</code>`;
+            }
+
+            // Image/Visual Comparison
+            if (msg.includes('image') || msg.includes('visual') || msg.includes('screenshot compare')) {
+                return `Visual/Image Comparison Testing:\n\n<code>// Built-in screenshot comparison
+test('visual regression', async ({ page }) => {
+  await page.goto('/');
+  
+  // Compare full page
+  await expect(page).toHaveScreenshot();
+  
+  // Compare specific element
+  await expect(page.locator('#hero')).toHaveScreenshot();
+  
+  // With custom name
+  await expect(page).toHaveScreenshot('homepage.png');
+  
+  // With threshold (allow small differences)
+  await expect(page).toHaveScreenshot({
+    maxDiffPixels: 100
+  });
+});
+
+// Update snapshots
+// npx playwright test --update-snapshots
+
+// Pixel-by-pixel comparison
+import { PNG } from 'pngjs';
+import pixelmatch from 'pixelmatch';
+
+test('custom image compare', async ({ page }) => {
+  await page.screenshot({ path: 'actual.png' });
+  const img1 = PNG.sync.read(fs.readFileSync('actual.png'));
+  const img2 = PNG.sync.read(fs.readFileSync('expected.png'));
+  const diff = new PNG({ width: img1.width, height: img1.height });
+  
+  const numDiffPixels = pixelmatch(
+    img1.data, img2.data, diff.data,
+    img1.width, img1.height,
+    { threshold: 0.1 }
+  );
+  
+  expect(numDiffPixels).toBeLessThan(100);
+});</code>`;
+            }
+
+            // Database Testing
+            if (msg.includes('database') || msg.includes('sql') || msg.includes('db test')) {
+                return `Database Testing:\n\n<code>// Using pg (PostgreSQL)
+import { Client } from 'pg';
+
+test('database validation', async ({ page }) => {
+  const client = new Client({
+    host: 'localhost',
+    database: 'testdb',
+    user: 'user',
+    password: 'password'
+  });
+  
+  await client.connect();
+  
+  // Insert test data
+  await client.query(
+    'INSERT INTO users (name, email) VALUES ($1, $2)',
+    ['Test User', 'test@example.com']
+  );
+  
+  // Perform UI actions
+  await page.goto('/users');
+  
+  // Verify in database
+  const result = await client.query(
+    'SELECT * FROM users WHERE email = $1',
+    ['test@example.com']
+  );
+  
+  expect(result.rows[0].name).toBe('Test User');
+  
+  // Cleanup
+  await client.query('DELETE FROM users WHERE email = $1',
+    ['test@example.com']);
+  await client.end();
+});
+
+// Using MySQL
+import mysql from 'mysql2/promise';
+
+const connection = await mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'password',
+  database: 'test'
+});
+
+const [rows] = await connection.execute(
+  'SELECT * FROM users WHERE id = ?',
+  [1]
+);</code>`;
+            }
+
+            // Authentication/Session
+            if (msg.includes('auth') || msg.includes('session') || msg.includes('cookie') || msg.includes('storage')) {
+                return `Authentication & Session Management:\n\n<code>// Save authentication state
+test('save auth', async ({ page }) => {
+  await page.goto('/login');
+  await page.fill('#username', 'user');
+  await page.fill('#password', 'pass');
+  await page.click('button');
+  
+  // Save storage state
+  await page.context().storageState({
+    path: 'auth.json'
+  });
+});
+
+// Reuse authentication
+test.use({ storageState: 'auth.json' });
+
+test('use saved auth', async ({ page }) => {
+  // Already logged in!
+  await page.goto('/dashboard');
+});
+
+// Global setup (setup.ts)
+import { chromium } from '@playwright/test';
+
+async function globalSetup() {
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  await page.goto('/login');
+  await page.fill('#user', 'admin');
+  await page.fill('#pass', 'admin123');
+  await page.click('button');
+  await page.context().storageState({ path: 'auth.json' });
+  await browser.close();
+}
+
+export default globalSetup;
+
+// In config: globalSetup: require.resolve('./setup.ts')</code>`;
+            }
+
+            // File Upload/Download
+            if (msg.includes('upload') || msg.includes('download') || msg.includes('file')) {
+                return `File Upload & Download:\n\n<code>// File Upload
+test('file upload', async ({ page }) => {
+  await page.goto('/upload');
+  
+  // Upload file
+  await page.setInputFiles('input[type="file"]', 'path/to/file.pdf');
+  
+  // Upload multiple files
+  await page.setInputFiles('input[type="file"]', [
+    'file1.pdf',
+    'file2.pdf'
+  ]);
+  
+  // Upload from buffer
+  await page.setInputFiles('input[type="file"]', {
+    name: 'test.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('file content')
+  });
+  
+  // Clear file input
+  await page.setInputFiles('input[type="file"]', []);
+});
+
+// File Download
+test('file download', async ({ page }) => {
+  await page.goto('/download');
+  
+  const downloadPromise = page.waitForEvent('download');
+  await page.click('#download-button');
+  const download = await downloadPromise;
+  
+  // Get download info
+  console.log(download.suggestedFilename());
+  
+  // Save to specific path
+  await download.saveAs('/path/to/save/' + download.suggestedFilename());
+  
+  // Get download stream
+  const stream = await download.createReadStream();
+});</code>`;
+            }
+
+            // General help
+            if (msg.includes('help') || msg.includes('what can you') || msg.includes('how to') || msg === 'hi' || msg === 'hello') {
+                return `<b>👋 Hi! I'm your AI Test Automation Assistant!</b>\n\nI can help with:\n\n🎯 <b>Code Generation</b>\n   - Login tests, API tests, UI tests\n   - Page Object Models\n   - Custom fixtures\n\n🔍 <b>Locators & Interactions</b>\n   - Finding elements\n   - Clicking, typing, form filling\n   - Drag & drop, hover\n\n✅ <b>Assertions & Verification</b>\n   - Element assertions\n   - Page assertions\n   - Data extraction\n\n🐛 <b>Debugging</b>\n   - Debug mode, traces\n   - Screenshots, videos\n   - Network debugging\n\n⚡ <b>Performance</b>\n   - Parallel execution\n   - Speed optimization\n\n📱 <b>Mobile Testing</b>\n   - Device emulation\n   - Responsive testing\n\n🔧 <b>Advanced Topics</b>\n   - Iframes & alerts\n   - Table data extraction\n   - Network interception\n   - File upload/download\n   - Database testing\n   - Visual regression\n   - CI/CD integration\n\n💡 <b>Try asking:</b>\n• "How to record tests?"\n• "Generate a login test"\n• "How to click elements?"\n• "Fill form examples"\n• "Handle iframes"\n• "Extract table data"\n• "API testing"\n• "Best practices"`;
+            }
+
+            // Default intelligent response
+            const keywords = {
+                'test': 'testing and test generation',
+                'click': 'clicking elements and interactions',
+                'selector': 'finding elements with selectors',
+                'error': 'debugging and error handling',
+                'slow': 'performance and speed optimization',
+                'run': 'running tests and execution',
+                'install': 'installation and setup',
+                'report': 'reporting and test results',
+                'ci': 'CI/CD integration',
+                'docker': 'Docker and containerization',
+                'browser': 'browser automation',
+                'element': 'element interaction',
+                'form': 'form filling and submission',
+                'table': 'table data extraction',
+                'iframe': 'iframe handling',
+                'alert': 'alert and dialog handling',
+                'network': 'network interception',
+                'mock': 'API mocking'
+            };
+
+            let detectedTopic = '';
+            for (const [keyword, topic] of Object.entries(keywords)) {
+                if (msg.includes(keyword)) {
+                    detectedTopic = topic;
+                    break;
+                }
+            }
+
+            if (detectedTopic) {
+                return `<b>I can help with ${detectedTopic}!</b>\n\nHere are some quick examples:\n\n<code>// Example Playwright test
+test('${message.substring(0, 30)}...', async ({ page }) => {
+  await page.goto('https://example.com');
+  
+  // Interact with elements
+  await page.click('button#submit');
+  await page.fill('input[name="field"]', 'value');
+  
+  // Verify results
+  await expect(page.locator('#result')).toBeVisible();
+});
+</code>\n\n💡 <b>For more specific help, try asking:</b>\n• "Generate a ${detectedTopic} test"\n• "How to debug ${detectedTopic}"\n• "Best practices for ${detectedTopic}"\n• "Show me ${detectedTopic} examples"\n\nWhat specific aspect would you like to know more about?`;
+            }
+
+            // Fallback help response
+            return `<b>I'm here to help with Playwright Test Automation!</b>\n\nYou asked: "<i>${message}</i>"\n\n🎯 <b>I can help you with:</b>\n\n<b>Code Generation:</b>\n• Login tests, API tests, UI tests\n• Page Object Models\n• Test fixtures and hooks\n\n<b>Common Tasks:</b>\n• Element locators and selectors\n• Assertions and verifications\n• Debugging and troubleshooting\n• Configuration and setup\n\n<b>Advanced Topics:</b>\n• Parallel execution\n• Visual regression testing\n• Database testing\n• File upload/download\n• Authentication\n\n💡 <b>Try asking specific questions like:</b>\n• "Generate a login test"\n• "How to find elements?"\n• "Debug failing tests"\n• "API testing examples"\n• "Best practices"\n• "Handle file uploads"\n• "Test with database"\n\nWhat would you like help with?`;
+        }
+
+        function addUserMessage(text) {
+            const chatbox = document.getElementById('chatbox');
+            const msg = document.createElement('div');
+            msg.className = 'message user-msg';
+            msg.textContent = '👤 ' + text;
+            chatbox.appendChild(msg);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        function addBotMessage(text) {
+            const chatbox = document.getElementById('chatbox');
+            const msg = document.createElement('div');
+            msg.className = 'message bot-msg';
+            
+            // Process the text to handle code blocks and formatting
+            let formattedText = text
+                .replace(/\n/g, '<br>')
+                .replace(/<code>([\s\S]*?)<\/code>/g, '<code>$1</code>');
+            
+            msg.innerHTML = '🤖 ' + formattedText;
+            chatbox.appendChild(msg);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        // Quick ask function for example questions
+        function quickAsk(question) {
+            document.getElementById('chatInput').value = question;
+            sendMessage();
+        }
+
+        // Clear chat history
+        function clearChat() {
+            const chatbox = document.getElementById('chatbox');
+            chatbox.innerHTML = `<div class="message bot-msg">🤖 <b>Chat cleared! Ready to help you again!</b><br><br>
+            I can assist with:<br>
+            • <b>Recording tests</b> - Codegen and Playwright Inspector<br>
+            • <b>Code generation</b> - Login, API, form tests<br>
+            • <b>Element interactions</b> - Click, type, select, drag<br>
+            • <b>Debugging</b> - Traces, screenshots, network logs<br>
+            • <b>Advanced features</b> - Iframes, alerts, tables, mocking<br><br>
+            💡 Ask me anything about Playwright test automation!</div>`;
+            showToast('💬 Chat history cleared');
+        }
+
+        // Copy command to clipboard
+        function copyCommand(button) {
+            const commandBox = button.parentElement;
+            const command = commandBox.textContent.replace('Copy', '').replace('$', '').trim();
+            navigator.clipboard.writeText(command).then(() => {
+                showToast('✅ Command copied to clipboard!');
+            });
+        }
+
+        // Run specific test type
+        function runTest(type) {
+            const config = getTestConfiguration();
+            const browserNames = { chromium: 'Chrome', msedge: 'Edge', firefox: 'Firefox' };
+            const reportNames = { allure: 'Allure', html: 'Playwright HTML Report', logs: 'Execution Logs' };
+            
+            showToast(`🚀 Initiating ${type} test execution...`);
+            addBotMessage(`🚀 <b>Running ${type} Tests:</b>\n\n🔄 Retries: ${config.retries} | 🧵 Workers: ${config.workers}\n🌐 Browser: ${browserNames[config.browser]} | 👁️ Headless: ${config.headless}\n📊 Report: ${reportNames[config.reporter]}\n\nExecuting ${type} test suite...`);
+            console.log(`Running ${type} tests with config:`, config);
+        }
+
+        // Run all tests
+        // Get test configuration
+        function getTestConfiguration() {
+            return {
+                retries: document.getElementById('retriesCount')?.value || '2',
+                workers: document.getElementById('parallelThreads')?.value || '2',
+                browser: document.getElementById('browserType')?.value || 'chromium',
+                headless: document.getElementById('headlessMode')?.value || 'false',
+                reporter: document.getElementById('reportOption')?.value || 'allure'
+            };
+        }
+
+        function runAllTests() {
+            const config = getTestConfiguration();
+            const browserNames = { chromium: 'Chrome', msedge: 'Edge', firefox: 'Firefox' };
+            const reportNames = { allure: 'Allure', html: 'Playwright HTML Report', logs: 'Execution Logs' };
+            
+            showToast('🚀 Initiating full test suite execution...');
+            addBotMessage(`🚀 <b>Running All Tests with Configuration:</b>\n\n🔄 <b>Retries:</b> ${config.retries}\n🧵 <b>Parallel Threads:</b> ${config.workers}\n🌐 <b>Browser:</b> ${browserNames[config.browser]}\n👁️ <b>Headless Mode:</b> ${config.headless}\n📊 <b>Report:</b> ${reportNames[config.reporter]}\n\n<b>Command would be:</b>\n<code>npx playwright test --retries=${config.retries} --workers=${config.workers} --project=${config.browser} ${config.headless === 'true' ? '--headed=false' : '--headed'} --reporter=${config.reporter}</code>\n\nTests are being executed...`);
+            console.log('Running all tests with config:', config);
+        }
+
+        // View reports
+        function viewReports() {
+            showToast('📊 Opening test reports...');
+            showPage(4); // Navigate to Reports page
+        }
+
+        // Open Playwright UI
+        function openPlaywrightUI() {
+            showToast('🎭 Opening Playwright UI Mode...');
+            console.log('Opening Playwright UI');
+        }
+
+        // Open project context
+        function openProjectContext() {
+            showToast('📖 Opening project documentation...');
+            window.open('PROJECT_CONTEXT.md', '_blank');
+        }
+
+        // Open terminal
+        function openTerminal() {
+            showToast('💻 Terminal command copied! Paste in VS Code terminal.');
+            console.log('Opening terminal');
+        }
+
+        // Open file
+        function openFile(filename) {
+            showToast(`📂 Opening ${filename}...`);
+            console.log(`Opening file: ${filename}`);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Playwright Testing Framework Dashboard Loaded');
+            showToast('✅ Dashboard loaded successfully!');
+            
+            // Add browser selection change event
+            const browserSelect = document.getElementById('browserSelect');
+            if (browserSelect) {
+                browserSelect.addEventListener('change', (e) => {
+                    const browserNames = {
+                        'chromium': 'Chrome',
+                        'msedge': 'Edge',
+                        'firefox': 'Firefox'
+                    };
+                    const browserName = browserNames[e.target.value] || e.target.value;
+                    showToast(`🌐 Browser changed to ${browserName}`);
+                });
+            }
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+R - View Reports
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                viewReports();
+            }
+            // Ctrl+T - Run All Tests
+            if (e.ctrlKey && e.key === 't') {
+                e.preventDefault();
+                runAllTests();
+            }
+            // Ctrl+U - Open Playwright UI
+            if (e.ctrlKey && e.key === 'u') {
+                e.preventDefault();
+                openPlaywrightUI();
+            }
+        });
+    </script>
+
+    <!-- Test Case Save Modal -->
+    <div id="testCaseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💾 Save Test Case</h2>
+                <button class="close-btn" onclick="closeTestCaseModal()">&times;</button>
+            </div>
+            <form onsubmit="saveTestCase(event)">
+                <div class="form-group">
+                    <label>📝 Test Case Name:</label>
+                    <input type="text" id="testCaseName" placeholder="e.g., TC01_ValidLogin" required>
+                    <small style="color: #64748b; display: block; margin-top: 4px;">Use format: TC##_TestName</small>
+                </div>
+                <div class="form-group">
+                    <label>📋 Description:</label>
+                    <input type="text" id="testCaseDescription" placeholder="e.g., Login with valid credentials" required>
+                </div>
+                <div class="form-group">
+                    <label>🏷️ Test Case Type:</label>
+                    <select id="testCaseType" required style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                        <option value="">-- Select Test Case Type --</option>
+                        <option value="System">System</option>
+                        <option value="Integration">Integration</option>
+                        <option value="Functional">Functional</option>
+                        <option value="UI">UI</option>
+                    </select>
+                    <small style="color: #64748b; display: block; margin-top: 4px;">Select the category of this test case</small>
+                </div>
+                <div class="form-group">
+                    <label>� Paste Generated Playwright Code:</label>
+                    <textarea id="playwrightCode" placeholder="Paste the code from Playwright Inspector here..." required style="font-family: 'Courier New', monospace; min-height: 200px;" oninput="extractTestSteps()"></textarea>
+                    <small style="color: #64748b; display: block; margin-top: 4px;">Copy the generated code from Playwright Inspector - Test Steps will auto-generate below!</small>
+                </div>
+                <div class="form-group">
+                    <label>� Test Steps (auto-generated):</label>
+                    <textarea id="testCaseSteps" placeholder="Paste Playwright code above to auto-generate test steps..." readonly style="background: #f8fafc;"></textarea>
+                    <small style="color: #64748b; display: block; margin-top: 4px;">Steps are automatically extracted from your code</small>
+                </div>
+                <div class="form-group">
+                    <label>🌐 Browser Used:</label>
+                    <input type="text" id="testCaseBrowser" readonly style="background: #f1f5f9;">
+                </div>
+                <div class="form-group">
+                    <label>🔗 Application URL:</label>
+                    <input type="text" id="testCaseUrl" readonly style="background: #f1f5f9;">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeTestCaseModal()">Cancel</button>
+                    <button type="submit" class="btn">💾 Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
