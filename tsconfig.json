@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "ignoreDeprecations": "6.0",
         "baseUrl": "./src",
         "paths": {
            "@pages/*":["advantage/pages/*"],
@@ -16,15 +17,15 @@
            "@dbSteps/*":["database/steps/*"],
            "@uiSteps/*":["advantage/steps/*"],
            "@restSteps/*":["API/REST/steps/*"],
-           "@soapSteps/*":["API/SOAP/steps/*"],
+           "@soapSteps/*":["API/SOAP/steps/*"]
         },
         "target": "ESNext",
-        "module": "CommonJS",
-        "moduleResolution": "Node",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "sourceMap": true,
         "outDir": "../tests-out",
         "resolveJsonModule": true,
         "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
+        "allowSyntheticDefaultImports": true
     }
 }

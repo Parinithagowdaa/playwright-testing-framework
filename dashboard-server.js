@@ -1,9 +1,71 @@
 const http = require('http');
-const { exec, spawn } = require('child_process');
+const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
 const PORT = 3456;
+
+// Function to extract elements from Playwright code
+function extractElementsFromCode(code) {
+    const elements = [];
+    const seenSelectors = new Set();
+
+    // Regular expressions to match different Playwright locator patterns
+    const patterns = [
+        /page\.locator\(['"]([^'"]+)['"]\)/g,
+        /page\.getByRole\(['"]\w+['"]\s*,\s*\{\s*name:\s*['"]([^'"]+)['"]\)/g,
+        /page\.getByText\(['"]([^'"]+)['"]\)/g,
+        /page\.getByLabel\(['"]([^'"]+)['"]\)/g,
+        /page\.getByPlaceholder\(['"]([^'"]+)['"]\)/g,
+        /page\.click\(['"]([^'"]+)['"]\)/g,
+        /page\.fill\(['"]([^'"]+)['"]\)/g,
+        /page\.type\(['"]([^'"]+)['"]\)/g,
+    ];
+
+    let counter = 1;
+
+    patterns.forEach((pattern) => {
+        let match = pattern.exec(code);
+        while (match !== null) {
+            const selector = match[1];
+            let actionType = 'ELEMENT';
+
+            // Determine element type based on selector or action
+            if (code.includes(`locator('${selector}').click()`) || code.includes(`click('${selector}')`)) {
+                actionType = 'BUTTON';
+            } else if (code.includes(`locator('${selector}').fill()`) || code.includes(`fill('${selector}')`)) {
+                actionType = 'TEXTBOX';
+            } else if (selector.includes('input')) {
+                actionType = 'INPUT';
+            } else if (selector.includes('button') || selector.includes('btn')) {
+                actionType = 'BUTTON';
+            } else if (selector.includes('icon')) {
+                actionType = 'ICON';
+            } else if (selector.includes('link') || selector.includes('a[')) {
+                actionType = 'LINK';
+            }
+
+            // Skip if we've already seen this selector
+            if (!seenSelectors.has(selector)) {
+                seenSelectors.add(selector);
+
+                // Generate element name
+                const elementName = `${actionType}_${counter}`;
+                counter += 1;
+
+                elements.push({
+                    name: elementName,
+                    selector,
+                    type: actionType,
+                });
+            }
+
+            match = pattern.exec(code);
+        }
+    });
+
+    return elements;
+}
 
 const server = http.createServer((req, res) => {
     // Enable CORS
@@ -19,8 +81,8 @@ const server = http.createServer((req, res) => {
 
     if (req.url === '/start-recording' && req.method === 'POST') {
         let body = '';
-        
-        req.on('data', chunk => {
+
+        req.on('data', (chunk) => {
             body += chunk.toString();
         });
 
@@ -46,7 +108,7 @@ const server = http.createServer((req, res) => {
                 // This ensures the browser and inspector windows launch correctly
                 const playwrightProcess = exec(command, {
                     windowsHide: false,
-                    detached: false
+                    detached: false,
                 }, (error, stdout, stderr) => {
                     if (error) {
                         console.error(`❌ Error launching Playwright: ${error.message}`);
@@ -62,13 +124,12 @@ const server = http.createServer((req, res) => {
                 console.log(`✅ Playwright codegen command executed (PID: ${playwrightProcess.pid})`);
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ 
-                    success: true, 
+                res.end(JSON.stringify({
+                    success: true,
                     message: `Launching ${browser} with ${url}`,
-                    command: command,
-                    pid: playwrightProcess.pid
+                    command,
+                    pid: playwrightProcess.pid,
                 }));
-
             } catch (error) {
                 res.writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: false, message: error.message }));
@@ -76,21 +137,21 @@ const server = http.createServer((req, res) => {
         });
     } else if (req.url === '/open-html-report' && req.method === 'POST') {
         console.log(`📄 Opening Playwright HTML Report...`);
-        
+
         // Check if playwright-report directory exists
         const reportPath = path.join(process.cwd(), 'playwright-report');
         if (!fs.existsSync(reportPath)) {
             console.log(`⚠️  No HTML report found. Run tests first.`);
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ 
-                success: false, 
-                message: 'No HTML report found. Please run tests first using the command: npx playwright test' 
+            res.end(JSON.stringify({
+                success: false,
+                message: 'No HTML report found. Please run tests first using the command: npx playwright test',
             }));
             return;
         }
 
         const command = `npx playwright show-report`;
-        exec(command, (error, stdout, stderr) => {
+        exec(command, (error) => {
             if (error) {
                 console.error(`Error: ${error.message}`);
             } else {
@@ -100,24 +161,23 @@ const server = http.createServer((req, res) => {
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, message: 'Opening Playwright HTML Report in your browser...' }));
-        
     } else if (req.url === '/open-allure-report' && req.method === 'POST') {
         console.log(`📊 Generating and opening Allure Report...`);
-        
+
         // Check if allure-results directory exists
         const allureResultsPath = path.join(process.cwd(), 'allure-results');
         if (!fs.existsSync(allureResultsPath)) {
             console.log(`⚠️  No Allure results found. Run tests with Allure reporter first.`);
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ 
-                success: false, 
-                message: 'No Allure results found. Please run tests first and ensure Allure reporter is configured.' 
+            res.end(JSON.stringify({
+                success: false,
+                message: 'No Allure results found. Please run tests first and ensure Allure reporter is configured.',
             }));
             return;
         }
 
         const command = `npx allure generate ./allure-results --clean -o ./allure-report && npx allure open ./allure-report`;
-        exec(command, (error, stdout, stderr) => {
+        exec(command, (error) => {
             if (error) {
                 console.error(`Error: ${error.message}`);
             } else {
@@ -127,24 +187,23 @@ const server = http.createServer((req, res) => {
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, message: 'Generating and opening Allure Report in your browser...' }));
-        
     } else if (req.url === '/open-logs' && req.method === 'POST') {
         console.log(`📝 Opening logs folder...`);
-        
+
         // Check if test-results directory exists
         const testResultsPath = path.join(process.cwd(), 'test-results');
         if (!fs.existsSync(testResultsPath)) {
             console.log(`⚠️  No test results folder found. Run tests first.`);
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ 
-                success: false, 
-                message: 'No test results folder found. Please run tests first to generate execution logs.' 
+            res.end(JSON.stringify({
+                success: false,
+                message: 'No test results folder found. Please run tests first to generate execution logs.',
             }));
             return;
         }
 
         const command = `explorer .\\test-results`;
-        exec(command, (error, stdout, stderr) => {
+        exec(command, (error) => {
             if (error) {
                 console.error(`Error: ${error.message}`);
             } else {
@@ -154,10 +213,9 @@ const server = http.createServer((req, res) => {
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, message: 'Opening test results folder...' }));
-        
     } else if (req.url === '/save-testcase' && req.method === 'POST') {
         let body = '';
-        req.on('data', chunk => {
+        req.on('data', (chunk) => {
             body += chunk.toString();
         });
 
@@ -166,28 +224,28 @@ const server = http.createServer((req, res) => {
                 const testCaseData = JSON.parse(body);
                 console.log(`💾 Saving test case: ${testCaseData.name}`);
                 
-                // Read PROJECT_CONTEXT.md
-                const projectContextPath = path.join(process.cwd(), 'PROJECT_CONTEXT.md');
+                // Read TESTING_FRAMEWORK_CONTEXT.md
+                const projectContextPath = path.join(process.cwd(), 'TESTING_FRAMEWORK_CONTEXT.md');
                 
                 if (!fs.existsSync(projectContextPath)) {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ 
-                        success: false, 
-                        message: 'PROJECT_CONTEXT.md file not found' 
+                    res.end(JSON.stringify({
+                        success: false,
+                        message: 'TESTING_FRAMEWORK_CONTEXT.md file not found',
                     }));
                     return;
                 }
                 
                 let content = fs.readFileSync(projectContextPath, 'utf8');
-                
+
                 // Extract elements from Playwright code
-                const elements = extractElementsFromCode(testCaseData.playwrightCode, testCaseData.name);
-                
+                const elements = extractElementsFromCode(testCaseData.playwrightCode);
+
                 // Build the page elements section
                 let elementsSection = '';
                 if (elements.length > 0) {
                     elementsSection = `\n\n### ${testCaseData.name} Page Elements\n\n\`\`\`typescript\n`;
-                    elements.forEach(el => {
+                    elements.forEach((el) => {
                         elementsSection += `${el.name} = "${el.selector}"\n`;
                     });
                     elementsSection += `\`\`\``;
@@ -196,14 +254,16 @@ const server = http.createServer((req, res) => {
                 // Build the test case entry with test scenario
                 const testCaseType = testCaseData.testCaseType || 'UI';
                 const testCaseEntry = `${elementsSection}\n\n### ${testCaseData.name} Test\n\n**${testCaseData.name}**: ${testCaseData.description}\n- Type: ${testCaseType}\n- ${testCaseData.steps}\n- Browser: ${testCaseData.browser}\n- URL: ${testCaseData.url}\n- Recorded: ${new Date(testCaseData.timestamp).toLocaleString()}`;
-                
+
                 // Find the Contact Us test section and add after it
                 const contactUsTestIndex = content.indexOf('### Contact Us Tests');
                 if (contactUsTestIndex !== -1) {
                     // Find the end of Contact Us test section (next ## heading)
                     const nextSectionIndex = content.indexOf('\n## ', contactUsTestIndex + 1);
                     if (nextSectionIndex !== -1) {
-                        content = content.slice(0, nextSectionIndex) + testCaseEntry + '\n' + content.slice(nextSectionIndex);
+                        const before = content.slice(0, nextSectionIndex);
+                        const after = content.slice(nextSectionIndex);
+                        content = `${before}${testCaseEntry}\n${after}`;
                     } else {
                         content += testCaseEntry;
                     }
@@ -211,93 +271,98 @@ const server = http.createServer((req, res) => {
                     // If Contact Us section not found, append at end of UI Test Scenarios
                     const uiTestDataIndex = content.indexOf('## UI Test Data');
                     if (uiTestDataIndex !== -1) {
-                        content = content.slice(0, uiTestDataIndex) + testCaseEntry + '\n\n' + content.slice(uiTestDataIndex);
+                        const before = content.slice(0, uiTestDataIndex);
+                        const after = content.slice(uiTestDataIndex);
+                        content = `${before}${testCaseEntry}\n\n${after}`;
                     } else {
                         content += testCaseEntry;
                     }
                 }
-                
+
                 // Write back to file
                 fs.writeFileSync(projectContextPath, content, 'utf8');
+
+                // Create actual test file in src/tests/
+                const testsDir = path.join(process.cwd(), 'src', 'tests');
+                if (!fs.existsSync(testsDir)) {
+                    fs.mkdirSync(testsDir, { recursive: true });
+                }
+
+                // Generate test file name from test case name
+                const testFileName = testCaseData.name.replace(/\s+/g, '') + '.spec.ts';
+                const testFilePath = path.join(testsDir, testFileName);
+
+                // Create test file content
+                const testFileContent = `import { test, expect } from '@playwright/test';
+
+/**
+ * Test Case: ${testCaseData.name}
+ * Description: ${testCaseData.description}
+ * Type: ${testCaseType}
+ * Browser: ${testCaseData.browser}
+ * URL: ${testCaseData.url}
+ * Generated: ${new Date(testCaseData.timestamp).toLocaleString()}
+ */
+
+${testCaseData.playwrightCode}
+`;
+
+                // Write test file
+                fs.writeFileSync(testFilePath, testFileContent, 'utf8');
+
+                console.log(`✅ Test case saved to TESTING_FRAMEWORK_CONTEXT.md (${elements.length} elements extracted)`);
+                console.log(`✅ Test file created: ${testFilePath}`);
                 
-                console.log(`✅ Test case saved to PROJECT_CONTEXT.md (${elements.length} elements extracted)`);
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ 
-                    success: true, 
-                    message: `Test case saved successfully with ${elements.length} page elements` 
+                res.end(JSON.stringify({
+                    success: true,
+                    message: `Test case saved successfully with ${elements.length} page elements`,
+                    testFilePath: testFilePath,
+                    testFileName: testFileName,
                 }));
-                
             } catch (error) {
                 console.error(`Error saving test case: ${error.message}`);
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ 
-                    success: false, 
-                    message: `Failed to save test case: ${error.message}` 
+                res.end(JSON.stringify({
+                    success: false,
+                    message: `Failed to save test case: ${error.message}`,
                 }));
             }
         });
-
-// Function to extract elements from Playwright code
-function extractElementsFromCode(code, testName) {
-    const elements = [];
-    const seenSelectors = new Set();
-    
-    // Regular expressions to match different Playwright locator patterns
-    const patterns = [
-        /page\.locator\(['"]([^'"]+)['"]\)/g,
-        /page\.getByRole\(['"](\w+)['"]\s*,\s*\{\s*name:\s*['"]([^'"]+)['"]/g,
-        /page\.getByText\(['"]([^'"]+)['"]\)/g,
-        /page\.getByLabel\(['"]([^'"]+)['"]\)/g,
-        /page\.getByPlaceholder\(['"]([^'"]+)['"]\)/g,
-        /page\.click\(['"]([^'"]+)['"]\)/g,
-        /page\.fill\(['"]([^'"]+)['"]/g,
-        /page\.type\(['"]([^'"]+)['"]/g,
-    ];
-    
-    let counter = 1;
-    
-    patterns.forEach(pattern => {
-        let match;
-        while ((match = pattern.exec(code)) !== null) {
-            let selector = match[1];
-            let actionType = 'ELEMENT';
+    } else if (req.url === '/get-saved-tests' && req.method === 'GET') {
+        // Read TESTING_FRAMEWORK_CONTEXT.md and extract saved test cases
+        try {
+            const projectContextPath = path.join(process.cwd(), 'TESTING_FRAMEWORK_CONTEXT.md');
             
-            // Determine element type based on selector or action
-            if (code.includes(`locator('${selector}').click()`) || code.includes(`click('${selector}')`)) {
-                actionType = 'BUTTON';
-            } else if (code.includes(`locator('${selector}').fill()`) || code.includes(`fill('${selector}')`)) {
-                actionType = 'TEXTBOX';
-            } else if (selector.includes('input')) {
-                actionType = 'INPUT';
-            } else if (selector.includes('button') || selector.includes('btn')) {
-                actionType = 'BUTTON';
-            } else if (selector.includes('icon')) {
-                actionType = 'ICON';
-            } else if (selector.includes('link') || selector.includes('a[')) {
-                actionType = 'LINK';
+            if (!fs.existsSync(projectContextPath)) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, tests: [] }));
+                return;
             }
             
-            // Skip if we've already seen this selector
-            if (seenSelectors.has(selector)) {
-                continue;
+            const content = fs.readFileSync(projectContextPath, 'utf8');
+            const tests = [];
+            
+            // Parse test cases from TESTING_FRAMEWORK_CONTEXT.md
+            const testRegex = /###\s+(.+?)\s+Test\s*\n\s*\*\*.*?\*\*:\s*(.+?)\n-\s*Type:\s*(.+?)\n-\s*(.+?)\n/g;
+            let match;
+            
+            while ((match = testRegex.exec(content)) !== null) {
+                tests.push({
+                    name: match[1].trim(),
+                    description: match[2].trim(),
+                    type: match[3].trim(),
+                    steps: match[4].trim(),
+                });
             }
-            seenSelectors.add(selector);
             
-            // Generate element name
-            const elementName = `${actionType}_${counter++}`;
-            
-            elements.push({
-                name: elementName,
-                selector: selector,
-                type: actionType
-            });
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, tests: tests }));
+        } catch (error) {
+            console.error('Error loading saved tests:', error);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, tests: [] }));
         }
-    });
-    
-    return elements;
-}
-
-        
     } else if (req.url === '/' || req.url === '/index.html') {
         // Serve the dashboard.html file
         const dashboardPath = path.join(__dirname, 'dashboard.html');
@@ -311,14 +376,14 @@ function extractElementsFromCode(code, testName) {
             res.writeHead(200, { 'Content-Type': 'text/html' });
             res.end(data);
         });
-    } else if (req.url === '/PROJECT_CONTEXT.md') {
-        // Serve the PROJECT_CONTEXT.md file
-        const projectContextPath = path.join(__dirname, 'PROJECT_CONTEXT.md');
+    } else if (req.url === '/TESTING_FRAMEWORK_CONTEXT.md') {
+        // Serve the TESTING_FRAMEWORK_CONTEXT.md file
+        const projectContextPath = path.join(__dirname, 'TESTING_FRAMEWORK_CONTEXT.md');
         
         fs.readFile(projectContextPath, 'utf8', (err, data) => {
             if (err) {
                 res.writeHead(404, { 'Content-Type': 'text/plain' });
-                res.end('PROJECT_CONTEXT.md not found');
+                res.end('TESTING_FRAMEWORK_CONTEXT.md not found');
                 return;
             }
             res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });

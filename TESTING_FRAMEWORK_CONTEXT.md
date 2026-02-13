@@ -899,3 +899,28 @@ When generating test code:
 ## End of Framework Context
 
 This document provides all necessary patterns and conventions for generating test automation code in this Playwright TypeScript framework. Follow these guidelines to ensure consistency and maintainability.
+
+
+### TC_ContactUS_01 Page Elements
+
+```typescript
+BUTTON_1 = "button"
+```
+
+### TC_ContactUS_01 Test
+
+**TC_ContactUS_01**: Verify that user can successfully submit the Contact Us form
+- Type: Functional
+- Navigate to http://advantageonlineshopping.com/#/ → Select "object:60" from element "select[name=" → Click element "select[name=" → Select "object:124" from element "select[name=" → Click element "input[name=" → Enter data in element "input[name=" → Click element "textarea[name=" → Enter data in element "textarea[name=" → Click SEND button
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 2/12/2026, 3:44:59 PM
+
+### TC_Search_001 Test
+
+**TC_Search_001**: Verify the Search functionality
+- Type: Functional
+- Navigate to http://advantageonlineshopping.com/#/ → Click element → Enter data in Search textbox → Click HP ELITE X2 1011 G1 TABLET $ link
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 2/13/2026, 12:41:26 PM
