@@ -2593,6 +2593,7 @@
             // Show loading message
             showToast(`?? Launching ${browserName}...`);
             addBotMessage(`?? <b>Launching ${browserName} for recording...</b>\n\nURL: <b>${url}</b>\nBrowser: <b>${browserName}</b>\n\nPlease wait while the browser opens...`);
+            addBotMessage('⚠️ <b>Important:</b> <br>When you finish recording, <b>close the Playwright Inspector window</b> before clicking <b>Stop</b> in the dashboard. The code will only be saved after the Inspector is closed.');
             
             try {
                 // Send request to dashboard server to launch browser
@@ -2707,11 +2708,42 @@
 
             showToast('?? Recording stopped');
             addBotMessage('?? <b>Recording session stopped!</b>\n\nNow you can save your test case details to TESTING_FRAMEWORK_CONTEXT.md.\n\n?? Please fill in the test case information in the form.');
-            
+
             // Pre-fill modal with recording session data
             document.getElementById('testCaseBrowser').value = recordingSession.browserName;
             document.getElementById('testCaseUrl').value = recordingSession.url;
-            
+
+
+            // Poll for the Playwright codegen file to appear (wait up to 10 seconds)
+            let pollAttempts = 0;
+            const maxPolls = 20; // 20 x 500ms = 10 seconds
+            function pollForCodegen() {
+                fetch('http://localhost:3456/get-playwright-code')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.code) {
+                            document.getElementById('playwrightCode').value = data.code;
+                            extractTestSteps();
+                        } else if (pollAttempts < maxPolls) {
+                            pollAttempts++;
+                            setTimeout(pollForCodegen, 500);
+                        } else {
+                            document.getElementById('playwrightCode').value = '';
+                            document.getElementById('testCaseSteps').value = 'No Playwright code found. Please close the Playwright Inspector and try again.';
+                        }
+                    })
+                    .catch(() => {
+                        if (pollAttempts < maxPolls) {
+                            pollAttempts++;
+                            setTimeout(pollForCodegen, 500);
+                        } else {
+                            document.getElementById('playwrightCode').value = '';
+                            document.getElementById('testCaseSteps').value = 'Error fetching Playwright code.';
+                        }
+                    });
+            }
+            pollForCodegen();
+
             // Show modal
             document.getElementById('testCaseModal').classList.add('show');
         }
@@ -2720,105 +2752,94 @@
         function extractTestSteps() {
             const code = document.getElementById('playwrightCode').value.trim();
             const stepsTextarea = document.getElementById('testCaseSteps');
-            
             if (!code) {
                 stepsTextarea.value = '';
                 return;
             }
-            
             const steps = [];
             const lines = code.split('\n');
-            
+            let stepNumber = 1;
             for (let line of lines) {
                 line = line.trim();
-                
-                // Navigate/goto
-                if (line.includes('.goto(') || line.includes('goto(')) {
-                    const urlMatch = line.match(/goto\(['"](.*?)['"]/);
-                    if (urlMatch) {
-                        steps.push(`Navigate to ${urlMatch[1]}`);
-                    } else {
-                        steps.push('Navigate to application');
+                try {
+                    // Navigation
+                    if (line.match(/\.goto\(['"][^'"]+['"]\)/)) {
+                        const urlMatch = line.match(/goto\(['"](.*?)['"]\)/);
+                        steps.push(`${stepNumber++}. Navigate to ${urlMatch ? urlMatch[1] : 'application'}`);
                     }
-                }
-                
-                // Click actions
-                else if (line.includes('.click(')) {
-                    let element = extractElement(line);
-                    steps.push(`Click ${element}`);
-                }
-                
-                // Fill/Type actions
-                else if (line.includes('.fill(') || line.includes('.type(')) {
-                    let element = extractElement(line);
-                    const valueMatch = line.match(/[fill|type]\([^,]+,\s*['"](.*?)['"]/);
-                    if (valueMatch && valueMatch[1]) {
-                        steps.push(`Enter "${valueMatch[1]}" in ${element}`);
-                    } else {
-                        steps.push(`Enter data in ${element}`);
+                    // Click
+                    else if (line.match(/\.click\(/)) {
+                        let element = extractElement(line);
+                        steps.push(`${stepNumber++}. Click on ${element}`);
                     }
-                }
-                
-                // Press key
-                else if (line.includes('.press(')) {
-                    const keyMatch = line.match(/press\(['"](.*?)['"]/);
-                    if (keyMatch) {
-                        steps.push(`Press ${keyMatch[1]} key`);
-                    }
-                }
-                
-                // Select dropdown
-                else if (line.includes('.selectOption(')) {
-                    let element = extractElement(line);
-                    const valueMatch = line.match(/selectOption\(['"](.*?)['"]/);
-                    if (valueMatch) {
-                        steps.push(`Select "${valueMatch[1]}" from ${element}`);
-                    } else {
-                        steps.push(`Select option from ${element}`);
-                    }
-                }
-                
-                // Check/Uncheck
-                else if (line.includes('.check(')) {
-                    let element = extractElement(line);
-                    steps.push(`Check ${element}`);
-                }
-                else if (line.includes('.uncheck(')) {
-                    let element = extractElement(line);
-                    steps.push(`Uncheck ${element}`);
-                }
-                
-                // Hover
-                else if (line.includes('.hover(')) {
-                    let element = extractElement(line);
-                    steps.push(`Hover over ${element}`);
-                }
-                
-                // Wait
-                else if (line.includes('.waitForSelector(') || line.includes('.waitFor(')) {
-                    let element = extractElement(line);
-                    steps.push(`Wait for ${element} to appear`);
-                }
-                
-                // Expect/Assert
-                else if (line.includes('expect(') && (line.includes('.toBeVisible') || line.includes('.toHaveText') || line.includes('.toContain'))) {
-                    let element = extractElement(line);
-                    if (line.includes('.toBeVisible')) {
-                        steps.push(`Verify ${element} is visible`);
-                    } else if (line.includes('.toHaveText')) {
-                        const textMatch = line.match(/toHaveText\(['"](.*?)['"]/);
-                        if (textMatch) {
-                            steps.push(`Verify ${element} has text "${textMatch[1]}"`);
+                    // Fill/Type
+                    else if (line.match(/\.(fill|type)\(/)) {
+                        let element = extractElement(line);
+                        const valueMatch = line.match(/\.(fill|type)\([^,]+,\s*['"](.*?)['"]\)/);
+                        if (valueMatch && valueMatch[2]) {
+                            steps.push(`${stepNumber++}. Enter "${valueMatch[2]}" in ${element}`);
                         } else {
-                            steps.push(`Verify ${element} text`);
+                            steps.push(`${stepNumber++}. Enter data in ${element}`);
                         }
-                    } else if (line.includes('.toContain')) {
-                        steps.push(`Verify ${element} contains expected value`);
                     }
+                    // Press key
+                    else if (line.match(/\.press\(/)) {
+                        const keyMatch = line.match(/press\(['"](.*?)['"]\)/);
+                        if (keyMatch) {
+                            steps.push(`${stepNumber++}. Press "${keyMatch[1]}" key`);
+                        }
+                    }
+                    // Select dropdown
+                    else if (line.match(/\.selectOption\(/)) {
+                        let element = extractElement(line);
+                        const valueMatch = line.match(/selectOption\(([^)]+)\)/);
+                        if (valueMatch) {
+                            steps.push(`${stepNumber++}. Select option ${valueMatch[1]} from ${element}`);
+                        } else {
+                            steps.push(`${stepNumber++}. Select option from ${element}`);
+                        }
+                    }
+                    // Check/Uncheck
+                    else if (line.match(/\.check\(/)) {
+                        let element = extractElement(line);
+                        steps.push(`${stepNumber++}. Check ${element}`);
+                    }
+                    else if (line.match(/\.uncheck\(/)) {
+                        let element = extractElement(line);
+                        steps.push(`${stepNumber++}. Uncheck ${element}`);
+                    }
+                    // Hover
+                    else if (line.match(/\.hover\(/)) {
+                        let element = extractElement(line);
+                        steps.push(`${stepNumber++}. Hover over ${element}`);
+                    }
+                    // Wait
+                    else if (line.match(/\.waitForSelector\(|\.waitFor\(/)) {
+                        let element = extractElement(line);
+                        steps.push(`${stepNumber++}. Wait for ${element} to appear`);
+                    }
+                    // Assertions
+                    else if (line.includes('expect(')) {
+                        let element = extractElement(line);
+                        if (line.includes('.toBeVisible')) {
+                            steps.push(`${stepNumber++}. Verify ${element} is visible`);
+                        } else if (line.includes('.toHaveText')) {
+                            const textMatch = line.match(/toHaveText\(['"](.*?)['"]\)/);
+                            if (textMatch) {
+                                steps.push(`${stepNumber++}. Verify ${element} has text "${textMatch[1]}"`);
+                            } else {
+                                steps.push(`${stepNumber++}. Verify ${element} text`);
+                            }
+                        } else if (line.includes('.toContain')) {
+                            steps.push(`${stepNumber++}. Verify ${element} contains expected value`);
+                        } else {
+                            steps.push(`${stepNumber++}. Verify assertion on ${element}`);
+                        }
+                    }
+                } catch (err) {
+                    steps.push(`${stepNumber++}. [Unparsed step: ${line}]`);
                 }
             }
-            
-            // If no steps extracted, provide a helpful message
             if (steps.length === 0) {
                 stepsTextarea.value = 'Paste valid Playwright code to see auto-generated steps';
             } else {

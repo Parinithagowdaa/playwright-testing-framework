@@ -79,6 +79,20 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    if (req.url === '/get-playwright-code' && req.method === 'GET') {
+        // Serve the latest generated Playwright code (if available)
+        const codePath = path.join(process.cwd(), 'playwright-latest-codegen.spec.ts');
+        if (fs.existsSync(codePath)) {
+            const code = fs.readFileSync(codePath, 'utf8');
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, code }));
+        } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: 'No code generated yet.' }));
+        }
+        return;
+    }
+
     if (req.url === '/start-recording' && req.method === 'POST') {
         let body = '';
 
@@ -97,7 +111,9 @@ const server = http.createServer((req, res) => {
                     return;
                 }
 
-                const command = `npx playwright codegen --browser=${browser} "${url}"`;
+                // Save codegen output to a file for later retrieval
+                const codegenFile = 'playwright-latest-codegen.spec.ts';
+                const command = `npx playwright codegen --output=${codegenFile} --browser=${browser} "${url}"`;
                 
                 console.log(`🎬 Launching Playwright Codegen...`);
                 console.log(`   Browser: ${browser}`);
