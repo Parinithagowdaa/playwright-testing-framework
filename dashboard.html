@@ -1243,11 +1243,11 @@
         <nav class="navigation-tabs">
             <div class="tabs-container">
                 <button class="tab-button active" onclick="showPage(0)">
-                    <span class="tab-icon">??</span>
+                    <span class="tab-icon">📊</span>
                     <span>Dashboard</span>
                 </button>
                 <button class="tab-button" onclick="showPage(1)">
-                    <span class="tab-icon">??</span>
+                    <span class="tab-icon">⏺️</span>
                     <span>Record & Play</span>
                 </button>
                 <button class="tab-button" onclick="showPage(2)">
@@ -1255,15 +1255,15 @@
                     <span>Test Scenarios</span>
                 </button>
                 <button class="tab-button" onclick="showPage(5)">
-                    <span class="tab-icon">??</span>
+                    <span class="tab-icon">🧪</span>
                     <span>API Tests</span>
                 </button>
                 <button class="tab-button" onclick="showPage(3)">
-                    <span class="tab-icon">??</span>
+                    <span class="tab-icon">📈</span>
                     <span>Reports</span>
                 </button>
                 <button class="tab-button" onclick="showPage(4)">
-                    <span class="tab-icon">??</span>
+                    <span class="tab-icon">⚙️</span>
                     <span>Configuration</span>
                 </button>
             </div>
@@ -1302,8 +1302,8 @@
 
         <!-- Quick Actions Panel -->
         <div class="panel">
-            <h2>
-                <span class="panel-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">?</span>
+                <h2>
+                <span class="panel-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">⚡</span>
                 Quick Actions
             </h2>
             
@@ -1311,7 +1311,7 @@
             <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; padding: 16px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 8px; border: 1px solid #e2e8f0;">
                 <div style="flex: 1; min-width: 140px;">
                     <label style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">
-                        ?? Retries Count:
+                        🔁 Retries Count:
                     </label>
                     <select id="retriesCount" class="browser-select" style="width: 100%;">
                         <option value="0">0</option>
@@ -1330,7 +1330,7 @@
                 
                 <div style="flex: 1; min-width: 140px;">
                     <label style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">
-                        ?? Parallel Threads:
+                        ⚙️ Parallel Threads:
                     </label>
                     <select id="parallelThreads" class="browser-select" style="width: 100%;">
                         <option value="1">1</option>
@@ -1342,7 +1342,7 @@
                 
                 <div style="flex: 1; min-width: 140px;">
                     <label style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">
-                        ?? Browser Type:
+                        🌐 Browser Type:
                     </label>
                     <select id="browserType" class="browser-select" style="width: 100%;">
                         <option value="chromium">Chrome</option>
@@ -1353,7 +1353,7 @@
                 
                 <div style="flex: 1; min-width: 140px;">
                     <label style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">
-                        ??? Headless Mode:
+                        🕵️ Headless Mode:
                     </label>
                     <select id="headlessMode" class="browser-select" style="width: 100%;">
                         <option value="false" selected>False</option>
@@ -1363,7 +1363,7 @@
                 
                 <div style="flex: 1; min-width: 180px;">
                     <label style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">
-                        ?? Report Option:
+                        📄 Report Option:
                     </label>
                     <select id="reportOption" class="browser-select" style="width: 100%;">
                         <option value="allure" selected>Allure</option>
@@ -1374,10 +1374,10 @@
             </div>
             
             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                <button class="btn" onclick="runAllTests()">? Run All Tests</button>
-                <button class="btn btn-secondary" onclick="viewReports()">?? View Reports</button>
-                <button class="btn btn-success" onclick="openPlaywrightUI()">?? Playwright UI</button>
-                <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="showPage(4)">?? Allure Report</button>
+                <button class="btn" onclick="runAllTests()">▶️ Run All Tests</button>
+                <button class="btn btn-secondary" onclick="viewReports()">📊 View Reports</button>
+                <button class="btn btn-success" onclick="openPlaywrightUI()">▶️ Playwright UI</button>
+                <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="showPage(4)">🧾 Allure Report</button>
             </div>
         </div>
 
@@ -1385,49 +1385,49 @@
         <div class="main-grid">
             <div class="panel">
                 <h2>
-                    <span class="panel-icon ui">?</span>
+                    <span class="panel-icon ui">📋</span>
                     Test Scenarios
                 </h2>
                 <p style="color: #64748b; margin-bottom: 16px;">20 comprehensive test scenarios: UI (8), Functional (4), Integration (3), System (2), Database (3)</p>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <button class="btn btn-small" onclick="showPage(2)">View All Tests</button>
-                    <button class="btn btn-small" onclick="runTest('All')">? Run All Tests</button>
+                    <button class="btn btn-small" onclick="runTest('All')">▶️ Run All Tests</button>
                 </div>
             </div>
 
             <div class="panel">
                 <h2>
-                    <span class="panel-icon rest">??</span>
+                    <span class="panel-icon rest">🔁</span>
                     REST API Tests
                 </h2>
                 <p style="color: #64748b; margin-bottom: 16px;">5 REST API tests for user management and data operations</p>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <button class="btn btn-secondary btn-small" onclick="showPage(5)">View Tests</button>
-                    <button class="btn btn-secondary btn-small" onclick="runTest('REST')">? Run Tests</button>
+                    <button class="btn btn-secondary btn-small" onclick="runTest('REST')">▶️ Run Tests</button>
                 </div>
             </div>
 
             <div class="panel">
                 <h2>
-                    <span class="panel-icon soap">??</span>
+                    <span class="panel-icon soap">🧾</span>
                     SOAP API Tests
                 </h2>
                 <p style="color: #64748b; margin-bottom: 16px;">5 SOAP API tests for account services and workflows</p>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <button class="btn btn-small" onclick="showPage(5)" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);">View Tests</button>
-                    <button class="btn btn-small" onclick="runTest('SOAP')" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);">? Run Tests</button>
+                    <button class="btn btn-small" onclick="runTest('SOAP')" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);">▶️ Run Tests</button>
                 </div>
             </div>
 
             <div class="panel">
                 <h2>
-                    <span class="panel-icon db">???</span>
+                    <span class="panel-icon db">🗄️</span>
                     Database Tests
                 </h2>
                 <p style="color: #64748b; margin-bottom: 16px;">5 database validation tests for data integrity</p>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <button class="btn btn-success btn-small" onclick="showPage(2)">View All Tests</button>
-                    <button class="btn btn-success btn-small" onclick="runTest('Database')">? Run Tests</button>
+                    <button class="btn btn-success btn-small" onclick="runTest('Database')">▶️ Run Tests</button>
                 </div>
             </div>
         </div>
@@ -1435,14 +1435,14 @@
         <!-- Recent Activity -->
         <div class="panel">
             <h2>
-                <span class="panel-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">??</span>
+                    <span class="panel-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">📝</span>
                 Recent Activity
             </h2>
             <div style="color: #64748b;">
-                <p>? Last test run: Successfully executed 18 test cases</p>
-                <p>?? Success rate: 83% (15 passed, 2 failed, 1 skipped)</p>
-                <p>?? Average execution time: 2m 45s</p>
-                <p>?? Coverage: UI, REST API, SOAP API, Database</p>
+                <p>🕘 Last test run: Successfully executed 18 test cases</p>
+                <p>✅ Success rate: 83% (15 passed, 2 failed, 1 skipped)</p>
+                <p>⏱️ Average execution time: 2m 45s</p>
+                <p>📚 Coverage: UI, REST API, SOAP API, Database</p>
             </div>
         </div>
         </div>
@@ -1454,16 +1454,16 @@
                 <!-- File Selection Panel (Left) -->
                 <div class="panel">
                     <h2>
-                        <span class="panel-icon rest">??</span>
-                        File Selection
-                    </h2>
+                        <span class="panel-icon rest">🔁</span>
+                            File Selection
+                        </h2>
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
-                            ?? Upload TESTING_FRAMEWORK_CONTEXT.md:
+                            📁 Upload TESTING_FRAMEWORK_CONTEXT.md:
                         </label>
                         <div class="file-selection">
                             <div class="file-input-wrapper">
-                                <button class="btn btn-small" onclick="document.getElementById('projectContextInput').click()">?? Select TESTING_FRAMEWORK_CONTEXT.md</button>
+                                <button class="btn btn-small" onclick="document.getElementById('projectContextInput').click()">📂 Select TESTING_FRAMEWORK_CONTEXT.md</button>
                                 <input type="file" id="projectContextInput" accept=".md" onchange="handleProjectContextSelect(event)" style="display: none;">
                             </div>
                             <p id="selectedProjectContext" style="margin: 0; color: #475569; font-weight: 600; font-size: 14px; flex-grow: 1;"></p>
@@ -1472,11 +1472,11 @@
                     
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
-                            ?? Upload HTML File:
+                            📁 Upload HTML File:
                         </label>
                         <div class="file-selection">
                             <div class="file-input-wrapper">
-                                <button class="btn btn-small" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="document.getElementById('htmlFileInput').click()">?? Select HTML File</button>
+                                <button class="btn btn-small" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="document.getElementById('htmlFileInput').click()">📂 Select HTML File</button>
                                 <input type="file" id="htmlFileInput" accept=".html" onchange="handleHtmlFileSelect(event)" style="display: none;">
                             </div>
                             <p id="selectedHtmlFile" style="margin: 0; color: #475569; font-weight: 600; font-size: 14px; flex-grow: 1;"></p>
@@ -1487,11 +1487,11 @@
                 <!-- AI Chatbot Panel (Right) -->
                 <div class="panel">
                     <h2>
-                        <span class="panel-icon db">??</span>
+                        <span class="panel-icon db">🤖</span>
                         AI Chatbot Assistant
                     </h2>
                     <div class="chatbot" id="chatbox">
-                        <div class="message bot-msg">?? <b>Hello! I'm your AI Test Automation Assistant!</b><br><br>
+                        <div class="message bot-msg">🤖 <b>Hello! I'm your AI Test Automation Assistant!</b><br><br>
                         I can help you with:<br>
                         � <b>Code generation</b> - Tests, Page Objects, fixtures<br>
                         � <b>Element interactions</b> - Click, type, drag & drop<br>
@@ -1499,20 +1499,20 @@
                         � <b>Debugging</b> - Traces, screenshots, network<br>
                         � <b>Advanced topics</b> - Iframes, alerts, tables, API mocking<br>
                         � <b>Best practices</b> - Performance, CI/CD, patterns<br><br>
-                        ?? <b>Quick start - Try asking:</b><br>
+                        ⚡ <b>Quick start - Try asking:</b><br>
                         � "How to record tests?"<br>
                         � "Generate a login test"<br>
                         � "How to fill forms?"<br>
                         � "Handle alerts"<br>
                         � "Extract table data"<br><br>
-                        I'll provide instant code examples and detailed explanations! ??</div>
+                        I'll provide instant code examples and detailed explanations! ✨</div>
                     </div>
                     <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything about test automation..." onkeypress="if(event.key==='Enter') sendMessage()">
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="btn" onclick="sendMessage()">?? Send</button>
-                        <button class="btn btn-secondary btn-small" onclick="quickAsk('Generate a login test')">?? Example: Login Test</button>
-                        <button class="btn btn-small" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);" onclick="quickAsk('help')">? Help</button>
-                        <button class="btn btn-small" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="clearChat()">??? Clear</button>
+                        <button class="btn" onclick="sendMessage()">➤ Send</button>
+                        <button class="btn btn-secondary btn-small" onclick="quickAsk('Generate a login test')">💡 Example: Login Test</button>
+                        <button class="btn btn-small" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);" onclick="quickAsk('help')">❓ Help</button>
+                        <button class="btn btn-small" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="clearChat()">🧹 Clear</button>
                     </div>
                 </div>
             </div>
@@ -1520,12 +1520,12 @@
             <!-- Recording Controls Section (Full Width) -->
             <div class="panel">
                 <h2>
-                    <span class="panel-icon soap">??</span>
+                    <span class="panel-icon soap">⏺️</span>
                     Recording Controls
                 </h2>
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
-                        ?? Select Browser:
+                        🌐 Select Browser:
                     </label>
                     <select id="browserSelect" class="browser-select">
                         <option value="chromium">Chrome</option>
@@ -1535,24 +1535,27 @@
                 </div>
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
-                        ?? Application URL:
+                        🌍 Application URL:
                     </label>
                     <input type="text" id="appUrl" class="browser-select" style="width: 100%; max-width: 600px;" value="http://advantageonlineshopping.com/" placeholder="Enter application URL (e.g., http://advantageonlineshopping.com)">
+                    <div role="status" aria-live="polite" style="margin-top:10px; max-width:600px; color:#075985; background:#ecfeff; border-left:4px solid #38bdf8; padding:10px 12px; border-radius:6px; font-size:13px;">
+                        <strong style="margin-right:8px;">ℹ️ Info:</strong> Close the application after recording, then click Stop to view the test case.
+                    </div>
                 </div>
                 <div class="recording-controls">
-                    <button class="btn" onclick="startRecording()">? Start Recording</button>
-                    <button class="btn btn-secondary" onclick="stopRecording()">? Stop</button>
-                    <button class="btn" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);" onclick="showToast('Playing recording')">? Play</button>
-                    <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="showToast('Recording paused')">? Pause</button>
+                    <button class="btn" onclick="startRecording()">⏺️ Start Recording</button>
+                    <button class="btn btn-secondary" onclick="stopRecording()">⏹️ Stop</button>
+                    <button class="btn" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);" onclick="showToast('Playing recording')">▶️ Play</button>
+                    <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="showToast('Recording paused')">⏸️ Pause</button>
                 </div>
 
                 <!-- Recording Results Section -->
                 <div id="recordingResults" style="display: none; margin-top: 24px; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px solid #0ea5e9; border-radius: 12px;">
                     <h3 style="color: #0369a1; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; justify-content: space-between;">
-                        <span style="display: flex; align-items: center; gap: 8px;">
-                            <span>?</span> Recording Session Completed
+                            <span style="display: flex; align-items: center; gap: 8px;">
+                            <span>⏺️</span> Recording Session Completed
                         </span>
-                        <button class="btn btn-small" onclick="viewRecordedTests()" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%); box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);">?? View Results</button>
+                        <button class="btn btn-small" onclick="viewRecordedTests()" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%); box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);">📄 View Results</button>
                     </h3>
                     <div id="recordingResultsContent" style="color: #0c4a6e;">
                         <!-- Results will be populated here -->
@@ -1565,7 +1568,7 @@
         <div id="page2" class="page">
             <div class="tree-container">
                 <h2 style="margin-bottom: 20px; color: #1e293b; user-select: none;">
-                    <span style="font-size: 24px; pointer-events: none;">??</span> <span style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; pointer-events: none;">Test Scenarios</span>
+                    <span style="font-size: 24px; pointer-events: none;">📋</span> <span style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; pointer-events: none;">Test Scenarios</span>
                 </h2>
 
                 <div id="testScenariosTree"></div>
@@ -1582,7 +1585,7 @@
 
             <div class="panel" style="margin-top: 24px;">
                 <h2>
-                    <span class="panel-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">??</span>
+                    <span class="panel-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">📚</span>
                     API Documentation
                 </h2>
                 <div style="color: #64748b;">
@@ -1590,7 +1593,7 @@
                     <p><strong>SOAP API Base URL:</strong> http://www.advantageonlineshopping.com:80</p>
                     <p><strong>WSDL:</strong> https://www.advantageonlineshopping.com/accountservice/ws/accountservice.wsdl</p>
                     <div style="margin-top: 15px;">
-                        <button class="btn btn-small" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="openFile('API_TESTING_CONTEXT.md')">?? View API Documentation</button>
+                        <button class="btn btn-small" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="openFile('API_TESTING_CONTEXT.md')">🔎 View API Documentation</button>
                     </div>
                 </div>
             </div>
@@ -1600,22 +1603,22 @@
         <div id="page3" class="page">
             <div class="panel">
                 <h2>
-                    <span class="panel-icon reports">??</span>
+                    <span class="panel-icon reports">📊</span>
                     Available Reports
                 </h2>
                 <div class="scrollable-content">
                     <div class="test-item">
-                        <h4>?? Playwright HTML Report</h4>
+                        <h4>📄 Playwright HTML Report</h4>
                         <p>Interactive HTML test report</p>
                         <button class="btn btn-small" style="margin-top: 10px;" onclick="openHtmlReport()">Open Report</button>
                     </div>
                     <div class="test-item">
-                        <h4>?? Allure Report</h4>
+                        <h4>🧾 Allure Report</h4>
                         <p>Comprehensive test analytics</p>
                         <button class="btn btn-small" style="margin-top: 10px;" onclick="openAllureReport()">Generate & Open</button>
                     </div>
                     <div class="test-item">
-                        <h4>?? Execution Logs</h4>
+                        <h4>📁 Execution Logs</h4>
                         <p>Detailed test execution logs</p>
                         <button class="btn btn-small" style="margin-top: 10px;" onclick="openLogs()">View Logs</button>
                     </div>
@@ -1627,7 +1630,7 @@
         <div id="page4" class="page">
             <div class="panel">
                 <h2>
-                    <span class="panel-icon config">??</span>
+                    <span class="panel-icon config">⚙️</span>
                     Framework Configuration
                 </h2>
                 <div class="scrollable-content">
@@ -1674,7 +1677,7 @@
                 </div>
 
                 <h2 style="margin-top: 24px;">
-                    <span class="panel-icon reports">??</span>
+                    <span class="panel-icon reports">📊</span>
                     Quick Commands
                 </h2>
                 <div style="margin-top: 15px;">
@@ -1696,8 +1699,8 @@
 
         <!-- Action Buttons -->
         <div class="panel" style="margin-top: 32px;">
-            <h2>
-                <span class="panel-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">??</span>
+                <h2>
+                <span class="panel-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">📌</span>
                 Quick Actions
             </h2>
             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
@@ -2008,7 +2011,7 @@
                             id: test.name.replace(/\s+/g, '_').toUpperCase(),
                             name: test.name,
                             description: test.description,
-                            steps: test.steps.split(' ? ').map(s => s.trim()).filter(s => s.length > 0)
+                            steps: test.steps.split(' • ').map(s => s.trim()).filter(s => s.length > 0)
                         };
                         
                         // Check if test already exists
@@ -2062,7 +2065,7 @@
                     <div class="module-row">
                         <div class="module-header" onclick="toggleModule(${moduleIndex})">
                             <div class="module-header-left">
-                                <span class="module-expand-icon" id="moduleIcon${moduleIndex}">?</span>
+                                <span class="module-expand-icon" id="moduleIcon${moduleIndex}">▸</span>
                                 <span class="module-title">${moduleName}</span>
                                 <span class="module-count">(${testCases.length} tests)</span>
                             </div>
@@ -2102,8 +2105,8 @@
                                 <div class="step-text" id="stepText${moduleIndex}-${tcIndex}-${stepIndex}">${step}</div>
                                 ${isEditing ? `
                                     <div class="step-actions">
-                                        <button class="icon-btn edit" onclick="editStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Edit">??</button>
-                                        <button class="icon-btn delete" onclick="deleteStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Delete">???</button>
+                                        <button class="icon-btn edit" onclick="editStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Edit">✏️</button>
+                                        <button class="icon-btn delete" onclick="deleteStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Delete">🗑️</button>
                                     </div>
                                 ` : ''}
                             </div>
@@ -2148,6 +2151,9 @@
             });
         }
 
+        // In-memory backup for edits so Cancel can restore original steps
+        const editBackups = {};
+
         // Toggle module expand/collapse
         function toggleModule(moduleIndex) {
             const content = document.getElementById(`moduleContent${moduleIndex}`);
@@ -2176,10 +2182,16 @@
         // Edit test case (enable edit mode)
         function editTestCase(moduleIndex, tcIndex) {
             if (currentEditingTestCase) {
-                showToast('?? Please save or cancel the current edit first');
+                showToast('⚠️ Please save or cancel the current edit first');
                 return;
             }
             
+            // Backup original steps for this test case so Cancel can restore them
+            const modules = Object.keys(testScenariosData);
+            const moduleName = modules[moduleIndex];
+            const testCase = testScenariosData[moduleName][tcIndex];
+            editBackups[`${moduleIndex}-${tcIndex}`] = Array.isArray(testCase.steps) ? testCase.steps.slice() : [];
+
             currentEditingTestCase = `${moduleIndex}-${tcIndex}`;
             renderTestScenarios();
             
@@ -2196,21 +2208,35 @@
                 stepsContainer.classList.add('expanded');
             }
             
-            showToast('?? Edit mode enabled. Add, edit, or delete steps.');
+            showToast('ℹ️ Edit mode enabled. Add, edit, or delete steps.');
         }
 
         // Save test case changes
         function saveTestCase(moduleIndex, tcIndex) {
+            // Commit: remove backup and exit edit mode
+            const key = `${moduleIndex}-${tcIndex}`;
+            if (editBackups[key]) delete editBackups[key];
             currentEditingTestCase = null;
             renderTestScenarios();
-            showToast('? Test case saved successfully!');
+            showToast('✅ Test case saved successfully!');
         }
 
         // Cancel edit mode
         function cancelEdit() {
+            // Restore steps from backup if available
+            if (currentEditingTestCase) {
+                const [moduleIndex, tcIndex] = currentEditingTestCase.split('-').map(n => parseInt(n, 10));
+                const key = `${moduleIndex}-${tcIndex}`;
+                if (editBackups[key]) {
+                    const modules = Object.keys(testScenariosData);
+                    const moduleName = modules[moduleIndex];
+                    testScenariosData[moduleName][tcIndex].steps = editBackups[key].slice();
+                    delete editBackups[key];
+                }
+            }
             currentEditingTestCase = null;
             renderTestScenarios();
-            showToast('? Edit cancelled');
+            showToast('ℹ️ Edit cancelled');
         }
 
         // Add new test step
@@ -2236,7 +2262,7 @@
                 stepsContainer.classList.add('expanded');
             }
             
-            showToast('? New step added');
+            showToast('✅ New step added');
         }
 
         // Edit a test step (inline editing)
@@ -2246,7 +2272,7 @@
             
             stepTextElement.innerHTML = `
                 <input type="text" class="step-text-editable" value="${currentText}" id="editInput${moduleIndex}-${tcIndex}-${stepIndex}">
-                <button class="icon-btn check" onclick="saveStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Save">?</button>
+                <button class="icon-btn check" onclick="saveStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Save">✔️</button>
             `;
             
             document.getElementById(`editInput${moduleIndex}-${tcIndex}-${stepIndex}`).focus();
@@ -2259,7 +2285,9 @@
             
             const modules = Object.keys(testScenariosData);
             const moduleName = modules[moduleIndex];
-            testScenariosData[moduleName][tcIndex].steps[stepIndex] = newText;
+            // Strip any leading numbering like "1. " from saved step text
+            const cleaned = newText.replace(/^\s*\d+\.\s*/, '');
+            testScenariosData[moduleName][tcIndex].steps[stepIndex] = cleaned;
             
             renderTestScenarios();
             
@@ -2268,7 +2296,7 @@
             const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
             stepsContainer.classList.add('expanded');
             
-            showToast('? Step updated');
+            showToast('✅ Step updated');
         }
 
         // Delete a test step
@@ -2288,7 +2316,7 @@
             const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
             stepsContainer.classList.add('expanded');
             
-            showToast('??? Step deleted');
+            showToast('🗑️ Step deleted');
         }
 
         // Delete entire test case
@@ -2310,7 +2338,7 @@
             }
             
             renderTestScenarios();
-            showToast(`??? Test case "${testCase.name}" deleted successfully`);
+            showToast(`🗑️ Test case "${testCase.name}" deleted successfully`);
         }
 
         // Render API Tests Tree (same structure as Test Scenarios)
@@ -2326,7 +2354,7 @@
                     <div class="module-row">
                         <div class="module-header" onclick="toggleApiModule(${moduleIndex})">
                             <div class="module-header-left">
-                                <span class="module-expand-icon" id="apiModuleIcon${moduleIndex}">?</span>
+                                <span class="module-expand-icon" id="apiModuleIcon${moduleIndex}">▸</span>
                                 <span class="module-title">${moduleName}</span>
                                 <span class="module-count">(${testCases.length} tests)</span>
                             </div>
@@ -2366,8 +2394,8 @@
                                 <div class="step-text" id="apiStepText${moduleIndex}-${tcIndex}-${stepIndex}">${step}</div>
                                 ${isEditing ? `
                                     <div class="step-actions">
-                                        <button class="icon-btn edit" onclick="editApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Edit">??</button>
-                                        <button class="icon-btn delete" onclick="deleteApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Delete">???</button>
+                                        <button class="icon-btn edit" onclick="editApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Edit">✏️</button>
+                                        <button class="icon-btn delete" onclick="deleteApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Delete">🗑️</button>
                                     </div>
                                 ` : ''}
                             </div>
@@ -2420,7 +2448,7 @@
 
         function editApiTestCase(moduleIndex, tcIndex) {
             if (currentEditingApiTestCase) {
-                showToast('?? Please save or cancel the current edit first');
+                showToast('⚠️ Please save or cancel the current edit first');
                 return;
             }
             
@@ -2430,19 +2458,19 @@
             const stepsContainer = document.getElementById(`apiSteps${moduleIndex}-${tcIndex}`);
             stepsContainer.classList.add('expanded');
             
-            showToast('?? Edit mode enabled. Add, edit, or delete steps.');
+            showToast('ℹ️ Edit mode enabled. Add, edit, or delete steps.');
         }
 
         function saveApiTestCase(moduleIndex, tcIndex) {
             currentEditingApiTestCase = null;
             renderApiTests();
-            showToast('? Test case saved successfully!');
+            showToast('✅ Test case saved successfully!');
         }
 
         function cancelApiEdit() {
             currentEditingApiTestCase = null;
             renderApiTests();
-            showToast('? Edit cancelled');
+            showToast('❌ Edit cancelled');
         }
 
         function addApiTestStep(moduleIndex, tcIndex) {
@@ -2457,7 +2485,7 @@
             const stepsContainer = document.getElementById(`apiSteps${moduleIndex}-${tcIndex}`);
             stepsContainer.classList.add('expanded');
             
-            showToast('? New step added');
+            showToast('✅ New step added');
         }
 
         function editApiStep(moduleIndex, tcIndex, stepIndex) {
@@ -2466,7 +2494,7 @@
             
             stepTextElement.innerHTML = `
                 <input type="text" class="step-text-editable" value="${currentText}" id="apiEditInput${moduleIndex}-${tcIndex}-${stepIndex}">
-                <button class="icon-btn check" onclick="saveApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Save">?</button>
+                <button class="icon-btn check" onclick="saveApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Save">✔️</button>
             `;
             
             document.getElementById(`apiEditInput${moduleIndex}-${tcIndex}-${stepIndex}`).focus();
@@ -2486,7 +2514,7 @@
             const stepsContainer = document.getElementById(`apiSteps${moduleIndex}-${tcIndex}`);
             stepsContainer.classList.add('expanded');
             
-            showToast('? Step updated');
+            showToast('✅ Step updated');
         }
 
         function deleteApiStep(moduleIndex, tcIndex, stepIndex) {
@@ -2504,7 +2532,7 @@
             const stepsContainer = document.getElementById(`apiSteps${moduleIndex}-${tcIndex}`);
             stepsContainer.classList.add('expanded');
             
-            showToast('??? Step deleted');
+            showToast('🗑️ Step deleted');
         }
 
         function deleteApiTestCase(moduleIndex, tcIndex) {
@@ -2523,7 +2551,7 @@
             }
             
             renderApiTests();
-            showToast(`??? Test case "${testCase.name}" deleted successfully`);
+            showToast(`✅ Test case "${testCase.name}" deleted successfully`);
         }
 
         // Initialize test scenarios on page load
@@ -2538,12 +2566,12 @@
             const file = event.target.files[0];
             if (file) {
                 if (!file.name.endsWith('.md')) {
-                    showToast('?? Please select a Markdown (.md) file');
+                    showToast('⚠️ Please select a Markdown (.md) file');
                     return;
                 }
-                document.getElementById('selectedProjectContext').textContent = `? ${file.name}`;
+                document.getElementById('selectedProjectContext').textContent = `📁 ${file.name}`;
                 showToast(`TESTING_FRAMEWORK_CONTEXT.md file selected: ${file.name}`);
-                addBotMessage(`?? <b>TESTING_FRAMEWORK_CONTEXT.md uploaded!</b>\n\nFile: "${file.name}"\n\nThis file contains:\n� Page Object Models\n� Test scenarios\n� Recorded test cases\n� Element locators\n\nYou can now reference this for creating new test cases!`);
+                addBotMessage(`🤖 <b>TESTING_FRAMEWORK_CONTEXT.md uploaded!</b>\n\nFile: "${file.name}"\n\nThis file contains:\n� Page Object Models\n� Test scenarios\n� Recorded test cases\n� Element locators\n\nYou can now reference this for creating new test cases!`);
             }
         }
         
@@ -2551,12 +2579,12 @@
             const file = event.target.files[0];
             if (file) {
                 if (!file.name.endsWith('.html')) {
-                    showToast('?? Please select an HTML file');
+                    showToast('⚠️ Please select an HTML file');
                     return;
                 }
-                document.getElementById('selectedHtmlFile').textContent = `? ${file.name}`;
+                document.getElementById('selectedHtmlFile').textContent = `📄 ${file.name}`;
                 showToast(`HTML file selected: ${file.name}`);
-                addBotMessage(`?? <b>HTML file uploaded!</b>\n\nFile: "${file.name}"\n\nYou can now:\n� Analyze the HTML structure\n� Extract element selectors\n� Create Page Object Models\n� Generate test scenarios\n\nWould you like help extracting elements from this page?`);
+                addBotMessage(`🤖 <b>HTML file uploaded!</b>\n\nFile: "${file.name}"\n\nYou can now:\n� Analyze the HTML structure\n� Extract element selectors\n� Create Page Object Models\n� Generate test scenarios\n\nWould you like help extracting elements from this page?`);
             }
         }
 
@@ -2581,7 +2609,7 @@
             const browserName = browserNames[browser] || browser;
             
             if (!url) {
-                showToast('?? Please enter an application URL');
+                showToast('⚠️ Please enter an application URL');
                 return;
             }
             
@@ -2591,8 +2619,9 @@
             const command = `npx playwright codegen --browser=${browser} ${url}`;
             
             // Show loading message
-            showToast(`?? Launching ${browserName}...`);
-            addBotMessage(`?? <b>Launching ${browserName} for recording...</b>\n\nURL: <b>${url}</b>\nBrowser: <b>${browserName}</b>\n\nPlease wait while the browser opens...`);
+            showToast(`🚀 Launching ${browserName}...`);
+            addBotMessage(`🚀 <b>Launching ${browserName} for recording...</b>\n\nURL: <b>${url}</b>\nBrowser: <b>${browserName}</b>\n\nPlease wait while the browser opens...`);
+            addBotMessage('⚠️ <b>Important:</b> <br>When you finish recording, <b>close the Playwright Inspector window</b> before clicking <b>Stop</b> in the dashboard. The code will only be saved after the Inspector is closed.');
             
             try {
                 // Send request to dashboard server to launch browser
@@ -2616,20 +2645,20 @@
                         browserName: browserName
                     };
                     
-                    showToast(`? Browser launched successfully!`);
-                    addBotMessage(`? <b>Success!</b> ${browserName} is now launching with Playwright Codegen.\n\n<b>What happens next:</b>\n1. ?? Browser window will open with your URL\n2. ?? Playwright Inspector will appear\n3. ?? Click the "Record" button to start capturing\n4. ??? Perform your test actions (click, type, navigate)\n5. ?? Click "Stop" button in dashboard when done\n\n<b>Command executed:</b>\n<code>${command}</code>\n\n?? <b>Tip:</b> After recording, you'll be asked to save your test case to TESTING_FRAMEWORK_CONTEXT.md!`);
+                    showToast(`✅ Browser launched successfully!`);
+                    addBotMessage(`✅ <b>Success!</b> ${browserName} is now launching with Playwright Codegen.\n\n<b>What happens next:</b>\n1. ▶️ Browser window will open with your URL\n2. 🧭 Playwright Inspector will appear\n3. ⏺️ Click the "Record" button to start capturing\n4. 🧪 Perform your test actions (click, type, navigate)\n5. ⏹️ Click "Stop" button in dashboard when done\n\n<b>Command executed:</b>\n<code>${command}</code>\n\n💡 <b>Tip:</b> After recording, you'll be asked to save your test case to TESTING_FRAMEWORK_CONTEXT.md!`);
                 } else {
                     throw new Error(result.message || 'Failed to launch browser');
                 }
-            } catch (error) {
-                showToast(`? Error: ${error.message}`);
-                addBotMessage(`?? <b>Could not launch browser automatically.</b>\n\n<b>Possible reasons:</b>\n� Dashboard server is not running\n� Playwright is not installed\n\n<b>Solution - Run this command in your terminal:</b>\n\n<code>${command}</code>\n\n<b>Or start the dashboard server first:</b>\n<code>node dashboard-server.js</code>\n\nThen try clicking "Start Recording" again.`);
+                } catch (error) {
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage(`❌ <b>Could not launch browser automatically.</b>\n\n<b>Possible reasons:</b>\n� Dashboard server is not running\n� Playwright is not installed\n\n<b>Solution - Run this command in your terminal:</b>\n\n<code>${command}</code>\n\n<b>Or start the dashboard server first:</b>\n<code>node dashboard-server.js</code>\n\nThen try clicking "Start Recording" again.`);
             }
         }
 
         // Report functions
         async function openHtmlReport() {
-            showToast('?? Opening Playwright HTML Report...');
+            showToast('📄 Opening Playwright HTML Report...');
             
             try {
                 const response = await fetch('http://localhost:3456/open-html-report', {
@@ -2640,19 +2669,19 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showToast('? HTML Report opened successfully!');
-                    addBotMessage('?? <b>Playwright HTML Report</b> is now opening!\n\nThis interactive report shows:\n� Test execution results\n� Screenshots and videos\n� Error traces\n� Test timings\n\n?? The report opens in your default browser automatically.');
+                    showToast('✅ HTML Report opened successfully!');
+                    addBotMessage('📄 <b>Playwright HTML Report</b> is now opening!\n\nThis interactive report shows:\n� Test execution results\n� Screenshots and videos\n� Error traces\n� Test timings\n\n🔗 The report opens in your default browser automatically.');
                 } else {
                     throw new Error(result.message);
                 }
             } catch (error) {
-                showToast(`? Error: ${error.message}`);
-                addBotMessage('?? <b>Could not open HTML report.</b>\n\nMake sure:\n� Tests have been executed\n� Report exists in playwright-report folder\n� Dashboard server is running\n\n<b>Or run manually:</b>\n<code>npx playwright show-report</code>');
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage('❌ <b>Could not open HTML report.</b>\n\nMake sure:\n� Tests have been executed\n� Report exists in playwright-report folder\n� Dashboard server is running\n\n<b>Or run manually:</b>\n<code>npx playwright show-report</code>');
             }
         }
 
         async function openAllureReport() {
-            showToast('?? Generating Allure Report...');
+            showToast('🧾 Generating Allure Report...');
             
             try {
                 const response = await fetch('http://localhost:3456/open-allure-report', {
@@ -2663,19 +2692,19 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showToast('? Allure Report is being generated!');
-                    addBotMessage('?? <b>Allure Report</b> is being generated and will open automatically!\n\n<b>This comprehensive report includes:</b>\n� Test execution timeline\n� Test history trends\n� Categorized failures\n� Detailed test steps\n� Screenshots and attachments\n� Flaky test detection\n\n? Please wait a moment while the report is generated...');
+                    showToast('✅ Allure Report is being generated!');
+                    addBotMessage('🧾 <b>Allure Report</b> is being generated and will open automatically!\n\n<b>This comprehensive report includes:</b>\n� Test execution timeline\n� Test history trends\n� Categorized failures\n� Detailed test steps\n� Screenshots and attachments\n� Flaky test detection\n\n⏳ Please wait a moment while the report is generated...');
                 } else {
                     throw new Error(result.message);
                 }
             } catch (error) {
-                showToast(`? Error: ${error.message}`);
-                addBotMessage('?? <b>Could not generate Allure report.</b>\n\nMake sure:\n� Allure is installed: <code>npm install -g allure-commandline</code>\n� Test results exist in allure-results folder\n� Dashboard server is running\n\n<b>Or run manually:</b>\n<code>npx allure generate ./allure-results --clean -o ./allure-report</code>\n<code>npx allure open ./allure-report</code>');
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage('❌ <b>Could not generate Allure report.</b>\n\nMake sure:\n� Allure is installed: <code>npm install -g allure-commandline</code>\n� Test results exist in allure-results folder\n� Dashboard server is running\n\n<b>Or run manually:</b>\n<code>npx allure generate ./allure-results --clean -o ./allure-report</code>\n<code>npx allure open ./allure-report</code>');
             }
         }
 
         async function openLogs() {
-            showToast('?? Opening logs folder...');
+            showToast('📁 Opening logs folder...');
             
             try {
                 const response = await fetch('http://localhost:3456/open-logs', {
@@ -2686,32 +2715,63 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showToast('? Logs folder opened!');
-                    addBotMessage('?? <b>Test execution logs</b> folder is now open!\n\n<b>You can find:</b>\n� Test trace files (.zip)\n� Screenshots\n� Videos\n� Console logs\n� Network data\n\n?? <b>Tip:</b> Open trace files with:\n<code>npx playwright show-trace trace.zip</code>');
+                    showToast('✅ Logs folder opened!');
+                    addBotMessage('📁 <b>Test execution logs</b> folder is now open!\n\n<b>You can find:</b>\n� Test trace files (.zip)\n� Screenshots\n� Videos\n� Console logs\n� Network data\n\n💡 <b>Tip:</b> Open trace files with:\n<code>npx playwright show-trace trace.zip</code>');
                 } else {
                     throw new Error(result.message);
                 }
             } catch (error) {
-                showToast(`? Error: ${error.message}`);
-                addBotMessage('?? <b>Could not open logs folder.</b>\n\nMake sure:\n� test-results folder exists\n� Dashboard server is running\n\n<b>Logs are usually in:</b> ./test-results/');
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage('❌ <b>Could not open logs folder.</b>\n\nMake sure:\n� test-results folder exists\n� Dashboard server is running\n\n<b>Logs are usually in:</b> ./test-results/');
             }
         }
 
         // Stop recording and open modal to save test case
         function stopRecording() {
             if (!recordingSession.isRecording) {
-                showToast('?? No active recording session');
-                addBotMessage('?? Please start a recording session first before stopping.');
+                showToast('⚠️ No active recording session');
+                addBotMessage('⚠️ Please start a recording session first before stopping.');
                 return;
             }
 
-            showToast('?? Recording stopped');
-            addBotMessage('?? <b>Recording session stopped!</b>\n\nNow you can save your test case details to TESTING_FRAMEWORK_CONTEXT.md.\n\n?? Please fill in the test case information in the form.');
-            
+            showToast('⏹️ Recording stopped');
+            addBotMessage('⏹️ <b>Recording session stopped!</b>\n\nNow you can save your test case details to TESTING_FRAMEWORK_CONTEXT.md.\n\n➡️ Please fill in the test case information in the form.');
+
             // Pre-fill modal with recording session data
             document.getElementById('testCaseBrowser').value = recordingSession.browserName;
             document.getElementById('testCaseUrl').value = recordingSession.url;
-            
+
+
+            // Poll for the Playwright codegen file to appear (wait up to 10 seconds)
+            let pollAttempts = 0;
+            const maxPolls = 20; // 20 x 500ms = 10 seconds
+            function pollForCodegen() {
+                fetch('http://localhost:3456/get-playwright-code')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.code) {
+                            document.getElementById('playwrightCode').value = data.code;
+                            extractTestSteps();
+                        } else if (pollAttempts < maxPolls) {
+                            pollAttempts++;
+                            setTimeout(pollForCodegen, 500);
+                        } else {
+                            document.getElementById('playwrightCode').value = '';
+                            document.getElementById('testCaseSteps').value = 'No Playwright code found. Please close the Playwright Inspector and try again.';
+                        }
+                    })
+                    .catch(() => {
+                        if (pollAttempts < maxPolls) {
+                            pollAttempts++;
+                            setTimeout(pollForCodegen, 500);
+                        } else {
+                            document.getElementById('playwrightCode').value = '';
+                            document.getElementById('testCaseSteps').value = 'Error fetching Playwright code.';
+                        }
+                    });
+            }
+            pollForCodegen();
+
             // Show modal
             document.getElementById('testCaseModal').classList.add('show');
         }
@@ -2720,105 +2780,117 @@
         function extractTestSteps() {
             const code = document.getElementById('playwrightCode').value.trim();
             const stepsTextarea = document.getElementById('testCaseSteps');
-            
             if (!code) {
                 stepsTextarea.value = '';
                 return;
             }
-            
             const steps = [];
             const lines = code.split('\n');
-            
-            for (let line of lines) {
-                line = line.trim();
-                
-                // Navigate/goto
-                if (line.includes('.goto(') || line.includes('goto(')) {
-                    const urlMatch = line.match(/goto\(['"](.*?)['"]/);
-                    if (urlMatch) {
-                        steps.push(`Navigate to ${urlMatch[1]}`);
-                    } else {
-                        steps.push('Navigate to application');
+            let stepNumber = 1;
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                try {
+                    // Navigation
+                    if (line.match(/\.goto\(['"][^'"]+['"]\)/)) {
+                        const urlMatch = line.match(/goto\(['"](.*?)['"]\)/);
+                        steps.push(`Navigate to ${urlMatch ? urlMatch[1] : 'application'}`);
+                        stepNumber++;
                     }
-                }
-                
-                // Click actions
-                else if (line.includes('.click(')) {
-                    let element = extractElement(line);
-                    steps.push(`Click ${element}`);
-                }
-                
-                // Fill/Type actions
-                else if (line.includes('.fill(') || line.includes('.type(')) {
-                    let element = extractElement(line);
-                    const valueMatch = line.match(/[fill|type]\([^,]+,\s*['"](.*?)['"]/);
-                    if (valueMatch && valueMatch[1]) {
-                        steps.push(`Enter "${valueMatch[1]}" in ${element}`);
-                    } else {
-                        steps.push(`Enter data in ${element}`);
+                    // Click
+                    else if (line.match(/\.click\(/)) {
+                        let element = extractElement(line, lines, i);
+                        steps.push(`Click on ${element}`);
+                        stepNumber++;
                     }
-                }
-                
-                // Press key
-                else if (line.includes('.press(')) {
-                    const keyMatch = line.match(/press\(['"](.*?)['"]/);
-                    if (keyMatch) {
-                        steps.push(`Press ${keyMatch[1]} key`);
-                    }
-                }
-                
-                // Select dropdown
-                else if (line.includes('.selectOption(')) {
-                    let element = extractElement(line);
-                    const valueMatch = line.match(/selectOption\(['"](.*?)['"]/);
-                    if (valueMatch) {
-                        steps.push(`Select "${valueMatch[1]}" from ${element}`);
-                    } else {
-                        steps.push(`Select option from ${element}`);
-                    }
-                }
-                
-                // Check/Uncheck
-                else if (line.includes('.check(')) {
-                    let element = extractElement(line);
-                    steps.push(`Check ${element}`);
-                }
-                else if (line.includes('.uncheck(')) {
-                    let element = extractElement(line);
-                    steps.push(`Uncheck ${element}`);
-                }
-                
-                // Hover
-                else if (line.includes('.hover(')) {
-                    let element = extractElement(line);
-                    steps.push(`Hover over ${element}`);
-                }
-                
-                // Wait
-                else if (line.includes('.waitForSelector(') || line.includes('.waitFor(')) {
-                    let element = extractElement(line);
-                    steps.push(`Wait for ${element} to appear`);
-                }
-                
-                // Expect/Assert
-                else if (line.includes('expect(') && (line.includes('.toBeVisible') || line.includes('.toHaveText') || line.includes('.toContain'))) {
-                    let element = extractElement(line);
-                    if (line.includes('.toBeVisible')) {
-                        steps.push(`Verify ${element} is visible`);
-                    } else if (line.includes('.toHaveText')) {
-                        const textMatch = line.match(/toHaveText\(['"](.*?)['"]/);
-                        if (textMatch) {
-                            steps.push(`Verify ${element} has text "${textMatch[1]}"`);
+                    // Fill/Type
+                    else if (line.match(/\.(fill|type)\(/)) {
+                        let element = extractElement(line, lines, i);
+                        const valueMatch = line.match(/\.(fill|type)\([^,]+,\s*['"](.*?)['"]\)/);
+                        if (valueMatch && valueMatch[2]) {
+                            steps.push(`Enter "${valueMatch[2]}" in ${element}`);
+                            stepNumber++;
                         } else {
-                            steps.push(`Verify ${element} text`);
+                            steps.push(`Enter data in ${element}`);
+                            stepNumber++;
                         }
-                    } else if (line.includes('.toContain')) {
-                        steps.push(`Verify ${element} contains expected value`);
                     }
+                    // Press key (ignore common scroll keys)
+                    else if (line.match(/\.press\(/)) {
+                        const keyMatch = line.match(/press\(['"](.*?)['"]\)/);
+                        if (keyMatch) {
+                            const key = keyMatch[1];
+                            const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End'];
+                            if (scrollKeys.includes(key)) {
+                                // skip scroll/arrow/page navigation keys from steps
+                            } else {
+                                steps.push(`Press "${key}" key`);
+                                stepNumber++;
+                            }
+                        }
+                    }
+                    // Select dropdown
+                    else if (line.match(/\.selectOption\(/)) {
+                        let element = extractElement(line, lines, i);
+                        const valueMatch = line.match(/selectOption\(([^)]+)\)/);
+                        if (valueMatch) {
+                            steps.push(`Select option ${valueMatch[1]} from ${element}`);
+                            stepNumber++;
+                        } else {
+                            steps.push(`Select option from ${element}`);
+                            stepNumber++;
+                        }
+                    }
+                    // Check/Uncheck
+                    else if (line.match(/\.check\(/)) {
+                        let element = extractElement(line, lines, i);
+                        steps.push(`Check ${element}`);
+                        stepNumber++;
+                    }
+                    else if (line.match(/\.uncheck\(/)) {
+                        let element = extractElement(line, lines, i);
+                        steps.push(`Uncheck ${element}`);
+                        stepNumber++;
+                    }
+                    // Hover
+                    else if (line.match(/\.hover\(/)) {
+                        let element = extractElement(line, lines, i);
+                        steps.push(`Hover over ${element}`);
+                        stepNumber++;
+                    }
+                    // Wait
+                    else if (line.match(/\.waitForSelector\(|\.waitFor\(/)) {
+                        let element = extractElement(line, lines, i);
+                        steps.push(`Wait for ${element} to appear`);
+                        stepNumber++;
+                    }
+                    // Assertions
+                    else if (line.includes('expect(')) {
+                        let element = extractElement(line, lines, i);
+                        if (line.includes('.toBeVisible')) {
+                            steps.push(`Verify ${element} is visible`);
+                            stepNumber++;
+                        } else if (line.includes('.toHaveText')) {
+                            const textMatch = line.match(/toHaveText\(['"](.*?)['"]\)/);
+                            if (textMatch) {
+                                steps.push(`Verify ${element} has text "${textMatch[1]}"`);
+                                stepNumber++;
+                            } else {
+                                steps.push(`Verify ${element} text`);
+                                stepNumber++;
+                            }
+                        } else if (line.includes('.toContain')) {
+                            steps.push(`Verify ${element} contains expected value`);
+                            stepNumber++;
+                        } else {
+                            steps.push(`Verify assertion on ${element}`);
+                            stepNumber++;
+                        }
+                    }
+                } catch (err) {
+                    steps.push(`[Unparsed step: ${line}]`);
+                    stepNumber++;
                 }
             }
-            
-            // If no steps extracted, provide a helpful message
             if (steps.length === 0) {
                 stepsTextarea.value = 'Paste valid Playwright code to see auto-generated steps';
             } else {
@@ -2826,9 +2898,10 @@
             }
         }
         
-        // Helper function to extract element description from code line
-        function extractElement(line) {
-            // Try to extract from getByRole
+        // Helper function to extract element description from code line (readable)
+        // Now accepts surrounding lines and current index to resolve attribute selectors to nearby text
+        function extractElement(line, lines, idx) {
+            // getByRole -> include role and name when available (readable)
             if (line.includes('getByRole')) {
                 const roleMatch = line.match(/getByRole\(['"](.*?)['"]\s*,\s*\{[^}]*name:\s*['"](.*?)['"]/);
                 if (roleMatch) {
@@ -2839,51 +2912,110 @@
                     return simpleRoleMatch[1];
                 }
             }
-            
-            // Try to extract from getByText
+
+            // getByTitle -> return human-friendly colour without .nth
+            if (line.includes('getByTitle')) {
+                const titleMatch = line.match(/getByTitle\(['"](.*?)['"]\)/);
+                if (titleMatch) return `${titleMatch[1]} colour`;
+            }
+
+            // getByText -> readable
             if (line.includes('getByText')) {
-                const textMatch = line.match(/getByText\(['"](.*?)['"]/);
-                if (textMatch) {
-                    return `"${textMatch[1]}" element`;
-                }
+                const textMatch = line.match(/getByText\(['"](.*?)['"]\)/);
+                if (textMatch) return `${textMatch[1]} element`;
             }
-            
-            // Try to extract from getByLabel
+
+            // getByLabel -> readable field
             if (line.includes('getByLabel')) {
-                const labelMatch = line.match(/getByLabel\(['"](.*?)['"]/);
-                if (labelMatch) {
-                    return `${labelMatch[1]} field`;
-                }
+                const labelMatch = line.match(/getByLabel\(['"](.*?)['"]\)/);
+                if (labelMatch) return `${labelMatch[1]} field`;
             }
-            
-            // Try to extract from getByPlaceholder
+
+            // getByPlaceholder -> readable
             if (line.includes('getByPlaceholder')) {
-                const placeholderMatch = line.match(/getByPlaceholder\(['"](.*?)['"]/);
-                if (placeholderMatch) {
-                    return `field with placeholder "${placeholderMatch[1]}"`;
-                }
+                const placeholderMatch = line.match(/getByPlaceholder\(['"](.*?)['"]\)/);
+                if (placeholderMatch) return `field with placeholder "${placeholderMatch[1]}"`;
             }
-            
-            // Try to extract from locator
+
+            // locator(...) - map common icon classes to readable icons; try to resolve attribute selectors like [id="..."] to nearby text
             if (line.includes('.locator(') || line.includes('locator(')) {
-                const locatorMatch = line.match(/locator\(['"](.*?)['"]/);
+                const locatorMatch = line.match(/locator\(['\"](.*?)['\"]\)/);
                 if (locatorMatch) {
                     let selector = locatorMatch[1];
+                    // If selector contains an id attribute like [id="83"], attempt to find nearby textual locator
+                    const idMatch = selector.match(/\[id=['\"]?(.*?)['\"]?\]/);
+                    if (idMatch && lines && typeof idx === 'number') {
+                        const idVal = idMatch[1];
+                        for (let j = idx - 1; j >= 0; j--) {
+                            const prev = (lines[j] || '').trim();
+                            if (!prev) continue;
+                            if (prev.includes('getByText')) {
+                                const m = prev.match(/getByText\(['\"](.*?)['\"]\)/);
+                                if (m) return `${m[1]} element`;
+                            }
+                            if (prev.includes('getByTitle')) {
+                                const m = prev.match(/getByTitle\(['\"](.*?)['\"]\)/);
+                                if (m) return `${m[1]} colour`;
+                            }
+                            if (prev.includes('getByRole')) {
+                                const m = prev.match(/getByRole\(['\"](\w+)['\"]\s*,\s*\{[^}]*name:\s*['\"](.*?)['\"]\}/);
+                                if (m) return `${m[2]} ${m[1]}`;
+                            }
+                        }
+                        // fallback to id if no nearby text found
+                        return `element with id "${idVal}"`;
+                    }
+
                     // Clean up selector for readability
                     if (selector.startsWith('#')) {
                         return `element with id "${selector.substring(1)}"`;
                     } else if (selector.startsWith('.')) {
-                        return `element with class "${selector.substring(1)}"`;
+                        const cls = selector.substring(1);
+                        if (/plus/i.test(cls)) return `+ icon`;
+                        if (/minus/i.test(cls)) return `- icon`;
+                        if (/cart|shopping-cart|cart-icon/i.test(cls)) return `cart icon`;
+                        return `element with class "${cls}"`;
                     } else if (selector.includes('[name=')) {
-                        const nameMatch = selector.match(/\[name=['"]?(.*?)['"]?\]/);
+                        const nameMatch = selector.match(/\[name=['\"]?(.*?)['\"]?\]/);
                         if (nameMatch) {
-                            return `${nameMatch[1]} field`;
+                            return `element with name "${nameMatch[1]}"`;
                         }
                     }
-                    return `element "${selector}"`;
+                    return `locator('${selector}')`;
                 }
             }
-            
+
+            // fallback: if line contains a selector-like string in click/fill/type and we have context
+            if (lines && typeof idx === 'number') {
+                const genericSelectorMatch = line.match(/\(['\"](#[^'\"\)]+|\.[^'\"\)]+|\[[^'\"\)]+\]|[^'\"\)]+?)['\"]\)/);
+                if (genericSelectorMatch) {
+                    let val = genericSelectorMatch[1];
+                    if (val.startsWith('.')) {
+                        const cls = val.substring(1);
+                        if (/plus/i.test(cls)) return `+ icon`;
+                        return `element with class "${cls}"`;
+                    }
+                    const attrId = val.match(/\[id=['\"]?(.*?)['\"]?\]/);
+                    if (attrId) {
+                        const idVal = attrId[1];
+                        for (let j = idx - 1; j >= 0; j--) {
+                            const prev = (lines[j] || '').trim();
+                            if (!prev) continue;
+                            if (prev.includes('getByText')) {
+                                const m = prev.match(/getByText\(['\"](.*?)['\"]\)/);
+                                if (m) return `${m[1]} element`;
+                            }
+                            if (prev.includes('getByTitle')) {
+                                const m = prev.match(/getByTitle\(['\"](.*?)['\"]\)/);
+                                if (m) return `${m[1]} colour`;
+                            }
+                        }
+                        return `element with id "${idVal}"`;
+                    }
+                    return `element "${val}"`;
+                }
+            }
+
             return 'element';
         }
 
@@ -2911,7 +3043,7 @@
             const steps = stepsText.split('\n')
                 .map(s => s.trim())
                 .filter(s => s.length > 0)
-                .join(' ? ');
+                .join(' • ');
             
             const testCaseData = {
                 name: testCaseName,
@@ -2924,7 +3056,7 @@
                 timestamp: new Date().toISOString()
             };
             
-            showToast('?? Saving test case...');
+            showToast('💾 Saving test case...');
             
             try {
                 const response = await fetch('http://localhost:3456/save-testcase', {
@@ -2936,7 +3068,7 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showToast('? Test case saved to TESTING_FRAMEWORK_CONTEXT.md!');
+                    showToast('✅ Test case saved to TESTING_FRAMEWORK_CONTEXT.md!');
                     
                     // Add test to testScenariosData dynamically
                     const moduleName = testCaseType === 'UI' ? 'UI Test Scenarios' :
@@ -2950,7 +3082,7 @@
                         id: testCaseName.replace(/\s+/g, '_').toUpperCase(),
                         name: testCaseName,
                         description: description,
-                        steps: steps.split(' ? ').map(s => s.trim()).filter(s => s.length > 0)
+                        steps: steps.split(' • ').map(s => s.trim()).map(s => s.replace(/^\s*\d+\.\s*/, '')).filter(s => s.length > 0)
                     };
                     
                     // Add to test scenarios data
@@ -2970,7 +3102,7 @@
                         <div style="display: grid; gap: 12px;">
                             <div style="background: white; padding: 16px; border-radius: 8px; border-left: 4px solid #0ea5e9;">
                                 <div style="font-weight: 700; font-size: 16px; color: #0369a1; margin-bottom: 8px;">
-                                    ?? ${testCaseName}
+                                    🧪 ${testCaseName}
                                 </div>
                                 <div style="color: #64748b; margin-bottom: 12px;">
                                     ${description}
@@ -2982,9 +3114,9 @@
                                     <div><b>Steps:</b> ${steps}</div>
                                     <div><b>Saved to:</b> TESTING_FRAMEWORK_CONTEXT.md & src/tests/${result.testFileName}</div>
                                     <div style="margin-top: 8px; padding: 12px; background: #f0f9ff; border-radius: 6px; color: #0369a1;">
-                                        ? <b>Test case saved successfully!</b><br>
-                                        ?? Added to <b>${moduleName}</b> in Test Scenarios page<br>
-                                        ?? Test file created: <code>${result.testFileName}</code>
+                                        ✅ <b>Test case saved successfully!</b><br>
+                                        ➕ Added to <b>${moduleName}</b> in Test Scenarios page<br>
+                                        📁 Test file created: <code>${result.testFileName}</code>
                                     </div>
                                 </div>
                             </div>
@@ -2996,7 +3128,7 @@
                     // Scroll to results
                     resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     
-                    addBotMessage(`? <b>Test case saved successfully!</b>\n\n<b>${testCaseName}</b>: ${description}\n\nYour test case has been added to:\n� Module: <b>${moduleName}</b> in Test Scenarios page\n� Type: ${testCaseType}\n� Test file: <code>src/tests/${result.testFileName}</code>\n� Documentation: TESTING_FRAMEWORK_CONTEXT.md\n� Page Elements extracted from code\n� Browser: ${recordingSession.browserName}\n� URL: ${recordingSession.url}\n\n?? Navigate to <b>Test Scenarios</b> page to view your test!`);
+                    addBotMessage(`✅ <b>Test case saved successfully!</b>\n\n<b>${testCaseName}</b>: ${description}\n\nYour test case has been added to:\n� Module: <b>${moduleName}</b> in Test Scenarios page\n� Type: ${testCaseType}\n� Test file: <code>src/tests/${result.testFileName}</code>\n� Documentation: TESTING_FRAMEWORK_CONTEXT.md\n� Page Elements extracted from code\n� Browser: ${recordingSession.browserName}\n� URL: ${recordingSession.url}\n\n➡️ Navigate to <b>Test Scenarios</b> page to view your test!`);
                     
                     // Close modal and reset recording session
                     closeTestCaseModal();
@@ -3005,8 +3137,8 @@
                     throw new Error(result.message || 'Failed to save test case');
                 }
             } catch (error) {
-                showToast(`? Error: ${error.message}`);
-                addBotMessage(`?? <b>Could not save test case.</b>\n\nError: ${error.message}\n\nMake sure the dashboard server is running.`);
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage(`❌ <b>Could not save test case.</b>\n\nError: ${error.message}\n\nMake sure the dashboard server is running.`);
             }
         }
 
@@ -3014,7 +3146,7 @@
         function viewRecordedTests() {
             showPage(2); // Navigate to Test Scenarios page
             loadRecordedTests(); // Load recorded tests
-            showToast('?? Viewing recorded test scenarios...');
+            showToast('🔍 Viewing recorded test scenarios...');
             
             // Scroll to recorded tests section
             setTimeout(() => {
@@ -3066,7 +3198,7 @@
             } catch (error) {
                 recordedTestsContent.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: #ef4444;">
-                        <p style="font-size: 16px; margin-bottom: 8px;">?? Error loading recorded tests</p>
+                        <p style="font-size: 16px; margin-bottom: 8px;">❌ Error loading recorded tests</p>
                         <small>${error.message}</small>
                     </div>
                 `;
@@ -3118,7 +3250,7 @@
                                 <details style="margin-top: 8px;">
                                     <summary style="cursor: pointer; color: #0369a1; font-weight: 600;">View Steps</summary>
                                     <div style="margin-top: 8px; padding: 12px; background: #f8fafc; border-radius: 6px; font-size: 12px;">
-                                        ${test.steps.split('?').map(step => `� ${step.trim()}`).join('<br>')}
+                                        ${test.steps.split(' • ').map(step => `• ${step.trim()}`).join('<br>')}
                                     </div>
                                 </details>
                             </div>
@@ -3224,7 +3356,7 @@
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
             if (!message) {
-                showToast('?? Please type a message first');
+                showToast('⚠️ Please type a message first');
                 return;
             }
 
@@ -3235,7 +3367,7 @@
             const chatbox = document.getElementById('chatbox');
             const typingIndicator = document.createElement('div');
             typingIndicator.className = 'message bot-msg typing-indicator';
-            typingIndicator.innerHTML = '?? <i>Analyzing your question...</i>';
+            typingIndicator.innerHTML = '🤖 <i>Analyzing your question...</i>';
             typingIndicator.id = 'typing-indicator';
             chatbox.appendChild(typingIndicator);
             chatbox.scrollTop = chatbox.scrollHeight;
@@ -3582,7 +3714,7 @@ await page.setInputFiles('input[type="file"]', 'path/to/file.pdf');
 await page.click('button[type="submit"]');
 // or
 await page.press('input', 'Enter');
-</code>\n\n?? <b>Tip:</b> Always wait for the form to be ready before filling!`;
+</code>\n\n💡 <b>Tip:</b> Always wait for the form to be ready before filling!`;
             }
 
             // Clicking & Interaction
@@ -3655,7 +3787,7 @@ await childFrame.locator('button').click();
 // Get all frames
 const frames = page.frames();
 console.log(frames.length);
-</code>\n\n?? <b>Tip:</b> Use frameLocator for better auto-waiting!`;
+</code>\n\n💡 <b>Tip:</b> Use frameLocator for better auto-waiting!`;
             }
 
             // Alert/Dialog Handling
@@ -3851,7 +3983,7 @@ CMD ["npx", "playwright", "test"]
 
             // Best Practices
             if (msg.includes('best practice') || msg.includes('tips') || msg.includes('recommend')) {
-                return `Playwright Best Practices:\n\n? Use user-facing locators (getByRole, getByText)\n? Add data-testid for stable selectors\n? Use Page Object Model for reusability\n? Enable auto-waiting (built-in)\n? Use soft assertions for non-critical checks\n? Parallelize tests for speed\n? Use trace viewer for debugging\n? Test in multiple browsers\n? Use fixtures for common setup\n? Keep tests independent\n\n? Avoid XPath when possible\n? Don't use long waits (sleep)\n? Avoid brittle selectors\n? Don't share state between tests\n? Avoid testing implementation details`;
+                return `Playwright Best Practices:\n\n• Use user-facing locators (getByRole, getByText)\n• Add data-testid for stable selectors\n• Use Page Object Model for reusability\n• Enable auto-waiting (built-in)\n• Use soft assertions for non-critical checks\n• Parallelize tests for speed\n• Use trace viewer for debugging\n• Test in multiple browsers\n• Use fixtures for common setup\n• Keep tests independent\n\n• Avoid XPath when possible\n• Don't use long waits (sleep)\n• Avoid brittle selectors\n• Don't share state between tests\n• Avoid testing implementation details`;
             }
 
             // Screenshot/Video
@@ -4159,7 +4291,7 @@ test('file download', async ({ page }) => {
 
             // General help
             if (msg.includes('help') || msg.includes('what can you') || msg.includes('how to') || msg === 'hi' || msg === 'hello') {
-                return `<b>?? Hi! I'm your AI Test Automation Assistant!</b>\n\nI can help with:\n\n?? <b>Code Generation</b>\n   - Login tests, API tests, UI tests\n   - Page Object Models\n   - Custom fixtures\n\n?? <b>Locators & Interactions</b>\n   - Finding elements\n   - Clicking, typing, form filling\n   - Drag & drop, hover\n\n? <b>Assertions & Verification</b>\n   - Element assertions\n   - Page assertions\n   - Data extraction\n\n?? <b>Debugging</b>\n   - Debug mode, traces\n   - Screenshots, videos\n   - Network debugging\n\n? <b>Performance</b>\n   - Parallel execution\n   - Speed optimization\n\n?? <b>Mobile Testing</b>\n   - Device emulation\n   - Responsive testing\n\n?? <b>Advanced Topics</b>\n   - Iframes & alerts\n   - Table data extraction\n   - Network interception\n   - File upload/download\n   - Database testing\n   - Visual regression\n   - CI/CD integration\n\n?? <b>Try asking:</b>\n� "How to record tests?"\n� "Generate a login test"\n� "How to click elements?"\n� "Fill form examples"\n� "Handle iframes"\n� "Extract table data"\n� "API testing"\n� "Best practices"`;
+                return `<b>🤖 Hi! I'm your AI Test Automation Assistant!</b>\n\nI can help with:\n\n🔹 <b>Code Generation</b>\n   - Login tests, API tests, UI tests\n   - Page Object Models\n   - Custom fixtures\n\n🔹 <b>Locators & Interactions</b>\n   - Finding elements\n   - Clicking, typing, form filling\n   - Drag & drop, hover\n\n🔹 <b>Assertions & Verification</b>\n   - Element assertions\n   - Page assertions\n   - Data extraction\n\n🔹 <b>Debugging</b>\n   - Debug mode, traces\n   - Screenshots, videos\n   - Network debugging\n\n🔹 <b>Performance</b>\n   - Parallel execution\n   - Speed optimization\n\n🔹 <b>Mobile Testing</b>\n   - Device emulation\n   - Responsive testing\n\n🔹 <b>Advanced Topics</b>\n   - Iframes & alerts\n   - Table data extraction\n   - Network interception\n   - File upload/download\n   - Database testing\n   - Visual regression\n   - CI/CD integration\n\n💡 <b>Try asking:</b>\n� "How to record tests?"\n� "Generate a login test"\n� "How to click elements?"\n� "Fill form examples"\n� "Handle iframes"\n� "Extract table data"\n� "API testing"\n� "Best practices"`;
             }
 
             // Default intelligent response
@@ -4204,18 +4336,18 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
   // Verify results
   await expect(page.locator('#result')).toBeVisible();
 });
-</code>\n\n?? <b>For more specific help, try asking:</b>\n� "Generate a ${detectedTopic} test"\n� "How to debug ${detectedTopic}"\n� "Best practices for ${detectedTopic}"\n� "Show me ${detectedTopic} examples"\n\nWhat specific aspect would you like to know more about?`;
+</code>\n\n💡 <b>For more specific help, try asking:</b>\n• "Generate a ${detectedTopic} test"\n• "How to debug ${detectedTopic}"\n• "Best practices for ${detectedTopic}"\n• "Show me ${detectedTopic} examples"\n\nWhat specific aspect would you like to know more about?`;
             }
 
             // Fallback help response
-            return `<b>I'm here to help with Playwright Test Automation!</b>\n\nYou asked: "<i>${message}</i>"\n\n?? <b>I can help you with:</b>\n\n<b>Code Generation:</b>\n� Login tests, API tests, UI tests\n� Page Object Models\n� Test fixtures and hooks\n\n<b>Common Tasks:</b>\n� Element locators and selectors\n� Assertions and verifications\n� Debugging and troubleshooting\n� Configuration and setup\n\n<b>Advanced Topics:</b>\n� Parallel execution\n� Visual regression testing\n� Database testing\n� File upload/download\n� Authentication\n\n?? <b>Try asking specific questions like:</b>\n� "Generate a login test"\n� "How to find elements?"\n� "Debug failing tests"\n� "API testing examples"\n� "Best practices"\n� "Handle file uploads"\n� "Test with database"\n\nWhat would you like help with?`;
+            return `<b>I'm here to help with Playwright Test Automation!</b>\n\nYou asked: "<i>${message}</i>"\n\n💡 <b>I can help you with:</b>\n\n<b>Code Generation:</b>\n• Login tests, API tests, UI tests\n• Page Object Models\n• Test fixtures and hooks\n\n<b>Common Tasks:</b>\n• Element locators and selectors\n• Assertions and verifications\n• Debugging and troubleshooting\n• Configuration and setup\n\n<b>Advanced Topics:</b>\n• Parallel execution\n• Visual regression testing\n• Database testing\n• File upload/download\n• Authentication\n\n📌 <b>Try asking specific questions like:</b>\n• "Generate a login test"\n• "How to find elements?"\n• "Debug failing tests"\n• "API testing examples"\n• "Best practices"\n• "Handle file uploads"\n• "Test with database"\n\nWhat would you like help with?`;
         }
 
         function addUserMessage(text) {
             const chatbox = document.getElementById('chatbox');
             const msg = document.createElement('div');
             msg.className = 'message user-msg';
-            msg.textContent = '?? ' + text;
+            msg.textContent = '🗨️ ' + text;
             chatbox.appendChild(msg);
             chatbox.scrollTop = chatbox.scrollHeight;
         }
@@ -4230,7 +4362,7 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
                 .replace(/\n/g, '<br>')
                 .replace(/<code>([\s\S]*?)<\/code>/g, '<code>$1</code>');
             
-            msg.innerHTML = '?? ' + formattedText;
+            msg.innerHTML = '🤖 ' + formattedText;
             chatbox.appendChild(msg);
             chatbox.scrollTop = chatbox.scrollHeight;
         }
@@ -4244,15 +4376,15 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
         // Clear chat history
         function clearChat() {
             const chatbox = document.getElementById('chatbox');
-            chatbox.innerHTML = `<div class="message bot-msg">?? <b>Chat cleared! Ready to help you again!</b><br><br>
+            chatbox.innerHTML = `<div class="message bot-msg">🤖 <b>Chat cleared! Ready to help you again!</b><br><br>
             I can assist with:<br>
             � <b>Recording tests</b> - Codegen and Playwright Inspector<br>
             � <b>Code generation</b> - Login, API, form tests<br>
             � <b>Element interactions</b> - Click, type, select, drag<br>
             � <b>Debugging</b> - Traces, screenshots, network logs<br>
             � <b>Advanced features</b> - Iframes, alerts, tables, mocking<br><br>
-            ?? Ask me anything about Playwright test automation!</div>`;
-            showToast('?? Chat history cleared');
+            🤖 Ask me anything about Playwright test automation!</div>`;
+            showToast('🧹 Chat history cleared');
         }
 
         // Copy command to clipboard
@@ -4260,7 +4392,7 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
             const commandBox = button.parentElement;
             const command = commandBox.textContent.replace('Copy', '').replace('$', '').trim();
             navigator.clipboard.writeText(command).then(() => {
-                showToast('? Command copied to clipboard!');
+                showToast('✅ Command copied to clipboard!');
             });
         }
 
@@ -4270,8 +4402,8 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
             const browserNames = { chromium: 'Chrome', msedge: 'Edge', firefox: 'Firefox' };
             const reportNames = { allure: 'Allure', html: 'Playwright HTML Report', logs: 'Execution Logs' };
             
-            showToast(`?? Initiating ${type} test execution...`);
-            addBotMessage(`?? <b>Running ${type} Tests:</b>\n\n?? Retries: ${config.retries} | ?? Workers: ${config.workers}\n?? Browser: ${browserNames[config.browser]} | ??? Headless: ${config.headless}\n?? Report: ${reportNames[config.reporter]}\n\nExecuting ${type} test suite...`);
+            showToast(`▶️ Initiating ${type} test execution...`);
+            addBotMessage(`🏁 <b>Running ${type} Tests:</b>\n\n🔁 Retries: ${config.retries} | ⚙️ Workers: ${config.workers}\n🌐 Browser: ${browserNames[config.browser]} | 🕵️ Headless: ${config.headless}\n📄 Report: ${reportNames[config.reporter]}\n\nExecuting ${type} test suite...`);
             console.log(`Running ${type} tests with config:`, config);
         }
 
@@ -4292,45 +4424,45 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
             const browserNames = { chromium: 'Chrome', msedge: 'Edge', firefox: 'Firefox' };
             const reportNames = { allure: 'Allure', html: 'Playwright HTML Report', logs: 'Execution Logs' };
             
-            showToast('?? Initiating full test suite execution...');
-            addBotMessage(`?? <b>Running All Tests with Configuration:</b>\n\n?? <b>Retries:</b> ${config.retries}\n?? <b>Parallel Threads:</b> ${config.workers}\n?? <b>Browser:</b> ${browserNames[config.browser]}\n??? <b>Headless Mode:</b> ${config.headless}\n?? <b>Report:</b> ${reportNames[config.reporter]}\n\n<b>Command would be:</b>\n<code>npx playwright test --retries=${config.retries} --workers=${config.workers} --project=${config.browser} ${config.headless === 'true' ? '--headed=false' : '--headed'} --reporter=${config.reporter}</code>\n\nTests are being executed...`);
+            showToast('🏃 Initiating full test suite execution...');
+            addBotMessage(`🏁 <b>Running All Tests with Configuration:</b>\n\n🔁 <b>Retries:</b> ${config.retries}\n⚙️ <b>Parallel Threads:</b> ${config.workers}\n🌐 <b>Browser:</b> ${browserNames[config.browser]}\n🕵️ <b>Headless Mode:</b> ${config.headless}\n📄 <b>Report:</b> ${reportNames[config.reporter]}\n\n<b>Command would be:</b>\n<code>npx playwright test --retries=${config.retries} --workers=${config.workers} --project=${config.browser} ${config.headless === 'true' ? '--headed=false' : '--headed'} --reporter=${config.reporter}</code>\n\nTests are being executed...`);
             console.log('Running all tests with config:', config);
         }
 
         // View reports
         function viewReports() {
-            showToast('?? Opening test reports...');
+            showToast('📊 Opening test reports...');
             showPage(4); // Navigate to Reports page
         }
 
         // Open Playwright UI
         function openPlaywrightUI() {
-            showToast('?? Opening Playwright UI Mode...');
+            showToast('▶️ Opening Playwright UI Mode...');
             console.log('Opening Playwright UI');
         }
 
         // Open project context
         function openProjectContext() {
-            showToast('?? Opening framework documentation...');
+            showToast('📚 Opening framework documentation...');
             window.open('TESTING_FRAMEWORK_CONTEXT.md', '_blank');
         }
 
         // Open terminal
         function openTerminal() {
-            showToast('?? Terminal command copied! Paste in VS Code terminal.');
+            showToast('📋 Terminal command copied! Paste in VS Code terminal.');
             console.log('Opening terminal');
         }
 
         // Open file
         function openFile(filename) {
-            showToast(`?? Opening ${filename}...`);
+            showToast(`📂 Opening ${filename}...`);
             console.log(`Opening file: ${filename}`);
         }
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Playwright Testing Framework Dashboard Loaded');
-            showToast('? Dashboard loaded successfully!');
+            showToast('✅ Dashboard loaded successfully!');
             
             // Add browser selection change event
             const browserSelect = document.getElementById('browserSelect');
@@ -4342,7 +4474,7 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
                         'firefox': 'Firefox'
                     };
                     const browserName = browserNames[e.target.value] || e.target.value;
-                    showToast(`?? Browser changed to ${browserName}`);
+                    showToast(`🌐 Browser changed to ${browserName}`);
                 });
             }
         });
@@ -4370,22 +4502,22 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
     <!-- Test Case Save Modal -->
     <div id="testCaseModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>?? Save Test Case</h2>
+                <div class="modal-header">
+                <h2>💾 Save Test Case</h2>
                 <button class="close-btn" onclick="closeTestCaseModal()">&times;</button>
             </div>
             <form onsubmit="saveTestCase(event)">
                 <div class="form-group">
-                    <label>?? Test Case Name:</label>
+                    <label>📝 Test Case Name:</label>
                     <input type="text" id="testCaseName" placeholder="e.g., TC01_ValidLogin" required>
                     <small style="color: #64748b; display: block; margin-top: 4px;">Use format: TC##_TestName</small>
                 </div>
                 <div class="form-group">
-                    <label>?? Description:</label>
+                    <label>📝 Description:</label>
                     <input type="text" id="testCaseDescription" placeholder="e.g., Login with valid credentials" required>
                 </div>
                 <div class="form-group">
-                    <label>??? Test Case Type:</label>
+                    <label>📚 Test Case Type:</label>
                     <select id="testCaseType" required style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                         <option value="">-- Select Test Case Type --</option>
                         <option value="System">System</option>
@@ -4396,26 +4528,26 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
                     <small style="color: #64748b; display: block; margin-top: 4px;">Select the category of this test case</small>
                 </div>
                 <div class="form-group">
-                    <label>? Paste Generated Playwright Code:</label>
+                    <label>📋 Paste Generated Playwright Code:</label>
                     <textarea id="playwrightCode" placeholder="Paste the code from Playwright Inspector here..." required style="font-family: 'Courier New', monospace; min-height: 200px;" oninput="extractTestSteps()"></textarea>
                     <small style="color: #64748b; display: block; margin-top: 4px;">Copy the generated code from Playwright Inspector - Test Steps will auto-generate below!</small>
                 </div>
                 <div class="form-group">
-                    <label>? Test Steps (auto-generated):</label>
+                    <label>🧾 Test Steps (auto-generated):</label>
                     <textarea id="testCaseSteps" placeholder="Paste Playwright code above to auto-generate test steps..." readonly style="background: #f8fafc;"></textarea>
                     <small style="color: #64748b; display: block; margin-top: 4px;">Steps are automatically extracted from your code</small>
                 </div>
                 <div class="form-group">
-                    <label>?? Browser Used:</label>
+                    <label>🌐 Browser Used:</label>
                     <input type="text" id="testCaseBrowser" readonly style="background: #f1f5f9;">
                 </div>
                 <div class="form-group">
-                    <label>?? Application URL:</label>
+                    <label>🔗 Application URL:</label>
                     <input type="text" id="testCaseUrl" readonly style="background: #f1f5f9;">
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-cancel" onclick="closeTestCaseModal()">Cancel</button>
-                    <button type="submit" class="btn">?? Save</button>
+                    <button type="submit" class="btn">💾 Save</button>
                 </div>
             </form>
         </div>
