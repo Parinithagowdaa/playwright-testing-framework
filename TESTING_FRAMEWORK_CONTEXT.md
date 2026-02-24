@@ -924,3 +924,233 @@ BUTTON_1 = "button"
 - Browser: Chrome
 - URL: http://advantageonlineshopping.com/
 - Recorded: 2/13/2026, 12:41:26 PM
+
+### TestNew01 Page Elements
+
+```typescript
+ELEMENT_1 = "*EmailEmail"
+```
+
+### TestNew01 Test
+
+**TestNew01**: ContactUs
+- Type: UI
+- 1. Navigate to http://advantageonlineshopping.com/#/ • 2. Click on CONTACT US link • 3. Select option 'object:60' from element "select[name=" • 4. Select option 'object:132' from element "select[name=" • 5. Click on "*EmailEmail" element • 6. Click on "*EmailEmail" element • 7. Enter data in element "input[name=" • 8. Click on element "textarea[name=" • 9. Enter data in element "textarea[name=" • 10. Click on SEND button
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 2/16/2026, 9:27:31 PM
+
+### SampleGetByTitle Page Elements
+
+```typescript
+BUTTON_1 = getByTitle('BLACK').nth(1) // locator: getByTitle
+```
+
+### SampleGetByTitle Test
+
+**SampleGetByTitle**: Sample: getByTitle nth click
+- Type: UI
+- Click the BLACK title element
+- Browser: chromium
+- URL: http://example.com
+- Recorded: 2/17/2026, 5:04:55 PM
+
+### TestNew02 Page Elements
+
+```typescript
+ELEMENT_1 = getByRole('link', { name: 'View Details' }).nth(1) // locator: getByRole
+ELEMENT_2 = getByRole('button', { name: 'ADD TO CART' }) // locator: getByRole
+ELEMENT_3 = getByRole('button', { name: 'CHECKOUT ($2,523.98)' }) // locator: getByRole
+BUTTON_4 = locator('#bunny') // locator: locator
+BUTTON_5 = locator('.plus') // locator: locator
+```
+
+### TestNew02 Test
+
+**TestNew02**: AddnewItem
+- Type: System
+- 1. Navigate to http://advantageonlineshopping.com/#/ • 2. Click on View Details link • 3. Click on element with id "bunny" • 4. Click on element with class "plus" • 5. Click on element "input[name=" • 6. Click on ADD TO CART button • 7. Click on CHECKOUT ($2,523.98) button
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 2/17/2026, 11:39:43 AM
+
+### TestNew03 Page Elements
+
+```typescript
+ELEMENT_1 = getByRole('button', { name: 'ADD TO CART' }) // locator: getByRole
+ELEMENT_2 = getByRole('cell', { name: 'CHECKOUT ($2,558.00)' }) // locator: getByRole
+BUTTON_3 = getByTitle('GRAY') // locator: getByTitle
+BUTTON_4 = getByText('$1,279.00') // locator: getByText
+BUTTON_5 = locator('.plus') // locator: locator
+```
+
+### TestNew03 Test
+
+**TestNew03**: Testcase03
+- Type: Integration
+- 1. Navigate to http://advantageonlineshopping.com/#/ • 2. Click on TabletsCategory link • 3. Click on "$1,279.00" element • 4. Click on element • 5. Click on element with class "plus" • 6. Click on ADD TO CART button • 7. Click on CHECKOUT ($2,558.00) cell
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 2/17/2026, 12:02:59 PM
+
+### VerifyGetByTitleLabel Page Elements
+
+```typescript
+BUTTON_1 = getByTitle('GRAY').nth(1) // locator: getByTitle
+```
+
+### VerifyGetByTitleLabel Test
+
+**VerifyGetByTitleLabel**: Verify getByTitle maps to readable label
+- Type: UI
+- Click GRAY colour
+- Browser: chromium
+- URL: http://example.com
+- Recorded: 2/17/2026, 7:03:39 PM
+
+### VerifyGetByTitleLabel Page Elements
+
+```typescript
+BUTTON_1 = getByTitle('GRAY').nth(1) // locator: getByTitle
+```
+
+### VerifyGetByTitleLabel Test
+
+**VerifyGetByTitleLabel**: Verify getByTitle maps to readable label
+- Type: UI
+- Click GRAY colour
+- Browser: chromium
+- URL: http://example.com
+- Recorded: 2/17/2026, 1:33:51 PM
+
+### VerifyGetByTitleLabel2 Page Elements
+
+```typescript
+BUTTON_1 = GRAY colour // locator: getByTitle
+```
+
+### VerifyGetByTitleLabel2 Test
+
+**VerifyGetByTitleLabel2**: Verify getByTitle maps to readable label after server restart
+- Type: UI
+- Click GRAY colour
+- Browser: chromium
+- URL: http://example.com
+- Recorded: 2/17/2026, 1:34:47 PM
+
+### testnew04 Page Elements
+
+```typescript
+ELEMENT_1 = MiceCategoryTxt link // locator: getByRole
+ELEMENT_2 = ADD TO CART button // locator: getByRole
+ELEMENT_3 = CHECKOUT ($179.97) button // locator: getByRole
+BUTTON_4 = RED colour // locator: getByTitle
+BUTTON_5 = + icon // locator: locator
+```
+
+### testnew04 Test
+
+**testnew04**: Testcase04
+- Type: Integration
+- 1. Navigate to http://advantageonlineshopping.com/#/ • 2. Click on MiceCategoryTxt link • 3. Click on element with id "26" • 4. Click on element with id "26" • 5. Click on RED colour • 6. Click on + icon • 7. Click on + icon • 8. Click on element with name "quantity" • 9. Click on ADD TO CART button • 10. Click on CHECKOUT ($179.97) button
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 2/17/2026, 3:27:37 PM
+
+### testnew05 Page Elements
+
+```typescript
+ELEMENT_1 = Special-offer link // locator: getByRole
+ELEMENT_2 = View Details link // locator: getByRole
+ELEMENT_3 = ADD TO CART button // locator: getByRole
+ELEMENT_4 = CHECKOUT ($169.99) button // locator: getByRole
+BUTTON_5 = BLACK colour // locator: getByTitle
+```
+
+### testnew05 Test
+
+**testnew05**: Testcase05
+- Type: System
+- 1. Navigate to http://advantageonlineshopping.com/#/ • 2. Click on Special-offer link • 3. Click on Special-offer link • 4. Click on Special-offer link • 5. Click on View Details link • 6. Click on BLACK colour • 7. Click on ADD TO CART button • 8. Click on CHECKOUT ($169.99) button
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 2/17/2026, 5:55:52 PM
+
+### testnew06 Page Elements
+
+```typescript
+ELEMENT_1 = ADD TO CART button // locator: getByRole
+ELEMENT_2 = CHECKOUT ($2,558.00) button // locator: getByRole
+BUTTON_3 = GRAY colour // locator: getByTitle
+BUTTON_4 = $1,279.00 element // locator: getByText
+BUTTON_5 = + icon // locator: locator
+```
+
+### testnew06 Test
+
+**testnew06**: Testcase06
+- Type: System
+- Navigate to http://advantageonlineshopping.com/#/ • Click on TabletsCategory link • Click on $1,279.00 element • Click on GRAY colour • Click on + icon • Click on ADD TO CART button • Click on CHECKOUT ($2,558.00) button
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 2/17/2026, 6:25:38 PM
+
+### testnew07 Page Elements
+
+```typescript
+ELEMENT_1 = Special-offer link // locator: getByRole
+ELEMENT_2 = View Details link // locator: getByRole
+ELEMENT_3 = ADD TO CART button // locator: getByRole
+ELEMENT_4 = CHECKOUT ($1,009.00) button // locator: getByRole
+BUTTON_5 = GRAY colour // locator: getByTitle
+BUTTON_6 = HP ELITEPAD 1000 G2 TABLET element // locator: getByText
+```
+
+### testnew07 Test
+
+**testnew07**: Testcase07
+- Type: System
+- Navigate to http://advantageonlineshopping.com/#/ • Click on Special-offer link • Click on HP ELITEPAD 1000 G2 TABLET element • Click on View Details link • Click on GRAY colour • Click on ADD TO CART button • Click on CHECKOUT ($1,009.00) button
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 2/17/2026, 6:38:14 PM
+
+### testnew08 Page Elements
+
+```typescript
+ELEMENT_1 = POPULAR ITEMS link // locator: getByRole
+ELEMENT_2 = View Details link // locator: getByRole
+ELEMENT_3 = ADD TO CART button // locator: getByRole
+ELEMENT_4 = CHECKOUT ($339.98) button // locator: getByRole
+BUTTON_5 = PURPLE colour // locator: getByTitle
+BUTTON_6 = + icon // locator: locator
+```
+
+### testnew08 Test
+
+**testnew08**: Testcase08
+- Type: System
+- Navigate to http://advantageonlineshopping.com/#/ • Click on POPULAR ITEMS link • Click on View Details link • Click on PURPLE colour • Click on + icon • Click on ADD TO CART button • Click on CHECKOUT ($339.98) button
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 2/18/2026, 3:16:43 PM
+
+### TestCase12 Page Elements
+
+```typescript
+ELEMENT_1 = TabletsCategoryTxt link // locator: getByRole
+ELEMENT_2 = ADD TO CART button // locator: getByRole
+ELEMENT_3 = CHECKOUT ($3,837.00) button // locator: getByRole
+BUTTON_4 = GRAY colour // locator: getByTitle
+BUTTON_5 = locator('body') // locator: locator
+BUTTON_6 = + icon // locator: locator
+```
+
+### TestCase12 Test
+
+**TestCase12**: Testcase12
+- Type: System
+- Navigate to http://advantageonlineshopping.com/#/ • Click on TabletsCategoryTxt link • Click on element with id "17" • Click on GRAY colour • Click on + icon • Click on + icon • Click on ADD TO CART button • Click on CHECKOUT ($3,837.00) button
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 2/18/2026, 4:38:34 PM

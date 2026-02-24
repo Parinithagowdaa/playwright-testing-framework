@@ -10,57 +10,101 @@ function extractElementsFromCode(code) {
     const elements = [];
     const seenSelectors = new Set();
 
-    // Regular expressions to match different Playwright locator patterns
-    const patterns = [
-        /page\.locator\(['"]([^'"]+)['"]\)/g,
-        /page\.getByRole\(['"]\w+['"]\s*,\s*\{\s*name:\s*['"]([^'"]+)['"]\)/g,
-        /page\.getByText\(['"]([^'"]+)['"]\)/g,
-        /page\.getByLabel\(['"]([^'"]+)['"]\)/g,
-        /page\.getByPlaceholder\(['"]([^'"]+)['"]\)/g,
-        /page\.click\(['"]([^'"]+)['"]\)/g,
-        /page\.fill\(['"]([^'"]+)['"]\)/g,
-        /page\.type\(['"]([^'"]+)['"]\)/g,
-    ];
-
     let counter = 1;
 
-    patterns.forEach((pattern) => {
-        let match = pattern.exec(code);
-        while (match !== null) {
-            const selector = match[1];
-            let actionType = 'ELEMENT';
+    // Helper to add element if not seen
+    function addElement(key, locatorType, locatorValue, nth, actionHint) {
+        const uniqueKey = `${locatorType}:${typeof locatorValue === 'object' ? JSON.stringify(locatorValue) : locatorValue}:${nth ?? '0'}`;
+        if (seenSelectors.has(uniqueKey)) return;
+        seenSelectors.add(uniqueKey);
 
-            // Determine element type based on selector or action
-            if (code.includes(`locator('${selector}').click()`) || code.includes(`click('${selector}')`)) {
-                actionType = 'BUTTON';
-            } else if (code.includes(`locator('${selector}').fill()`) || code.includes(`fill('${selector}')`)) {
-                actionType = 'TEXTBOX';
-            } else if (selector.includes('input')) {
-                actionType = 'INPUT';
-            } else if (selector.includes('button') || selector.includes('btn')) {
-                actionType = 'BUTTON';
-            } else if (selector.includes('icon')) {
-                actionType = 'ICON';
-            } else if (selector.includes('link') || selector.includes('a[')) {
-                actionType = 'LINK';
+        const elementName = `${(actionHint || 'ELEMENT').toUpperCase()}_${counter}`;
+        counter += 1;
+
+        // Build a human-friendly description using locator strategy
+        let description = '';
+        if (locatorType === 'getByRole') {
+            description = `${locatorValue.name} ${locatorValue.role}`;
+        } else if (locatorType === 'getByTitle') {
+            description = `${locatorValue} colour`;
+        } else if (locatorType === 'getByText') {
+            description = `${locatorValue} element`;
+        } else if (locatorType === 'getByLabel') {
+            description = `${locatorValue} field`;
+        } else if (locatorType === 'getByPlaceholder') {
+            description = `field with placeholder "${locatorValue}"`;
+        } else if (locatorType === 'locator') {
+            // Friendly mapping for common selectors
+            if (typeof locatorValue === 'string') {
+                if (locatorValue.startsWith('#')) {
+                    description = `element with id "${locatorValue.substring(1)}"`;
+                } else if (locatorValue.startsWith('.')) {
+                    const cls = locatorValue.substring(1);
+                    if (/plus/i.test(cls)) description = `+ icon`;
+                    else if (/minus/i.test(cls)) description = `- icon`;
+                    else if (/cart|shopping-cart|cart-icon/i.test(cls)) description = `cart icon`;
+                    else description = `element with class "${cls}"`;
+                } else if (locatorValue.includes('[name=')) {
+                    const m = locatorValue.match(/\[name=['"]?(.*?)['"]?\]/);
+                    description = m ? `element with name "${m[1]}"` : `locator('${locatorValue}')`;
+                } else {
+                    description = `locator('${locatorValue}')`;
+                }
+            } else {
+                description = `locator`;
             }
+        } else if (locatorType === 'click' || locatorType === 'fill' || locatorType === 'type') {
+            description = `${locatorType}('${locatorValue}')`;
+        } else {
+            description = `${locatorType}('${locatorValue}')`;
+        }
 
-            // Skip if we've already seen this selector
-            if (!seenSelectors.has(selector)) {
-                seenSelectors.add(selector);
+        elements.push({
+            name: elementName,
+            selector: locatorValue,
+            locatorType,
+            locatorValue,
+            nth: nth ?? null,
+            type: (actionHint || 'ELEMENT').toUpperCase(),
+            description,
+        });
+    }
 
-                // Generate element name
-                const elementName = `${actionType}_${counter}`;
-                counter += 1;
+    // Patterns that capture locator strategy, value and optional nth(index)
+    const patterns = [
+        { type: 'getByRole', regex: /page\.getByRole\(['"](\w+)['"]\s*,\s*\{\s*name:\s*['"]([^'\"]+)['"]\s*\}\)(?:\.nth\((\d+)\))?/g },
+        { type: 'getByTitle', regex: /page\.getByTitle\(['"]([^'\"]+)['"]\)(?:\.nth\((\d+)\))?/g },
+        { type: 'getByText', regex: /page\.getByText\(['"]([^'\"]+)['"]\)(?:\.nth\((\d+)\))?/g },
+        { type: 'getByLabel', regex: /page\.getByLabel\(['"]([^'\"]+)['"]\)(?:\.nth\((\d+)\))?/g },
+        { type: 'getByPlaceholder', regex: /page\.getByPlaceholder\(['"]([^'\"]+)['"]\)(?:\.nth\((\d+)\))?/g },
+        { type: 'locator', regex: /page\.locator\(['"]([^'\"]+)['"]\)(?:\.nth\((\d+)\))?/g },
+        { type: 'click', regex: /page\.click\(['"]([^'\"]+)['"]\)(?:\.nth\((\d+)\))?/g },
+        { type: 'fill', regex: /page\.fill\(['"]([^'\"]+)['"]\)(?:\.nth\((\d+)\))?/g },
+        { type: 'type', regex: /page\.type\(['"]([^'\"]+)['"]\)(?:\.nth\((\d+)\))?/g },
+    ];
 
-                elements.push({
-                    name: elementName,
-                    selector,
-                    type: actionType,
-                });
+    patterns.forEach((pat) => {
+        let match;
+        while ((match = pat.regex.exec(code)) !== null) {
+            if (pat.type === 'getByRole') {
+                const role = match[1];
+                const name = match[2];
+                const nth = match[3] ? parseInt(match[3], 10) : null;
+                addElement(`${role}:${name}`, 'getByRole', { role, name }, nth, 'ELEMENT');
+            } else {
+                const value = match[1];
+                const nth = match[2] ? parseInt(match[2], 10) : null;
+
+                // Infer action hint from surrounding code if possible
+                let actionHint = 'ELEMENT';
+                const lookbackIndex = Math.max(0, pat.regex.lastIndex - 200);
+                const snippet = code.slice(lookbackIndex, pat.regex.lastIndex + 200);
+                if (/\.click\(\)/.test(snippet) || pat.type === 'click') actionHint = 'BUTTON';
+                if (/\.fill\(\)/.test(snippet) || pat.type === 'fill') actionHint = 'TEXTBOX';
+                if (/\.type\(\)/.test(snippet) || pat.type === 'type') actionHint = 'TEXTBOX';
+
+                addElement(value, pat.type, value, nth, actionHint);
             }
-
-            match = pattern.exec(code);
         }
     });
 
@@ -260,11 +304,13 @@ const server = http.createServer((req, res) => {
                 // Build the page elements section
                 let elementsSection = '';
                 if (elements.length > 0) {
-                    elementsSection = `\n\n### ${testCaseData.name} Page Elements\n\n\`\`\`typescript\n`;
+                    elementsSection = '\n\n### ' + testCaseData.name + " Page Elements\n\n```typescript\n";
                     elements.forEach((el) => {
-                        elementsSection += `${el.name} = "${el.selector}"\n`;
+                        // Include human-friendly description and locator metadata
+                        const locatorMeta = el.description;
+                        elementsSection += el.name + ' = ' + locatorMeta + ' // locator: ' + el.locatorType + '\n';
                     });
-                    elementsSection += `\`\`\``;
+                    elementsSection += '```';
                 }
                 
                 // Build the test case entry with test scenario
