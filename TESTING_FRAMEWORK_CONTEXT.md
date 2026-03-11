@@ -1203,3 +1203,73 @@ ELEMENT_2 = CONTACT US link // locator: getByRole
 - Browser: Chrome
 - URL: http://advantageonlineshopping.com/
 - Recorded: 11/3/2026, 10:10:58 pm
+
+### TC_03_MyTesting Page Elements
+
+```typescript
+ELEMENT_1 = POPULAR ITEMS link // locator: getByRole
+ELEMENT_2 = CONTACT US link // locator: getByRole
+```
+
+### TC_03_MyTesting Test
+
+**TC_03_MyTesting**: Verifying the page objects is created or not
+- Module: MyTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on POPULAR ITEMS link • Click on CONTACT US link
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 11/3/2026, 10:34:49 pm
+
+### TC_05_MyTesting Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+```
+
+### TC_05_MyTesting Test
+
+**TC_05_MyTesting**: Think the page objects
+- Module: MyTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on CONTACT US link • Select option 'object:62' from element with name "categoryListboxContactUs"
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 11/3/2026, 10:58:50 pm
+
+### TC_06_MyTesting Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+BUTTON_2 = * Subject element // locator: getByText
+```
+
+### TC_06_MyTesting Test
+
+**TC_06_MyTesting**: Double checking
+- Module: MyTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on CONTACT US link • Select option 'object:63' from element with name "categoryListboxContactUs" • Click on element with name "subjectTextareaContactUs" • Click on * Subject element
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 11/3/2026, 11:24:31 pm
+
+### TC_07_MyTesting Page Elements
+
+```typescript
+ELEMENT_1 = POPULAR ITEMS link // locator: getByRole
+ELEMENT_2 = Special-offer link // locator: getByRole
+ELEMENT_3 = View Details link // locator: getByRole
+ELEMENT_4 = HP ELITEPAD 1000 G2 TABLET heading // locator: getByRole
+BUTTON_5 = HP ELITEPAD 1000 G2 TABLET element // locator: getByText
+```
+
+### TC_07_MyTesting Test
+
+**TC_07_MyTesting**: ensure of functionality
+- Module: MyTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on POPULAR ITEMS link • Click on HP ELITEPAD 1000 G2 TABLET element • Click on Special-offer link • Click on View Details link • Click on HP ELITEPAD 1000 G2 TABLET heading
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 11/3/2026, 11:50:54 pm

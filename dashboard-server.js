@@ -232,6 +232,495 @@ ${cleanCode}
     };
 }
 
+// Helper function to parse Playwright code and extract locators
+function parsePlaywrightCode(specFileContent) {
+    const locators = [];
+    const actions = [];
+    let url = '';
+    
+    // Extract URL from goto()
+    const gotoMatch = specFileContent.match(/page\.goto\(['"](.*?)['"]/);
+    if (gotoMatch) {
+        url = gotoMatch[1];
+    }
+    
+    // Pattern for getByRole
+    const getByRoleRegex = /page\.getByRole\(['"](\w+)['"]\s*,\s*\{\s*name:\s*['"]([^'"]+)['"]\s*\}\)/g;
+    let match;
+    while ((match = getByRoleRegex.exec(specFileContent)) !== null) {
+        const role = match[1];
+        const name = match[2];
+        const constantName = name.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_' + role.toUpperCase();
+        const selector = `page.getByRole('${role}', { name: '${name}' })`;
+        
+        if (!locators.some(l => l.constantName === constantName)) {
+            locators.push({
+                constantName,
+                description: `${name} ${role}`,
+                selector: selector,
+                selectorType: 'getByRole'
+            });
+        }
+    }
+    
+    // Pattern for getByText
+    const getByTextRegex = /page\.getByText\(['"]([^'"]+)['"]\)/g;
+    while ((match = getByTextRegex.exec(specFileContent)) !== null) {
+        const text = match[1];
+        const constantName = text.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_TEXT';
+        const selector = `page.getByText('${text}')`;
+        
+        if (!locators.some(l => l.constantName === constantName)) {
+            locators.push({
+                constantName,
+                description: `${text} text`,
+                selector: selector,
+                selectorType: 'getByText'
+            });
+        }
+    }
+    
+    // Pattern for getByLabel
+    const getByLabelRegex = /page\.getByLabel\(['"]([^'"]+)['"]\)/g;
+    while ((match = getByLabelRegex.exec(specFileContent)) !== null) {
+        const label = match[1];
+        const constantName = label.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_FIELD';
+        const selector = `page.getByLabel('${label}')`;
+        
+        if (!locators.some(l => l.constantName === constantName)) {
+            locators.push({
+                constantName,
+                description: `${label} field`,
+                selector: selector,
+                selectorType: 'getByLabel'
+            });
+        }
+    }
+    
+    // Pattern for getByPlaceholder
+    const getByPlaceholderRegex = /page\.getByPlaceholder\(['"]([^'"]+)['"]\)/g;
+    while ((match = getByPlaceholderRegex.exec(specFileContent)) !== null) {
+        const placeholder = match[1];
+        const constantName = placeholder.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_INPUT';
+        const selector = `page.getByPlaceholder('${placeholder}')`;
+        
+        if (!locators.some(l => l.constantName === constantName)) {
+            locators.push({
+                constantName,
+                description: `field with placeholder "${placeholder}"`,
+                selector: selector,
+                selectorType: 'getByPlaceholder'
+            });
+        }
+    }
+    
+    // Pattern for locator() with CSS selectors
+    const locatorRegex = /page\.locator\(['"]([^'"]+)['"]\)/g;
+    while ((match = locatorRegex.exec(specFileContent)) !== null) {
+        const selector = match[1];
+        let constantName = 'ELEMENT';
+        
+        if (selector.startsWith('#')) {
+            constantName = selector.substring(1).replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+        } else if (selector.startsWith('.')) {
+            constantName = selector.substring(1).replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+        } else if (selector.includes('[name=')) {
+            const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+            if (nameMatch) {
+                constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+            }
+        }
+        
+        if (!locators.some(l => l.constantName === constantName)) {
+            locators.push({
+                constantName,
+                description: `element with selector "${selector}"`,
+                selector: `"${selector}"`,
+                selectorType: 'locator'
+            });
+        }
+    }
+    
+    // Extract actions (click, fill, type, etc.)
+    const clickRegex = /\.click\(\)/g;
+    const fillRegex = /\.fill\(['"]([^'"]*)['"]\)/g;
+    const typeRegex = /\.type\(['"]([^'"]*)['"]\)/g;
+    
+    return {
+        url,
+        locators,
+        actions
+    };
+}
+
+// Helper function to update or create Constants file
+function updateOrCreateConstantsFile(moduleName, locators, constantsFilePath) {
+    const addedConstants = [];
+    
+    if (!fs.existsSync(constantsFilePath)) {
+        // Create new file
+        let content = `export default class ${moduleName}Constants {\n`;
+        content += `    static readonly PAGE_TITLE = "${moduleName} Page";\n`;
+        
+        locators.forEach(locator => {
+            content += `    static readonly ${locator.constantName} = "${locator.description}";\n`;
+            addedConstants.push(locator.constantName);
+        });
+        
+        content += `}\n`;
+        fs.writeFileSync(constantsFilePath, content, 'utf8');
+        console.log(`✅ Created ${moduleName}Constants.ts with ${addedConstants.length} constants`);
+    } else {
+        // Update existing file
+        let content = fs.readFileSync(constantsFilePath, 'utf8');
+        
+        // Find the position before the closing brace
+        const lastBraceIndex = content.lastIndexOf('}');
+        
+        locators.forEach(locator => {
+            // Check if constant already exists
+            const constantRegex = new RegExp(`static\\s+readonly\\s+${locator.constantName}\\s*=`, 'i');
+            if (!constantRegex.test(content)) {
+                const newConstant = `    static readonly ${locator.constantName} = "${locator.description}";\n`;
+                content = content.slice(0, lastBraceIndex) + newConstant + content.slice(lastBraceIndex);
+                addedConstants.push(locator.constantName);
+            }
+        });
+        
+        fs.writeFileSync(constantsFilePath, content, 'utf8');
+        if (addedConstants.length > 0) {
+            console.log(`✅ Updated ${moduleName}Constants.ts - Added ${addedConstants.length} constants: ${addedConstants.join(', ')}`);
+        } else {
+            console.log(`ℹ️  ${moduleName}Constants.ts - No new constants to add`);
+        }
+    }
+    
+    return addedConstants;
+}
+
+// Helper function to convert Playwright locator to CSS selector string
+function convertLocatorToCSSSelector(locator) {
+    if (locator.selectorType === 'locator') {
+        // Already a CSS selector, just wrap in quotes
+        return `"${locator.selector.replace(/"/g, "'")}"`;
+    } else if (locator.selectorType === 'getByRole') {
+        // Convert getByRole to CSS selector with text matching
+        if (locator.selector.includes("page.getByRole('link'")) {
+            // Extract the name from the selector
+            const nameMatch = locator.selector.match(/name:\s*'([^']+)'/);
+            if (nameMatch) {
+                return `"a:has-text('${nameMatch[1]}')"`;
+            }
+        } else if (locator.selector.includes("page.getByRole('button'")) {
+            const nameMatch = locator.selector.match(/name:\s*'([^']+)'/);
+            if (nameMatch) {
+                return `"button:has-text('${nameMatch[1]}')"`;
+            }
+        } else if (locator.selector.includes("page.getByRole('heading'")) {
+            const nameMatch = locator.selector.match(/name:\s*'([^']+)'/);
+            if (nameMatch) {
+                return `":is(h1,h2,h3,h4,h5,h6):has-text('${nameMatch[1]}')"`;
+            }
+        } else if (locator.selector.includes("page.getByRole('textbox'")) {
+            const nameMatch = locator.selector.match(/name:\s*'([^']+)'/);
+            if (nameMatch) {
+                return `"input[type='text']:has-text('${nameMatch[1]}'), textarea:has-text('${nameMatch[1]}')"`;
+            }
+        } else if (locator.selector.includes("page.getByRole('checkbox'")) {
+            const nameMatch = locator.selector.match(/name:\s*'([^']+)'/);
+            if (nameMatch) {
+                return `"input[type='checkbox']:has-text('${nameMatch[1]}')"`;
+            }
+        } else if (locator.selector.includes("page.getByRole('radio'")) {
+            const nameMatch = locator.selector.match(/name:\s*'([^']+)'/);
+            if (nameMatch) {
+                return `"input[type='radio']:has-text('${nameMatch[1]}')"`;
+            }
+        }
+        // Generic fallback
+        return `"${locator.selector.replace(/page\.getByRole\(|\)/g, '').replace(/"/g, "'")}"`;
+    } else if (locator.selectorType === 'getByText') {
+        // Convert getByText to text selector
+        const textMatch = locator.selector.match(/page\.getByText\('([^']+)'\)/);
+        if (textMatch) {
+            return `"text='${textMatch[1]}'"`;
+        }
+        return `"${locator.selector}"`;
+    } else if (locator.selectorType === 'getByLabel') {
+        // Convert getByLabel to label selector
+        const labelMatch = locator.selector.match(/page\.getByLabel\('([^']+)'\)/);
+        if (labelMatch) {
+            return `"label:has-text('${labelMatch[1]}')"`;
+        }
+        return `"${locator.selector}"`;
+    } else if (locator.selectorType === 'getByPlaceholder') {
+        // Convert getByPlaceholder to placeholder attribute selector
+        const placeholderMatch = locator.selector.match(/page\.getByPlaceholder\('([^']+)'\)/);
+        if (placeholderMatch) {
+            return `"[placeholder='${placeholderMatch[1]}']"`;
+        }
+        return `"${locator.selector}"`;
+    }
+    // Default fallback
+    return `"${locator.selector}"`;
+}
+
+// Helper function to update or create Page file
+function updateOrCreatePageFile(moduleName, locators, pageFilePath) {
+    const addedLocators = [];
+    
+    if (!fs.existsSync(pageFilePath)) {
+        // Create new file
+        let content = `export default class ${moduleName}Page {\n`;
+        
+        locators.forEach(locator => {
+            const cssSelector = convertLocatorToCSSSelector(locator);
+            content += `    static readonly ${locator.constantName} = ${cssSelector};\n`;
+            addedLocators.push(locator.constantName);
+        });
+        
+        content += `}\n`;
+        fs.writeFileSync(pageFilePath, content, 'utf8');
+        console.log(`✅ Created ${moduleName}Page.ts with ${addedLocators.length} locators`);
+    } else {
+        // Update existing file
+        let content = fs.readFileSync(pageFilePath, 'utf8');
+        
+        // Find the position before the closing brace
+        const lastBraceIndex = content.lastIndexOf('}');
+        
+        locators.forEach(locator => {
+            // Check if locator already exists
+            const locatorRegex = new RegExp(`static\\s+readonly\\s+${locator.constantName}\\s*=`, 'i');
+            if (!locatorRegex.test(content)) {
+                const cssSelector = convertLocatorToCSSSelector(locator);
+                const newLocator = `    static readonly ${locator.constantName} = ${cssSelector};\n`;
+                content = content.slice(0, lastBraceIndex) + newLocator + content.slice(lastBraceIndex);
+                addedLocators.push(locator.constantName);
+            }
+        });
+        
+        fs.writeFileSync(pageFilePath, content, 'utf8');
+        if (addedLocators.length > 0) {
+            console.log(`✅ Updated ${moduleName}Page.ts - Added ${addedLocators.length} locators: ${addedLocators.join(', ')}`);
+        } else {
+            console.log(`ℹ️  ${moduleName}Page.ts - No new locators to add`);
+        }
+    }
+    
+    return addedLocators;
+}
+
+// Helper function to generate method name from constant name
+function generateMethodName(constantName, action = 'click') {
+    const lowerName = constantName.toLowerCase().replace(/_/g, '');
+    const actionVerb = action === 'fill' ? 'fill' : action === 'type' ? 'enter' : 'click';
+    return actionVerb + lowerName.charAt(0).toUpperCase() + lowerName.slice(1);
+}
+
+// Helper function to update or create Steps file
+function updateOrCreateStepsFile(moduleName, locators, url, stepsFilePath) {
+    const addedMethods = [];
+    
+    if (!fs.existsSync(stepsFilePath)) {
+        // Create new file
+        let content = `import test, { Page } from "@playwright/test";
+import UIActions from "@uiActions/UIActions";
+import Assert from "@asserts/Assert";
+import CommonConstants from "@uiConstants/CommonConstants";
+import ${moduleName}Constants from "@uiConstants/${moduleName}Constants";
+import ${moduleName}Page from "@pages/${moduleName}Page";
+
+export default class ${moduleName}Steps {    
+    private ui: UIActions;
+
+    constructor(private page: Page) {
+        this.ui = new UIActions(page);
+    }
+
+    /**
+     * Launch the ${moduleName} page
+     */
+    public async launchPage() {
+        await test.step(\`Launching ${moduleName} page\`, async () => {
+            await this.ui.goto("${url || '${process.env.BASE_URL}'}", ${moduleName}Constants.PAGE_TITLE);
+        });
+    }
+`;
+        
+        // Add methods for each locator
+        locators.forEach(locator => {
+            const methodName = generateMethodName(locator.constantName);
+            content += `
+    /**
+     * Click on ${locator.description}
+     */
+    public async ${methodName}() {
+        await test.step(\`Click on ${locator.description}\`, async () => {
+            await this.ui.element(${moduleName}Page.${locator.constantName}, ${moduleName}Constants.${locator.constantName}).click();
+        });
+    }
+`;
+            addedMethods.push(methodName);
+        });
+        
+        content += `}\n`;
+        fs.writeFileSync(stepsFilePath, content, 'utf8');
+        console.log(`✅ Created ${moduleName}Steps.ts with ${addedMethods.length} methods`);
+    } else {
+        // Update existing file
+        let content = fs.readFileSync(stepsFilePath, 'utf8');
+        
+        // Find the position before the closing brace
+        const lastBraceIndex = content.lastIndexOf('}');
+        
+        // Add launchPage method if it doesn't exist
+        if (!/public\s+async\s+launchPage\s*\(\s*\)/i.test(content)) {
+            const launchPageMethod = `
+    /**
+     * Launch the ${moduleName} page
+     */
+    public async launchPage() {
+        await test.step(\`Launching ${moduleName} page\`, async () => {
+            await this.ui.goto("${url || '${process.env.BASE_URL}'}", ${moduleName}Constants.PAGE_TITLE);
+        });
+    }
+`;
+            content = content.slice(0, lastBraceIndex) + launchPageMethod + content.slice(lastBraceIndex);
+            addedMethods.push('launchPage');
+        }
+        
+        // Add methods for each locator
+        locators.forEach(locator => {
+            const methodName = generateMethodName(locator.constantName);
+            const methodRegex = new RegExp(`public\\s+async\\s+${methodName}\\s*\\(`, 'i');
+            
+            if (!methodRegex.test(content)) {
+                const newMethod = `
+    /**
+     * Click on ${locator.description}
+     */
+    public async ${methodName}() {
+        await test.step(\`Click on ${locator.description}\`, async () => {
+            await this.ui.element(${moduleName}Page.${locator.constantName}, ${moduleName}Constants.${locator.constantName}).click();
+        });
+    }
+`;
+                // Insert before closing brace
+                const insertPosition = content.lastIndexOf('}');
+                content = content.slice(0, insertPosition) + newMethod + content.slice(insertPosition);
+                addedMethods.push(methodName);
+            }
+        });
+        
+        fs.writeFileSync(stepsFilePath, content, 'utf8');
+        if (addedMethods.length > 0) {
+            console.log(`✅ Updated ${moduleName}Steps.ts - Added ${addedMethods.length} methods: ${addedMethods.join(', ')}`);
+        } else {
+            console.log(`ℹ️  ${moduleName}Steps.ts - No new methods to add`);
+        }
+    }
+    
+    return addedMethods;
+}
+
+// Helper function to create Page Object files
+function createPageObjectFiles(specFileName, specFilePath) {
+    try {
+        console.log('\n🏗️  STEP 2: Generating Page Object Model Implementation');
+        
+        // Extract module name from spec file (e.g., "MyTesting.spec.ts" -> "MyTesting")
+        const moduleName = specFileName.replace('.spec.ts', '');
+        
+        // Read the spec file content
+        const specFileContent = fs.readFileSync(specFilePath, 'utf8');
+        
+        // Parse the spec file to extract locators
+        const parsedData = parsePlaywrightCode(specFileContent);
+        
+        console.log(`📊 Parsed ${parsedData.locators.length} unique locators from spec file`);
+        
+        // Define paths for the three Page Object files
+        const constantsDir = path.join(process.cwd(), 'src', 'advantage', 'constants');
+        const pagesDir = path.join(process.cwd(), 'src', 'advantage', 'pages');
+        const stepsDir = path.join(process.cwd(), 'src', 'advantage', 'steps');
+        
+        // Ensure directories exist
+        [constantsDir, pagesDir, stepsDir].forEach(dir => {
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+        });
+        
+        // Define file paths
+        const constantsFile = path.join(constantsDir, `${moduleName}Constants.ts`);
+        const pageFile = path.join(pagesDir, `${moduleName}Page.ts`);
+        const stepsFile = path.join(stepsDir, `${moduleName}Steps.ts`);
+        
+        const result = {
+            success: true,
+            createdFiles: [],
+            updatedFiles: [],
+            moduleName: moduleName,
+            addedConstants: [],
+            addedLocators: [],
+            addedMethods: []
+        };
+        
+        // Process Constants file
+        const addedConstants = updateOrCreateConstantsFile(moduleName, parsedData.locators, constantsFile);
+        if (!fs.existsSync(constantsFile) || addedConstants.length > 0) {
+            if (fs.existsSync(constantsFile)) {
+                result.updatedFiles.push(`${moduleName}Constants.ts`);
+            } else {
+                result.createdFiles.push(`${moduleName}Constants.ts`);
+            }
+        }
+        result.addedConstants = addedConstants;
+        
+        // Process Page file
+        const addedLocators = updateOrCreatePageFile(moduleName, parsedData.locators, pageFile);
+        if (!fs.existsSync(pageFile) || addedLocators.length > 0) {
+            if (fs.existsSync(pageFile)) {
+                result.updatedFiles.push(`${moduleName}Page.ts`);
+            } else {
+                result.createdFiles.push(`${moduleName}Page.ts`);
+            }
+        }
+        result.addedLocators = addedLocators;
+        
+        // Process Steps file
+        const addedMethods = updateOrCreateStepsFile(moduleName, parsedData.locators, parsedData.url, stepsFile);
+        if (!fs.existsSync(stepsFile) || addedMethods.length > 0) {
+            if (fs.existsSync(stepsFile)) {
+                result.updatedFiles.push(`${moduleName}Steps.ts`);
+            } else {
+                result.createdFiles.push(`${moduleName}Steps.ts`);
+            }
+        }
+        result.addedMethods = addedMethods;
+        
+        // Summary logging
+        console.log('\n✅ Page Object Model Generation Complete:');
+        if (result.createdFiles.length > 0) {
+            console.log(`   📝 Created: ${result.createdFiles.join(', ')}`);
+        }
+        if (result.updatedFiles.length > 0) {
+            console.log(`   🔄 Updated: ${result.updatedFiles.join(', ')}`);
+        }
+        console.log(`   📊 Total: ${parsedData.locators.length} locators | ${addedConstants.length} constants | ${addedLocators.length} page elements | ${addedMethods.length} methods\n`);
+        
+        return result;
+    } catch (error) {
+        console.error(`❌ Error creating Page Object files: ${error.message}`);
+        console.error(error.stack);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
 const server = http.createServer((req, res) => {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -477,6 +966,16 @@ const server = http.createServer((req, res) => {
                 console.log(`✅ Test case saved to TESTING_FRAMEWORK_CONTEXT.md (${elements.length} elements extracted)`);
                 console.log(`✅ Test file ${fileResult.isNewFile ? 'created' : 'updated'}: ${fileResult.testFilePath}`);
                 
+                // Create Page Object files after spec file is created/updated
+                const pageObjectResult = createPageObjectFiles(fileResult.testFileName, fileResult.testFilePath);
+                
+                if (pageObjectResult.success) {
+                    const allFiles = [...(pageObjectResult.createdFiles || []), ...(pageObjectResult.updatedFiles || [])];
+                    if (allFiles.length > 0) {
+                        console.log(`✅ Page Object files created/updated: ${allFiles.join(', ')}`);
+                    }
+                }
+                
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({
                     success: true,
@@ -484,6 +983,15 @@ const server = http.createServer((req, res) => {
                     testFilePath: fileResult.testFilePath,
                     testFileName: fileResult.testFileName,
                     isNewFile: fileResult.isNewFile,
+                    pageObjectFiles: [...(pageObjectResult.createdFiles || []), ...(pageObjectResult.updatedFiles || [])],
+                    pageObjectModuleName: pageObjectResult.moduleName || null,
+                    pageObjectDetails: {
+                        created: pageObjectResult.createdFiles || [],
+                        updated: pageObjectResult.updatedFiles || [],
+                        addedConstants: pageObjectResult.addedConstants || [],
+                        addedLocators: pageObjectResult.addedLocators || [],
+                        addedMethods: pageObjectResult.addedMethods || []
+                    },
                 }));
             } catch (error) {
                 console.error(`Error saving test case: ${error.message}`);

@@ -3146,6 +3146,15 @@
                                     <div><b>URL:</b> ${recordingSession.url}</div>
                                     <div><b>Steps:</b> ${steps}</div>
                                     <div><b>Saved to:</b> TESTING_FRAMEWORK_CONTEXT.md & src/tests/${result.testFileName}</div>
+                                    ${result.pageObjectDetails ? `
+                                    <div style="margin-top: 8px; padding: 10px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px;">
+                                        <b>🎨 Page Object Model:</b>
+                                        ${result.pageObjectDetails.created.length > 0 ? `<br>✨ <b>Created:</b> ${result.pageObjectDetails.created.join(', ')}` : ''}
+                                        ${result.pageObjectDetails.updated.length > 0 ? `<br>🔄 <b>Updated:</b> ${result.pageObjectDetails.updated.join(', ')}` : ''}
+                                        ${result.pageObjectDetails.addedLocators.length > 0 ? `<br>📍 <b>Locators added:</b> ${result.pageObjectDetails.addedLocators.length}` : ''}
+                                        ${result.pageObjectDetails.addedMethods.length > 0 ? `<br>⚙️ <b>Methods added:</b> ${result.pageObjectDetails.addedMethods.length}` : ''}
+                                    </div>
+                                    ` : ''}
                                     <div style="margin-top: 8px; padding: 12px; background: #f0f9ff; border-radius: 6px; color: #0369a1;">
                                         ✅ <b>Test case saved successfully!</b><br>
                                         ➕ Added to <b>${moduleName}</b> in Test Scenarios page<br>
@@ -3161,7 +3170,7 @@
                     // Scroll to results
                     resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     
-                    addBotMessage(`✅ <b>Test case saved successfully!</b>\n\n<b>${testCaseName}</b>: ${description}\n\nYour test case has been added to:\n📁 Module: <b>${moduleName}</b> in Test Scenarios page\n📊 Type: ${testCaseType}\n📝 Test file ${result.isNewFile ? 'created' : 'updated'}: <code>src/tests/${result.testFileName}</code>\n📄 Documentation: TESTING_FRAMEWORK_CONTEXT.md\n🎯 Page Elements extracted from code\n🌐 Browser: ${recordingSession.browserName}\n🔗 URL: ${recordingSession.url}\n\n➡️ Navigate to <b>Test Scenarios</b> page to view your test!`);
+                    addBotMessage(`✅ <b>Test case saved successfully!</b>\n\n<b>${testCaseName}</b>: ${description}\n\nYour test case has been added to:\n📁 Module: <b>${moduleName}</b> in Test Scenarios page\n📊 Type: ${testCaseType}\n📝 Test file ${result.isNewFile ? 'created' : 'updated'}: <code>src/tests/${result.testFileName}</code>\n📄 Documentation: TESTING_FRAMEWORK_CONTEXT.md\n🎯 Page Elements extracted from code\n🌐 Browser: ${recordingSession.browserName}\n🔗 URL: ${recordingSession.url}${result.pageObjectDetails ? `\n\n<b>🎨 Page Object Model Generated:</b>${result.pageObjectDetails.created.length > 0 ? `\n✨ Created: ${result.pageObjectDetails.created.join(', ')}` : ''}${result.pageObjectDetails.updated.length > 0 ? `\n🔄 Updated: ${result.pageObjectDetails.updated.join(', ')}` : ''}${result.pageObjectDetails.addedLocators.length > 0 ? `\n📍 Locators: ${result.pageObjectDetails.addedLocators.length} added` : ''}${result.pageObjectDetails.addedMethods.length > 0 ? `\n⚙️ Methods: ${result.pageObjectDetails.addedMethods.length} added` : ''}` : ''}\n\n➡️ Navigate to <b>Test Scenarios</b> page to view your test!`);
                     
                     // Close modal and reset recording session
                     closeTestCaseModal();
