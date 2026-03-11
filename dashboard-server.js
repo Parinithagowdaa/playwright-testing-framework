@@ -111,6 +111,127 @@ function extractElementsFromCode(code) {
     return elements;
 }
 
+// Helper function to remove duplicate imports from spec file content
+function removeDuplicateImports(content) {
+    const lines = content.split('\n');
+    const imports = new Set();
+    const importLines = [];
+    const nonImportLines = [];
+    let inImportSection = true;
+    
+    for (const line of lines) {
+        const trimmedLine = line.trim();
+        
+        // Check if line is an import statement
+        if (trimmedLine.startsWith('import ') && trimmedLine.includes('from')) {
+            // Normalize the import statement for comparison
+            const normalizedImport = trimmedLine.replace(/\s+/g, ' ');
+            if (!imports.has(normalizedImport)) {
+                imports.add(normalizedImport);
+                importLines.push(line);
+            }
+            // Skip duplicate imports
+        } else {
+            // Once we hit non-import content, mark that we're past imports
+            if (trimmedLine.length > 0 && !trimmedLine.startsWith('//') && !trimmedLine.startsWith('/*') && !trimmedLine.startsWith('*')) {
+                inImportSection = false;
+            }
+            nonImportLines.push(line);
+        }
+    }
+    
+    // Combine: imports at top, then rest of content
+    return [...importLines, '', ...nonImportLines].join('\n');
+}
+
+// Helper function to extract and remove imports from playwright code
+function extractAndRemoveImports(playwrightCode) {
+    const lines = playwrightCode.split('\n');
+    const imports = [];
+    const codeWithoutImports = [];
+    
+    for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith('import ') && trimmedLine.includes('from')) {
+            imports.push(trimmedLine);
+        } else {
+            codeWithoutImports.push(line);
+        }
+    }
+    
+    return {
+        imports: imports,
+        code: codeWithoutImports.join('\n').trim()
+    };
+}
+
+// Helper function to create or update spec file
+function createOrUpdateSpecFile(testCaseData, moduleName, testCaseType, testsDir) {
+    const specFile = testCaseData.specFile;
+    let testFileName, testFilePath, isNewFile;
+    
+    // Determine the file name and path
+    if (specFile && specFile.trim() !== '') {
+        // Use existing selected file
+        testFileName = specFile;
+        testFilePath = path.join(testsDir, testFileName);
+        isNewFile = false;
+    } else {
+        // Create new file based on module name
+        testFileName = moduleName.replace(/\s+/g, '') + '.spec.ts';
+        testFilePath = path.join(testsDir, testFileName);
+        isNewFile = !fs.existsSync(testFilePath);
+    }
+    
+    // Extract imports from playwright code and get clean code
+    const { imports: extractedImports, code: cleanCode } = extractAndRemoveImports(testCaseData.playwrightCode);
+    
+    // Build the test case content WITHOUT imports
+    const testCaseContent = `
+/**
+ * Test Case: ${testCaseData.name}
+ * Description: ${testCaseData.description}
+ * Module: ${moduleName}
+ * Type: ${testCaseType}
+ * Browser: ${testCaseData.browser}
+ * URL: ${testCaseData.url}
+ * Generated: ${new Date(testCaseData.timestamp).toLocaleString()}
+ */
+
+${cleanCode}
+`;
+
+    let finalContent;
+    
+    if (isNewFile) {
+        // Create new file - collect all imports
+        const allImports = new Set(['import { test, expect } from \'@playwright/test\';']);
+        extractedImports.forEach(imp => allImports.add(imp));
+        
+        const importSection = Array.from(allImports).join('\n');
+        finalContent = `${importSection}\n${testCaseContent}`;
+    } else {
+        // Append to existing file
+        const existingContent = fs.readFileSync(testFilePath, 'utf8');
+        
+        // Add extracted imports to the content (will be deduplicated later)
+        const importsSection = extractedImports.length > 0 ? extractedImports.join('\n') + '\n' : '';
+        const combinedContent = importsSection + existingContent + '\n' + testCaseContent;
+        
+        // Remove duplicate imports and organize
+        finalContent = removeDuplicateImports(combinedContent);
+    }
+    
+    // Write the file
+    fs.writeFileSync(testFilePath, finalContent, 'utf8');
+    
+    return {
+        testFileName: testFileName,
+        testFilePath: testFilePath,
+        isNewFile: isNewFile
+    };
+}
+
 const server = http.createServer((req, res) => {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -315,7 +436,8 @@ const server = http.createServer((req, res) => {
                 
                 // Build the test case entry with test scenario
                 const testCaseType = testCaseData.testCaseType || 'UI';
-                const testCaseEntry = `${elementsSection}\n\n### ${testCaseData.name} Test\n\n**${testCaseData.name}**: ${testCaseData.description}\n- Type: ${testCaseType}\n- ${testCaseData.steps}\n- Browser: ${testCaseData.browser}\n- URL: ${testCaseData.url}\n- Recorded: ${new Date(testCaseData.timestamp).toLocaleString()}`;
+                const moduleName = testCaseData.moduleName || 'General Tests';
+                const testCaseEntry = `${elementsSection}\n\n### ${testCaseData.name} Test\n\n**${testCaseData.name}**: ${testCaseData.description}\n- Module: ${moduleName}\n- Type: ${testCaseType}\n- ${testCaseData.steps}\n- Browser: ${testCaseData.browser}\n- URL: ${testCaseData.url}\n- Recorded: ${new Date(testCaseData.timestamp).toLocaleString()}`;
 
                 // Find the Contact Us test section and add after it
                 const contactUsTestIndex = content.indexOf('### Contact Us Tests');
@@ -344,43 +466,24 @@ const server = http.createServer((req, res) => {
                 // Write back to file
                 fs.writeFileSync(projectContextPath, content, 'utf8');
 
-                // Create actual test file in src/tests/
+                // Create or update spec file using helper function
                 const testsDir = path.join(process.cwd(), 'src', 'tests');
                 if (!fs.existsSync(testsDir)) {
                     fs.mkdirSync(testsDir, { recursive: true });
                 }
 
-                // Generate test file name from test case name
-                const testFileName = testCaseData.name.replace(/\s+/g, '') + '.spec.ts';
-                const testFilePath = path.join(testsDir, testFileName);
-
-                // Create test file content
-                const testFileContent = `import { test, expect } from '@playwright/test';
-
-/**
- * Test Case: ${testCaseData.name}
- * Description: ${testCaseData.description}
- * Type: ${testCaseType}
- * Browser: ${testCaseData.browser}
- * URL: ${testCaseData.url}
- * Generated: ${new Date(testCaseData.timestamp).toLocaleString()}
- */
-
-${testCaseData.playwrightCode}
-`;
-
-                // Write test file
-                fs.writeFileSync(testFilePath, testFileContent, 'utf8');
+                const fileResult = createOrUpdateSpecFile(testCaseData, moduleName, testCaseType, testsDir);
 
                 console.log(`✅ Test case saved to TESTING_FRAMEWORK_CONTEXT.md (${elements.length} elements extracted)`);
-                console.log(`✅ Test file created: ${testFilePath}`);
+                console.log(`✅ Test file ${fileResult.isNewFile ? 'created' : 'updated'}: ${fileResult.testFilePath}`);
                 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({
                     success: true,
                     message: `Test case saved successfully with ${elements.length} page elements`,
-                    testFilePath: testFilePath,
-                    testFileName: testFileName,
+                    testFilePath: fileResult.testFilePath,
+                    testFileName: fileResult.testFileName,
+                    isNewFile: fileResult.isNewFile,
                 }));
             } catch (error) {
                 console.error(`Error saving test case: ${error.message}`);
@@ -424,6 +527,28 @@ ${testCaseData.playwrightCode}
             console.error('Error loading saved tests:', error);
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: false, tests: [] }));
+        }
+    } else if (req.url === '/get-spec-files' && req.method === 'GET') {
+        // Get list of existing spec files in src/tests directory
+        try {
+            const testsDir = path.join(process.cwd(), 'src', 'tests');
+            
+            if (!fs.existsSync(testsDir)) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, files: [] }));
+                return;
+            }
+            
+            const files = fs.readdirSync(testsDir)
+                .filter(file => file.endsWith('.spec.ts'))
+                .sort();
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, files: files }));
+        } catch (error) {
+            console.error('Error loading spec files:', error);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, files: [] }));
         }
     } else if (req.url === '/' || req.url === '/index.html') {
         // Serve the dashboard.html file

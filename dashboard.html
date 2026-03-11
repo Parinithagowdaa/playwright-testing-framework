@@ -2772,8 +2772,35 @@
             }
             pollForCodegen();
 
+            // Load existing spec files into dropdown
+            loadSpecFiles();
+
             // Show modal
             document.getElementById('testCaseModal').classList.add('show');
+        }
+
+        // Load existing spec files for dropdown
+        async function loadSpecFiles() {
+            try {
+                const response = await fetch('http://localhost:3456/get-spec-files');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const dropdown = document.getElementById('specFileSelect');
+                    // Clear existing options except the first one
+                    dropdown.innerHTML = '<option value="">-- Create New Spec File --</option>';
+                    
+                    // Add existing files
+                    result.files.forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file;
+                        option.textContent = file;
+                        dropdown.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading spec files:', error);
+            }
         }
 
         // Extract test steps from Playwright code
@@ -3023,8 +3050,11 @@
         function closeTestCaseModal() {
             document.getElementById('testCaseModal').classList.remove('show');
             // Reset form
+            document.getElementById('moduleName').value = '';
             document.getElementById('testCaseName').value = '';
             document.getElementById('testCaseDescription').value = '';
+            document.getElementById('testCaseType').value = '';
+            document.getElementById('specFileSelect').value = '';
             document.getElementById('testCaseSteps').value = '';
             document.getElementById('playwrightCode').value = '';
         }
@@ -3033,11 +3063,19 @@
         async function saveTestCase(event) {
             event.preventDefault();
             
+            const moduleName = document.getElementById('moduleName').value.trim();
             const testCaseName = document.getElementById('testCaseName').value.trim();
             const description = document.getElementById('testCaseDescription').value.trim();
             const testCaseType = document.getElementById('testCaseType').value.trim();
+            const specFile = document.getElementById('specFileSelect').value.trim();
             const stepsText = document.getElementById('testCaseSteps').value.trim();
             const playwrightCode = document.getElementById('playwrightCode').value.trim();
+            
+            // Validate mandatory fields
+            if (!moduleName || !testCaseName || !description || !testCaseType) {
+                showToast('❌ Please fill in all mandatory fields!');
+                return;
+            }
             
             // Convert steps to arrow format
             const steps = stepsText.split('\n')
@@ -3046,9 +3084,11 @@
                 .join(' • ');
             
             const testCaseData = {
+                moduleName: moduleName,
                 name: testCaseName,
                 description: description,
                 testCaseType: testCaseType,
+                specFile: specFile,
                 steps: steps,
                 playwrightCode: playwrightCode,
                 browser: recordingSession.browserName,
@@ -3071,13 +3111,6 @@
                     showToast('✅ Test case saved to TESTING_FRAMEWORK_CONTEXT.md!');
                     
                     // Add test to testScenariosData dynamically
-                    const moduleName = testCaseType === 'UI' ? 'UI Test Scenarios' :
-                                     testCaseType === 'Functional' ? 'Functional Test Scenarios' :
-                                     testCaseType === 'Integration' ? 'Integration Test Scenarios' :
-                                     testCaseType === 'System' ? 'System Test Scenarios' :
-                                     testCaseType === 'Database' ? 'Database Test Scenarios' :
-                                     'UI Test Scenarios';
-                    
                     const newTestCase = {
                         id: testCaseName.replace(/\s+/g, '_').toUpperCase(),
                         name: testCaseName,
@@ -3116,7 +3149,7 @@
                                     <div style="margin-top: 8px; padding: 12px; background: #f0f9ff; border-radius: 6px; color: #0369a1;">
                                         ✅ <b>Test case saved successfully!</b><br>
                                         ➕ Added to <b>${moduleName}</b> in Test Scenarios page<br>
-                                        📁 Test file created: <code>${result.testFileName}</code>
+                                        📁 Test file ${result.isNewFile ? 'created' : 'updated'}: <code>${result.testFileName}</code>
                                     </div>
                                 </div>
                             </div>
@@ -3128,7 +3161,7 @@
                     // Scroll to results
                     resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     
-                    addBotMessage(`✅ <b>Test case saved successfully!</b>\n\n<b>${testCaseName}</b>: ${description}\n\nYour test case has been added to:\n� Module: <b>${moduleName}</b> in Test Scenarios page\n� Type: ${testCaseType}\n� Test file: <code>src/tests/${result.testFileName}</code>\n� Documentation: TESTING_FRAMEWORK_CONTEXT.md\n� Page Elements extracted from code\n� Browser: ${recordingSession.browserName}\n� URL: ${recordingSession.url}\n\n➡️ Navigate to <b>Test Scenarios</b> page to view your test!`);
+                    addBotMessage(`✅ <b>Test case saved successfully!</b>\n\n<b>${testCaseName}</b>: ${description}\n\nYour test case has been added to:\n📁 Module: <b>${moduleName}</b> in Test Scenarios page\n📊 Type: ${testCaseType}\n📝 Test file ${result.isNewFile ? 'created' : 'updated'}: <code>src/tests/${result.testFileName}</code>\n📄 Documentation: TESTING_FRAMEWORK_CONTEXT.md\n🎯 Page Elements extracted from code\n🌐 Browser: ${recordingSession.browserName}\n🔗 URL: ${recordingSession.url}\n\n➡️ Navigate to <b>Test Scenarios</b> page to view your test!`);
                     
                     // Close modal and reset recording session
                     closeTestCaseModal();
@@ -4508,7 +4541,12 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
             </div>
             <form onsubmit="saveTestCase(event)">
                 <div class="form-group">
-                    <label>📝 Test Case Name:</label>
+                    <label>� Module Name:</label>
+                    <input type="text" id="moduleName" placeholder="e.g., Login Module" required>
+                    <small style="color: #64748b; display: block; margin-top: 4px;">Enter the module/feature name for this test case</small>
+                </div>
+                <div class="form-group">
+                    <label>�📝 Test Case Name:</label>
                     <input type="text" id="testCaseName" placeholder="e.g., TC01_ValidLogin" required>
                     <small style="color: #64748b; display: block; margin-top: 4px;">Use format: TC##_TestName</small>
                 </div>
@@ -4528,7 +4566,14 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
                     <small style="color: #64748b; display: block; margin-top: 4px;">Select the category of this test case</small>
                 </div>
                 <div class="form-group">
-                    <label>📋 Paste Generated Playwright Code:</label>
+                    <label>� Spec File (Optional):</label>
+                    <select id="specFileSelect" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                        <option value="">-- Create New Spec File --</option>
+                    </select>
+                    <small style="color: #64748b; display: block; margin-top: 4px;">Select an existing file to append, or leave blank to create a new file based on Module Name</small>
+                </div>
+                <div class="form-group">
+                    <label>�📋 Paste Generated Playwright Code:</label>
                     <textarea id="playwrightCode" placeholder="Paste the code from Playwright Inspector here..." required style="font-family: 'Courier New', monospace; min-height: 200px;" oninput="extractTestSteps()"></textarea>
                     <small style="color: #64748b; display: block; margin-top: 4px;">Copy the generated code from Playwright Inspector - Test Steps will auto-generate below!</small>
                 </div>

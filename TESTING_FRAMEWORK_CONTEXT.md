@@ -1154,3 +1154,52 @@ BUTTON_6 = + icon // locator: locator
 - Browser: Chrome
 - URL: http://advantageonlineshopping.com/
 - Recorded: 2/18/2026, 4:38:34 PM
+
+### TC_01_MyTesting Page Elements
+
+```typescript
+ELEMENT_1 = POPULAR ITEMS link // locator: getByRole
+```
+
+### TC_01_MyTesting Test
+
+**TC_01_MyTesting**: Verify the first testing
+- Module: MyTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on POPULAR ITEMS link • Click on POPULAR ITEMS link
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 11/3/2026, 9:59:27 pm
+
+### TC_02_MyTesting Page Elements
+
+```typescript
+ELEMENT_1 = POPULAR ITEMS link // locator: getByRole
+```
+
+### TC_02_MyTesting Test
+
+**TC_02_MyTesting**: Testing the second scenario
+- Module: MyTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on POPULAR ITEMS link
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 11/3/2026, 10:08:50 pm
+
+### TC_01_SecondModule Page Elements
+
+```typescript
+ELEMENT_1 = POPULAR ITEMS link // locator: getByRole
+ELEMENT_2 = CONTACT US link // locator: getByRole
+```
+
+### TC_01_SecondModule Test
+
+**TC_01_SecondModule**: Testing the second module
+- Module: SecondModule
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on POPULAR ITEMS link • Click on CONTACT US link
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 11/3/2026, 10:10:58 pm
