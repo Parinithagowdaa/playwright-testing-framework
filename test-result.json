@@ -1,0 +1,215 @@
+﻿{
+  "config": {
+    "configFile": "D:\\Framework\\playwright-testing-framework\\playwright.config.ts",
+    "rootDir": "D:/Framework/playwright-testing-framework/src/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "failures-only",
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": null,
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "D:/Framework/playwright-testing-framework/test-results/failure",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "local",
+        "name": "local",
+        "testDir": "D:/Framework/playwright-testing-framework/src/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "*debug*"
+        ],
+        "timeout": 1200000
+      },
+      {
+        "outputDir": "D:/Framework/playwright-testing-framework/test-results/failure",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "suite",
+        "name": "suite",
+        "testDir": "D:/Framework/playwright-testing-framework/src/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/\\.*(test|spec)\\.ts$/"
+        ],
+        "timeout": 1200000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.55.1",
+    "workers": 3,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "Confirm.spec.ts",
+      "file": "Confirm.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "TC_01_Confirm - Checking the first scenario confirmation",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 1200000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "suite",
+              "projectName": "suite",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 65523,
+                  "error": {
+                    "message": "TimeoutError: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('role=navigation').first() to be visible\u001b[22m\n\u001b[2m    115 ├ù locator resolved to hidden <nav>ΓÇª</nav>\u001b[22m\n",
+                    "stack": "TimeoutError: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('role=navigation').first() to be visible\u001b[22m\n\u001b[2m    115 ├ù locator resolved to hidden <nav>ΓÇª</nav>\u001b[22m\n\n    at D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts:164:21\n    at UIElementActions.getTextContent (D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts:162:16)\n    at D:\\Framework\\playwright-testing-framework\\src\\advantage\\steps\\ConfirmSteps.ts:40:50\n    at ConfirmSteps.validateNavigation (D:\\Framework\\playwright-testing-framework\\src\\advantage\\steps\\ConfirmSteps.ts:37:20)\n    at D:\\Framework\\playwright-testing-framework\\src\\tests\\Confirm.spec.ts:22:19",
+                    "location": {
+                      "file": "D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts",
+                      "column": 21,
+                      "line": 164
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\framework\\playwright\\actions\\UIElementActions.ts:164\n\n\u001b[0m \u001b[90m 162 |\u001b[39m     \u001b[36mawait\u001b[39m test\u001b[33m.\u001b[39mstep(\u001b[32m`Getting text content of ${this.description}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n \u001b[90m 163 |\u001b[39m       \u001b[36mconst\u001b[39m element \u001b[33m=\u001b[39m \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mgetLocator()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 164 |\u001b[39m       \u001b[36mawait\u001b[39m element\u001b[33m.\u001b[39mwaitFor()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 165 |\u001b[39m       content \u001b[33m=\u001b[39m (\u001b[36mawait\u001b[39m element\u001b[33m.\u001b[39mtextContent())\u001b[33m.\u001b[39mtrim()\u001b[33m;\u001b[39m\n \u001b[90m 166 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 167 |\u001b[39m     \u001b[36mreturn\u001b[39m content\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts",
+                        "column": 21,
+                        "line": 164
+                      },
+                      "message": "TimeoutError: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('role=navigation').first() to be visible\u001b[22m\n\u001b[2m    115 ├ù locator resolved to hidden <nav>ΓÇª</nav>\u001b[22m\n\n\n   at ..\\framework\\playwright\\actions\\UIElementActions.ts:164\n\n  162 |     await test.step(`Getting text content of ${this.description}`, async () => {\n  163 |       const element = this.getLocator();\n> 164 |       await element.waitFor();\n      |                     ^\n  165 |       content = (await element.textContent()).trim();\n  166 |     });\n  167 |     return content;\n    at D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts:164:21\n    at UIElementActions.getTextContent (D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts:162:16)\n    at D:\\Framework\\playwright-testing-framework\\src\\advantage\\steps\\ConfirmSteps.ts:40:50\n    at ConfirmSteps.validateNavigation (D:\\Framework\\playwright-testing-framework\\src\\advantage\\steps\\ConfirmSteps.ts:37:20)\n    at D:\\Framework\\playwright-testing-framework\\src\\tests\\Confirm.spec.ts:22:19"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Launching Confirm page",
+                      "duration": 2531,
+                      "steps": [
+                        {
+                          "title": "Navigate to Confirm Page",
+                          "duration": 2527
+                        }
+                      ]
+                    },
+                    {
+                      "title": "Validate navigation element contains: CONTACT US",
+                      "duration": 60032,
+                      "error": {
+                        "message": "TimeoutError: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('role=navigation').first() to be visible\u001b[22m\n\u001b[2m    115 ├ù locator resolved to hidden <nav>ΓÇª</nav>\u001b[22m\n",
+                        "stack": "TimeoutError: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('role=navigation').first() to be visible\u001b[22m\n\u001b[2m    115 ├ù locator resolved to hidden <nav>ΓÇª</nav>\u001b[22m\n\n    at D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts:164:21\n    at UIElementActions.getTextContent (D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts:162:16)\n    at D:\\Framework\\playwright-testing-framework\\src\\advantage\\steps\\ConfirmSteps.ts:40:50\n    at ConfirmSteps.validateNavigation (D:\\Framework\\playwright-testing-framework\\src\\advantage\\steps\\ConfirmSteps.ts:37:20)\n    at D:\\Framework\\playwright-testing-framework\\src\\tests\\Confirm.spec.ts:22:19",
+                        "location": {
+                          "file": "D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts",
+                          "column": 21,
+                          "line": 164
+                        },
+                        "snippet": "\u001b[90m   at \u001b[39m..\\framework\\playwright\\actions\\UIElementActions.ts:164\n\n\u001b[0m \u001b[90m 162 |\u001b[39m     \u001b[36mawait\u001b[39m test\u001b[33m.\u001b[39mstep(\u001b[32m`Getting text content of ${this.description}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n \u001b[90m 163 |\u001b[39m       \u001b[36mconst\u001b[39m element \u001b[33m=\u001b[39m \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mgetLocator()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 164 |\u001b[39m       \u001b[36mawait\u001b[39m element\u001b[33m.\u001b[39mwaitFor()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 165 |\u001b[39m       content \u001b[33m=\u001b[39m (\u001b[36mawait\u001b[39m element\u001b[33m.\u001b[39mtextContent())\u001b[33m.\u001b[39mtrim()\u001b[33m;\u001b[39m\n \u001b[90m 166 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 167 |\u001b[39m     \u001b[36mreturn\u001b[39m content\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "steps": [
+                        {
+                          "title": "Getting text content of navigation element",
+                          "duration": 60027,
+                          "error": {
+                            "message": "TimeoutError: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('role=navigation').first() to be visible\u001b[22m\n\u001b[2m    115 ├ù locator resolved to hidden <nav>ΓÇª</nav>\u001b[22m\n",
+                            "stack": "TimeoutError: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('role=navigation').first() to be visible\u001b[22m\n\u001b[2m    115 ├ù locator resolved to hidden <nav>ΓÇª</nav>\u001b[22m\n\n    at D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts:164:21\n    at UIElementActions.getTextContent (D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts:162:16)\n    at D:\\Framework\\playwright-testing-framework\\src\\advantage\\steps\\ConfirmSteps.ts:40:50\n    at ConfirmSteps.validateNavigation (D:\\Framework\\playwright-testing-framework\\src\\advantage\\steps\\ConfirmSteps.ts:37:20)\n    at D:\\Framework\\playwright-testing-framework\\src\\tests\\Confirm.spec.ts:22:19",
+                            "location": {
+                              "file": "D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts",
+                              "column": 21,
+                              "line": 164
+                            },
+                            "snippet": "\u001b[90m   at \u001b[39m..\\framework\\playwright\\actions\\UIElementActions.ts:164\n\n\u001b[0m \u001b[90m 162 |\u001b[39m     \u001b[36mawait\u001b[39m test\u001b[33m.\u001b[39mstep(\u001b[32m`Getting text content of ${this.description}`\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n \u001b[90m 163 |\u001b[39m       \u001b[36mconst\u001b[39m element \u001b[33m=\u001b[39m \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mgetLocator()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 164 |\u001b[39m       \u001b[36mawait\u001b[39m element\u001b[33m.\u001b[39mwaitFor()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 165 |\u001b[39m       content \u001b[33m=\u001b[39m (\u001b[36mawait\u001b[39m element\u001b[33m.\u001b[39mtextContent())\u001b[33m.\u001b[39mtrim()\u001b[33m;\u001b[39m\n \u001b[90m 166 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 167 |\u001b[39m     \u001b[36mreturn\u001b[39m content\u001b[33m;\u001b[39m\u001b[0m"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "startTime": "2026-03-11T23:42:58.629Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "Allure Metadata (metadata)",
+                      "contentType": "application/vnd.allure.message+json",
+                      "body": "eyJ0eXBlIjoibWV0YWRhdGEiLCJkYXRhIjp7ImRlc2NyaXB0aW9uIjoiQ2hlY2tpbmcgdGhlIGZpcnN0IHNjZW5hcmlvIGNvbmZpcm1hdGlvbiJ9fQ=="
+                    },
+                    {
+                      "name": "Allure Metadata (metadata)",
+                      "contentType": "application/vnd.allure.message+json",
+                      "body": "eyJ0eXBlIjoibWV0YWRhdGEiLCJkYXRhIjp7ImxhYmVscyI6W3sibmFtZSI6Im93bmVyIiwidmFsdWUiOiJhZG1pbiJ9XX19"
+                    },
+                    {
+                      "name": "Allure Metadata (metadata)",
+                      "contentType": "application/vnd.allure.message+json",
+                      "body": "eyJ0eXBlIjoibWV0YWRhdGEiLCJkYXRhIjp7ImxpbmtzIjpbeyJ1cmwiOiJodHRwczovL2dpdGh1Yi5jb20vbWljcm9zb2Z0L3BsYXl3cmlnaHQvaXNzdWVzL1RDXzAxX0NvbmZpcm0iLCJuYW1lIjoiSVNTVUUtVENfMDFfQ29uZmlybSJ9XX19"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\Framework\\playwright-testing-framework\\test-results\\failure\\Confirm-TC-01-Confirm---Ch-fdb20-first-scenario-confirmation-suite\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "D:\\Framework\\playwright-testing-framework\\test-results\\failure\\Confirm-TC-01-Confirm---Ch-fdb20-first-scenario-confirmation-suite\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "D:\\Framework\\playwright-testing-framework\\test-results\\failure\\Confirm-TC-01-Confirm---Ch-fdb20-first-scenario-confirmation-suite\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "D:\\Framework\\playwright-testing-framework\\src\\framework\\playwright\\actions\\UIElementActions.ts",
+                    "column": 21,
+                    "line": 164
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3ea8cfdb5537e7297a6b-1d505341b9ff1cb107c6",
+          "file": "Confirm.spec.ts",
+          "line": 19,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-03-11T23:42:57.776Z",
+    "duration": 67054.878,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

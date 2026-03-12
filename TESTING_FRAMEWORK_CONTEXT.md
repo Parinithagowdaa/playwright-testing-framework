@@ -1273,3 +1273,400 @@ BUTTON_5 = HP ELITEPAD 1000 G2 TABLET element // locator: getByText
 - Browser: Chrome
 - URL: http://advantageonlineshopping.com/
 - Recorded: 11/3/2026, 11:50:54 pm
+
+### TC_07_MyTesting Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+```
+
+### TC_07_MyTesting Test
+
+**TC_07_MyTesting**: More detail testing
+- Module: MyTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on CONTACT US link • Select option 'object:60' from element with name "categoryListboxContactUs" • Select option 'object:141' from element with name "productListboxContactUs" • Click on element with name "emailContactUs" • Click on element with name "emailContactUs" • Enter data in element with name "emailContactUs"
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 12:46:58 am
+
+### TC_01_Detail Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+ELEMENT_2 = CONTACT US heading // locator: getByRole
+ELEMENT_3 = SEND button // locator: getByRole
+BUTTON_4 = element with id "supportCover" // locator: locator
+BUTTON_5 = element with id "registerSuccessCover" // locator: locator
+```
+
+### TC_01_Detail Test
+
+**TC_01_Detail**: Verifying the detail testing
+- Module: Detail
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on CONTACT US link • Select option 'object:60' from element with name "categoryListboxContactUs" • Select option 'object:131' from element with name "productListboxContactUs" • Click on element with name "emailContactUs" • Enter data in element with name "emailContactUs" • Click on element with name "subjectTextareaContactUs" • Enter data in element with name "subjectTextareaContactUs" • Verify CONTACT US heading is visible • Verify element with id "supportCover" contains expected value • Click on SEND button • Click on Thank you for contacting element • Verify element with id "registerSuccessCover" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 1:14:56 am
+
+### TC_02_Detail Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+ELEMENT_2 = CONTACT US heading // locator: getByRole
+BUTTON_3 = CHAT WITH US element // locator: getByText
+BUTTON_4 = element with id "supportCover" // locator: locator
+```
+
+### TC_02_Detail Test
+
+**TC_02_Detail**: Checking the functionality is preserving for the same spec file
+- Module: Detail
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on CONTACT US link • Verify CONTACT US heading is visible • Verify element with id "supportCover" contains expected value • Click on CHAT WITH US element • Click on Server connect. element
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 1:46:36 am
+
+### TC_06_MyTesting Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+```
+
+### TC_06_MyTesting Test
+
+**TC_06_MyTesting**: New new scenario new new scenario
+- Module: MyTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on CONTACT US link • Select option 'object:60' from element with name "categoryListboxContactUs" • Select option 'object:131' from element with name "productListboxContactUs" • Click on element with name "subjectTextareaContactUs"
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 2:23:25 am
+
+### TC_01_NewTesting Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+```
+
+### TC_01_NewTesting Test
+
+**TC_01_NewTesting**: Testing first senario
+- Module: NewTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on CONTACT US link • Select option 'object:60' from element with name "categoryListboxContactUs" • Select option 'object:130' from element with name "productListboxContactUs" • Click on element with name "subjectTextareaContactUs" • Enter data in element with name "subjectTextareaContactUs"
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 2:28:43 am
+
+### TC_02_NewTesting Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+BUTTON_2 = element with id "supportCover" // locator: locator
+```
+
+### TC_02_NewTesting Test
+
+**TC_02_NewTesting**: Testing the second scenario
+- Module: NewTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on CONTACT US link • Select option 'object:62' from element with name "categoryListboxContactUs" • Select option 'object:127' from element with name "productListboxContactUs" • Click on element with name "subjectTextareaContactUs" • Enter data in element with name "subjectTextareaContactUs" • Verify element with id "supportCover" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 2:36:57 am
+
+### TC_03_NewTesting Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+ELEMENT_2 = POPULAR ITEMS link // locator: getByRole
+BUTTON_3 = element with id "popular_items" // locator: locator
+```
+
+### TC_03_NewTesting Test
+
+**TC_03_NewTesting**: Testing the third scenario
+- Module: NewTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Verify CONTACT US link is visible • Click on POPULAR ITEMS link • Verify element with id "popular_items" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 2:44:50 am
+
+### TC_04_NewTesting Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+ELEMENT_2 = SEND button // locator: getByRole
+BUTTON_3 = *EmailEmail element // locator: getByText
+BUTTON_4 = element with id "registerSuccessCover" // locator: locator
+```
+
+### TC_04_NewTesting Test
+
+**TC_04_NewTesting**: NewTesting04
+- Module: NewTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on CONTACT US link • Select option 'object:60' from element with name "categoryListboxContactUs" • Select option 'object:129' from element with name "productListboxContactUs" • Click on *EmailEmail element • Enter data in element with name "emailContactUs" • Click on element with name "subjectTextareaContactUs" • Enter data in element with name "subjectTextareaContactUs" • Click on SEND button • Verify element with id "registerSuccessCover" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 2:51:30 am
+
+### TC_01_NewTesting Page Elements
+
+```typescript
+ELEMENT_1 = POPULAR ITEMS link // locator: getByRole
+BUTTON_2 = element with id "popular_items" // locator: locator
+```
+
+### TC_01_NewTesting Test
+
+**TC_01_NewTesting**: Training AI 1st
+- Module: NewTesting
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Verify navigation contains expected value • Click on POPULAR ITEMS link • Verify element with id "popular_items" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 3:06:07 am
+
+### TC_01_Product Page Elements
+
+```typescript
+ELEMENT_1 = OUR PRODUCTS link // locator: getByRole
+ELEMENT_2 = SpeakersCategoryTxt link // locator: getByRole
+ELEMENT_3 = SpeakersCategoryTxt field // locator: getByLabel
+```
+
+### TC_01_Product Test
+
+**TC_01_Product**: Testing the first scenario
+- Module: Product
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on OUR PRODUCTS link • Verify navigation contains expected value • Verify SpeakersCategoryTxt link is visible • Verify SpeakersCategoryTxt field contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 3:13:11 am
+
+### TC_02_Product Page Elements
+
+```typescript
+ELEMENT_1 = POPULAR ITEMS link // locator: getByRole
+ELEMENT_2 = Special-offer link // locator: getByRole
+BUTTON_3 = element with id "popular_items" // locator: locator
+```
+
+### TC_02_Product Test
+
+**TC_02_Product**: Second senario
+- Module: Product
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Verify POPULAR ITEMS link is visible • Verify navigation contains expected value • Click on POPULAR ITEMS link • Verify element with id "popular_items" contains expected value • Click on Special-offer link
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 3:27:21 am
+
+### TC_03_Product Page Elements
+
+```typescript
+ELEMENT_1 = OUR PRODUCTS link // locator: getByRole
+BUTTON_2 = element with id "tabletsTxt" // locator: locator
+```
+
+### TC_03_Product Test
+
+**TC_03_Product**: Thrid TC_03_Product
+- Module: Product
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Verify navigation contains expected value • Verify navigation contains expected value • Click on OUR PRODUCTS link • Verify element with id "tabletsTxt" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 3:41:09 am
+
+### TC_01_TestingModule Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+ELEMENT_2 = SEND button // locator: getByRole
+BUTTON_3 = element with id 'supportCover' // locator: locator
+BUTTON_4 = element with id 'registerSuccessCover' // locator: locator
+```
+
+### TC_01_TestingModule Test
+
+**TC_01_TestingModule**: first scenario of testing model
+- Module: TestingModule
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on CONTACT US link • Verify element with id "supportCover" contains expected value • Select option 'object:61' from element with name "categoryListboxContactUs" • Select option 'object:134' from element with name "productListboxContactUs" • Click on element with name "emailContactUs" • Enter data in element with name "emailContactUs" • Click on element with name "subjectTextareaContactUs" • Enter data in element with name "subjectTextareaContactUs" • Click on SEND button • Verify element with id "registerSuccessCover" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 3:59:16 am
+
+### TC_02_TestingModule Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+ELEMENT_2 = SEND button // locator: getByRole
+BUTTON_3 = element with id 'supportCover' // locator: locator
+```
+
+### TC_02_TestingModule Test
+
+**TC_02_TestingModule**: Second Sen
+- Module: TestingModule
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Verify navigation contains expected value • Click on CONTACT US link • Select option 'object:60' from element with name "categoryListboxContactUs" • Select option 'object:131' from element with name "productListboxContactUs" • Click on element with name "emailContactUs" • Enter data in element with name "emailContactUs" • Click on element with name "subjectTextareaContactUs" • Enter data in element with name "subjectTextareaContactUs" • Click on element with name "subjectTextareaContactUs" • Enter data in element with name "subjectTextareaContactUs" • Click on SEND button • Click on Invalid e-mail address. element • Verify element with id "supportCover" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 4:13:12 am
+
+### TC_01_ContactForm Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+ELEMENT_2 = SEND button // locator: getByRole
+BUTTON_3 = element with id 'registerSuccessCover' // locator: locator
+```
+
+### TC_01_ContactForm Test
+
+**TC_01_ContactForm**: testing the contacts from first scenario
+- Module: ContactForm
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Verify navigation contains expected value • Click on CONTACT US link • Select option 'object:60' from element with name "categoryListboxContactUs" • Select option 'object:128' from element with name "productListboxContactUs" • Click on element with name "emailContactUs" • Enter data in element with name "emailContactUs" • Click on element with name "subjectTextareaContactUs" • Enter data in element with name "subjectTextareaContactUs" • Click on SEND button • Verify element with id "registerSuccessCover" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 4:41:11 am
+
+### TC_01 Fix Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+ELEMENT_2 = SEND button // locator: getByRole
+BUTTON_3 = ProductSelect ProductProduct element // locator: getByText
+BUTTON_4 = element with id 'registerSuccessCover' // locator: locator
+```
+
+### TC_01 Fix Test
+
+**TC_01 Fix**: Testing the first scenario fix
+- Module: Fix
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Verify navigation contains expected value • Click on CONTACT US link • Select option 'object:60' from element with name "categoryListboxContactUs" • Click on ProductSelect ProductProduct element • Select option 'object:129' from element with name "productListboxContactUs" • Enter data in element with name "emailContactUs" • Click on element with name "subjectTextareaContactUs" • Enter data in element with name "subjectTextareaContactUs" • Click on SEND button • Verify element with id "registerSuccessCover" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 4:50:14 am
+
+### TC_01_Confirm Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+ELEMENT_2 = SEND button // locator: getByRole
+```
+
+### TC_01_Confirm Test
+
+**TC_01_Confirm**: Checking the first scenario confirmation
+- Module: Confirm
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Verify navigation contains expected value • Verify CONTACT US link is visible • Click on CONTACT US link • Select option 'object:60' from element with name "categoryListboxContactUs" • Select option 'object:128' from element with name "productListboxContactUs" • Click on element with name "emailContactUs" • Enter data in element with name "emailContactUs" • Click on element with name "subjectTextareaContactUs" • Enter data in element with name "subjectTextareaContactUs" • Click on SEND button
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 5:01:19 am
+
+### TC_01_Retest Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+BUTTON_2 = *EmailEmail element // locator: getByText
+BUTTON_3 = element with id 'supportCover' // locator: locator
+```
+
+### TC_01_Retest Test
+
+**TC_01_Retest**: Retest one
+- Module: Retest
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on CONTACT US link • Select option 'object:60' from element with name "categoryListboxContactUs" • Select option 'object:129' from element with name "productListboxContactUs" • Verify element with id "supportCover" contains expected value • Click on *EmailEmail element • Enter data in element with name "emailContactUs"
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 5:20:30 am
+
+### TC_02_Retest Page Elements
+
+```typescript
+ELEMENT_1 = CONTACT US link // locator: getByRole
+ELEMENT_2 = CONTACT US heading // locator: getByRole
+BUTTON_3 = CHAT WITH US element // locator: getByText
+BUTTON_4 = element with id 'supportCover' // locator: locator
+```
+
+### TC_02_Retest Test
+
+**TC_02_Retest**: testing the second scenario properly
+- Module: Retest
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on CONTACT US link • Verify element with id "supportCover" contains expected value • Click on CHAT WITH US element • Verify paragraph contains expected value • Click on CONTACT US heading • Verify element with id "supportCover" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 5:36:02 am
+
+### TC_01_Test Page Elements
+
+```typescript
+ELEMENT_1 = POPULAR ITEMS link // locator: getByRole
+ELEMENT_2 = Special-offer link // locator: getByRole
+ELEMENT_3 = View Details link // locator: getByRole
+ELEMENT_4 = ADD TO CART button // locator: getByRole
+BUTTON_5 = locator('tfoot') // locator: locator
+```
+
+### TC_01_Test Test
+
+**TC_01_Test**: Validation
+- Module: Test
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on POPULAR ITEMS link • Click on Special-offer link • Click on View Details link • Click on ADD TO CART button • Verify locator('tfoot') contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 5:58:21 am
+
+### TC_01_NewMod Page Elements
+
+```typescript
+ELEMENT_1 = SPECIAL OFFER link // locator: getByRole
+ELEMENT_2 = SEE OFFER button // locator: getByRole
+ELEMENT_3 = $ heading // locator: getByRole
+BUTTON_4 = element with id 'special_offer_items' // locator: locator
+BUTTON_5 = element with id 'Description' // locator: locator
+```
+
+### TC_01_NewMod Test
+
+**TC_01_NewMod**: Testing new mod
+- Module: NewMod
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on SPECIAL OFFER link • Verify element with id "special_offer_items" contains expected value • Click on SEE OFFER button • Verify $ heading is visible • Verify element with id "Description" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 6:06:42 am
+
+### TC_02_NewMod Page Elements
+
+```typescript
+ELEMENT_1 = POPULAR ITEMS link // locator: getByRole
+ELEMENT_2 = View Details link // locator: getByRole
+BUTTON_3 = element with id 'Description' // locator: locator
+```
+
+### TC_02_NewMod Test
+
+**TC_02_NewMod**: Second test
+- Module: NewMod
+- Type: UI
+- Navigate to http://advantageonlineshopping.com/#/ • Click on POPULAR ITEMS link • Click on View Details link • Verify element with id "Description" contains expected value
+- Browser: Chrome
+- URL: http://advantageonlineshopping.com/
+- Recorded: 12/3/2026, 6:08:35 am

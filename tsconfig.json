@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-        "ignoreDeprecations": "6.0",
         "baseUrl": "./src",
         "paths": {
            "@pages/*":["advantage/pages/*"],
@@ -20,8 +19,8 @@
            "@soapSteps/*":["API/SOAP/steps/*"]
         },
         "target": "ESNext",
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
+        "module": "commonjs",
+        "moduleResolution": "node",
         "sourceMap": true,
         "outDir": "../tests-out",
         "resolveJsonModule": true,

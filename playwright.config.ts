@@ -58,7 +58,7 @@ const config: PlaywrightTestConfig = {
     },
     {
       name: "suite",
-      testMatch: "*.test.ts",
+      testMatch: /\.*(test|spec)\.ts$/,
     },
   ],
 };

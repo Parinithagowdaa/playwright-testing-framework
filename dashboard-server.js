@@ -2,8 +2,11 @@ const http = require('http');
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+require('dotenv').config();
+const { autoRunTest } = require('./auto-test-runner');
 
 const PORT = 3456;
+const ACTION_TIMEOUT_SECONDS = Number.parseInt(process.env.ACTION_TIMEOUT || '1', 10) * 60;
 
 // Function to extract elements from Playwright code
 function extractElementsFromCode(code) {
@@ -37,13 +40,13 @@ function extractElementsFromCode(code) {
             // Friendly mapping for common selectors
             if (typeof locatorValue === 'string') {
                 if (locatorValue.startsWith('#')) {
-                    description = `element with id "${locatorValue.substring(1)}"`;
+                    description = `element with id '${locatorValue.substring(1)}'`;
                 } else if (locatorValue.startsWith('.')) {
                     const cls = locatorValue.substring(1);
                     if (/plus/i.test(cls)) description = `+ icon`;
                     else if (/minus/i.test(cls)) description = `- icon`;
                     else if (/cart|shopping-cart|cart-icon/i.test(cls)) description = `cart icon`;
-                    else description = `element with class "${cls}"`;
+                    else description = `element with class '${cls}'`;
                 } else if (locatorValue.includes('[name=')) {
                     const m = locatorValue.match(/\[name=['"]?(.*?)['"]?\]/);
                     description = m ? `element with name "${m[1]}"` : `locator('${locatorValue}')`;
@@ -232,7 +235,7 @@ ${cleanCode}
     };
 }
 
-// Helper function to parse Playwright code and extract locators
+// Helper function to parse Playwright code and extract locators AND actions WITH parameters
 function parsePlaywrightCode(specFileContent) {
     const locators = [];
     const actions = [];
@@ -244,107 +247,319 @@ function parsePlaywrightCode(specFileContent) {
         url = gotoMatch[1];
     }
     
-    // Pattern for getByRole
-    const getByRoleRegex = /page\.getByRole\(['"](\w+)['"]\s*,\s*\{\s*name:\s*['"]([^'"]+)['"]\s*\}\)/g;
-    let match;
-    while ((match = getByRoleRegex.exec(specFileContent)) !== null) {
-        const role = match[1];
-        const name = match[2];
-        const constantName = name.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_' + role.toUpperCase();
-        const selector = `page.getByRole('${role}', { name: '${name}' })`;
-        
+    // Helper to add locator if not exists
+    function addLocator(constantName, description, selector, selectorType) {
         if (!locators.some(l => l.constantName === constantName)) {
             locators.push({
                 constantName,
-                description: `${name} ${role}`,
-                selector: selector,
-                selectorType: 'getByRole'
+                description,
+                selector,
+                selectorType
             });
         }
+        return constantName;
     }
     
-    // Pattern for getByText
-    const getByTextRegex = /page\.getByText\(['"]([^'"]+)['"]\)/g;
-    while ((match = getByTextRegex.exec(specFileContent)) !== null) {
-        const text = match[1];
-        const constantName = text.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_TEXT';
-        const selector = `page.getByText('${text}')`;
+    // Helper to add action with parameters
+    function addAction(constantName, actionType, param = null) {
+        actions.push({
+            constantName,
+            actionType,  // 'click', 'fill', 'selectOption', 'toBeVisible', 'toContainText'
+            param
+        });
+    }
+    
+    // Parse ALL actions line by line to preserve order and capture everything
+    const lines = specFileContent.split('\n');
+    
+    for (let line of lines) {
+        line = line.trim();
         
-        if (!locators.some(l => l.constantName === constantName)) {
-            locators.push({
-                constantName,
-                description: `${text} text`,
-                selector: selector,
-                selectorType: 'getByText'
-            });
+        // Skip empty lines, comments, and import statements
+        if (!line || line.startsWith('//') || line.startsWith('/*') || line.startsWith('import ')) continue;
+        
+        let match;
+        
+        // 1. Extract getByRole with click action
+        match = line.match(/await\s+page\.getByRole\(['"](\w+)['"]\s*,\s*\{\s*name:\s*['"]([^'"]+)['"]\s*\}\)\.click\(\)/);
+        if (match) {
+            const [, role, name] = match;
+            const constantName = name.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_' + role.toUpperCase();
+            addLocator(constantName, `${name} ${role}`, `page.getByRole('${role}', { name: '${name}' })`, 'getByRole');
+            addAction(constantName, 'click');
+            continue;
         }
-    }
-    
-    // Pattern for getByLabel
-    const getByLabelRegex = /page\.getByLabel\(['"]([^'"]+)['"]\)/g;
-    while ((match = getByLabelRegex.exec(specFileContent)) !== null) {
-        const label = match[1];
-        const constantName = label.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_FIELD';
-        const selector = `page.getByLabel('${label}')`;
         
-        if (!locators.some(l => l.constantName === constantName)) {
-            locators.push({
-                constantName,
-                description: `${label} field`,
-                selector: selector,
-                selectorType: 'getByLabel'
-            });
+        // 1b. Extract getByRole with nth() and click action
+        match = line.match(/await\s+page\.getByRole\(['"](\w+)['"]\s*,\s*\{\s*name:\s*['"]([^'"]+)['"]\s*\}\)\.nth\((\d+)\)\.click\(\)/);
+        if (match) {
+            const [, role, name, index] = match;
+            const constantName = name.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_' + role.toUpperCase() + '_' + index;
+            addLocator(constantName, `${name} ${role} at index ${index}`, `page.getByRole('${role}', { name: '${name}' }).nth(${index})`, 'getByRole');
+            addAction(constantName, 'click');
+            continue;
         }
-    }
-    
-    // Pattern for getByPlaceholder
-    const getByPlaceholderRegex = /page\.getByPlaceholder\(['"]([^'"]+)['"]\)/g;
-    while ((match = getByPlaceholderRegex.exec(specFileContent)) !== null) {
-        const placeholder = match[1];
-        const constantName = placeholder.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_INPUT';
-        const selector = `page.getByPlaceholder('${placeholder}')`;
         
-        if (!locators.some(l => l.constantName === constantName)) {
-            locators.push({
-                constantName,
-                description: `field with placeholder "${placeholder}"`,
-                selector: selector,
-                selectorType: 'getByPlaceholder'
-            });
+        // 2. Extract getByRole with fill action
+        match = line.match(/await\s+page\.getByRole\(['"](\w+)['"]\s*,\s*\{\s*name:\s*['"]([^'"]+)['"]\s*\}\)\.fill\(['"]([^'"]*)['"]\)/);
+        if (match) {
+            const [, role, name, value] = match;
+            const constantName = name.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_' + role.toUpperCase();
+            addLocator(constantName, `${name} ${role}`, `page.getByRole('${role}', { name: '${name}' })`, 'getByRole');
+            addAction(constantName, 'fill', value);
+            continue;
         }
-    }
-    
-    // Pattern for locator() with CSS selectors
-    const locatorRegex = /page\.locator\(['"]([^'"]+)['"]\)/g;
-    while ((match = locatorRegex.exec(specFileContent)) !== null) {
-        const selector = match[1];
-        let constantName = 'ELEMENT';
         
-        if (selector.startsWith('#')) {
-            constantName = selector.substring(1).replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
-        } else if (selector.startsWith('.')) {
-            constantName = selector.substring(1).replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
-        } else if (selector.includes('[name=')) {
-            const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
-            if (nameMatch) {
-                constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+        // 3. Extract getByText with actions
+        match = line.match(/await\s+page\.getByText\(['"]([^'"]+)['"]\)\.click\(\)/);
+        if (match) {
+            const text = match[1];
+            const constantName = text.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_TEXT';
+            addLocator(constantName, `${text} text`, `page.getByText('${text}')`, 'getByText');
+            addAction(constantName, 'click');
+            continue;
+        }
+        
+        // 4. Extract locator() with click action
+        match = line.match(/await\s+page\.locator\('([^']+)'\)\.click\(\)/);
+        if (match) {
+            const selector = match[1];
+            let constantName = 'ELEMENT';
+            let description = `element with selector "${selector}"`;
+            
+            if (selector.startsWith('#')) {
+                constantName = selector.substring(1).replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                description = `element with id '${selector.substring(1)}'`;
+            } else if (selector.startsWith('.')) {
+                constantName = selector.substring(1).replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                description = `element with class '${selector.substring(1)}'`;
+            } else if (selector.includes('[name=')) {
+                const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+                if (nameMatch) {
+                    constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                    description = `${nameMatch[1]} field`;
+                }
+            } else if (selector.match(/^select/)) {
+                const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+                if (nameMatch) {
+                    constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                    description = `${nameMatch[1]} dropdown`;
+                }
+            } else if (selector.match(/^input/)) {
+                const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+                if (nameMatch) {
+                    constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                    description = `${nameMatch[1]} input field`;
+                }
+            } else if (selector.match(/^textarea/)) {
+                const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+                if (nameMatch) {
+                    constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                    description = `${nameMatch[1]} textarea`;
+                }
+            } else if (selector.match(/^button/)) {
+                const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+                if (nameMatch) {
+                    constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                    description = `${nameMatch[1]} button`;
+                }
             }
+            
+            addLocator(constantName, description, selector, 'locator');
+            addAction(constantName, 'click');
+            continue;
         }
         
-        if (!locators.some(l => l.constantName === constantName)) {
-            locators.push({
-                constantName,
-                description: `element with selector "${selector}"`,
-                selector: `"${selector}"`,
-                selectorType: 'locator'
-            });
+        // 5. Extract locator() with fill action
+        match = line.match(/await\s+page\.locator\('([^']+)'\)\.fill\('([^']*)'\)/);
+        if (match) {
+            const [, selector, value] = match;
+            let constantName = 'ELEMENT';
+            let description = `element with selector "${selector}"`;
+            
+            if (selector.includes('[name=')) {
+                const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+                if (nameMatch) {
+                    constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                    description = `${nameMatch[1]} field`;
+                }
+            } else if (selector.startsWith('#')) {
+                constantName = selector.substring(1).replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                description = `element with id '${selector.substring(1)}'`;
+            } else if (selector.match(/^input/)) {
+                const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+                if (nameMatch) {
+                    constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                    description = `${nameMatch[1]} input`;
+                }
+            } else if (selector.match(/^textarea/)) {
+                const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+                if (nameMatch) {
+                    constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                    description = `${nameMatch[1]} textarea`;
+                }
+            }
+            
+            addLocator(constantName, description, selector, 'locator');
+            addAction(constantName, 'fill', value);
+            continue;
+        }
+        
+        // 6. Extract locator() with selectOption action
+        match = line.match(/await\s+page\.locator\('([^']+)'\)\.selectOption\('([^']+)'\)/);
+        if (match) {
+            const [, selector, value] = match;
+            let constantName = 'ELEMENT';
+            let description = `element with selector "${selector}"`;
+            
+            if (selector.includes('[name=')) {
+                const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+                if (nameMatch) {
+                    constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                    description = `${nameMatch[1]} dropdown`;
+                }
+            } else if (selector.startsWith('select')) {
+                const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+                if (nameMatch) {
+                    constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                    description = `${nameMatch[1]} dropdown`;
+                }
+            }
+            
+            addLocator(constantName, description, selector, 'locator');
+            addAction(constantName, 'selectOption', value);
+            continue;
+        }
+        
+        // 7. Extract expect() with toBeVisible() - getByRole WITH name
+        match = line.match(/await\s+expect\(page\.getByRole\(['"](\w+)['"]\s*,\s*\{\s*name:\s*['"]([^'"]+)['"]\s*\}\)\)\.toBeVisible\(\)/);
+        if (match) {
+            const [, role, name] = match;
+            const constantName = name.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_' + role.toUpperCase();
+            addLocator(constantName, `${name} ${role}`, `page.getByRole('${role}', { name: '${name}' })`, 'getByRole');
+            addAction(constantName, 'toBeVisible');
+            continue;
+        }
+        
+        // 7b. Extract expect() with toBeVisible() - getByRole WITHOUT name
+        match = line.match(/await\s+expect\(page\.getByRole\(['"](\w+)['"]\)\)\.toBeVisible\(\)/);
+        if (match) {
+            const [, role] = match;
+            const constantName = role.toUpperCase();
+            addLocator(constantName, `${role} element`, `page.getByRole('${role}')`, 'getByRole');
+            addAction(constantName, 'toBeVisible');
+            continue;
+        }
+        
+        // 8. Extract expect() with toBeVisible() - locator
+        match = line.match(/await\s+expect\(page\.locator\('([^']+)'\)\)\.toBeVisible\(\)/);
+        if (match) {
+            const selector = match[1];
+            let constantName = 'ELEMENT';
+            let description = `element with selector "${selector}"`;
+            
+            if (selector.startsWith('#')) {
+                constantName = selector.substring(1).replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                description = `element with id '${selector.substring(1)}'`;
+            } else if (selector.includes('[name=')) {
+                const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+                if (nameMatch) {
+                    constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                    description = `${nameMatch[1]} element`;
+                }
+            }
+            
+            addLocator(constantName, description, selector, 'locator');
+            addAction(constantName, 'toBeVisible');
+            continue;
+        }
+        
+        // 9. Extract expect() with toContainText() - getByRole WITH name
+        match = line.match(/await\s+expect\(page\.getByRole\(['"](\w+)['"]\s*,\s*\{\s*name:\s*['"]([^'"]+)['"]\s*\}\)\)\.toContainText\(['"]([^'"]+)['"]\)/);
+        if (match) {
+            const [, role, name, textValue] = match;
+            const constantName = name.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_' + role.toUpperCase();
+            addLocator(constantName, `${name} ${role}`, `page.getByRole('${role}', { name: '${name}' })`, 'getByRole');
+            addAction(constantName, 'toContainText', textValue);
+            continue;
+        }
+        
+        // 9b. Extract expect() with toContainText() - getByRole WITHOUT name
+        match = line.match(/await\s+expect\(page\.getByRole\(['"](\w+)['"]\)\)\.toContainText\(['"]([^'"]+)['"]\)/);
+        if (match) {
+            const [, role, textValue] = match;
+            const constantName = role.toUpperCase();
+            addLocator(constantName, `${role} element`, `page.getByRole('${role}')`, 'getByRole');
+            addAction(constantName, 'toContainText', textValue);
+            continue;
+        }
+        
+        // 10. Extract expect() with toContainText() - locator
+        match = line.match(/await\s+expect\(page\.locator\('([^']+)'\)\)\.toContainText\('([^']+)'\)/);
+        if (match) {
+            const [, selector, textValue] = match;
+            let constantName = 'ELEMENT';
+            let description = `element with selector "${selector}"`;
+            
+            if (selector.startsWith('#')) {
+                constantName = selector.substring(1).replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                description = `element with id '${selector.substring(1)}'`;
+            } else if (selector.includes('[name=')) {
+                const nameMatch = selector.match(/\[name=['"]?([^'"\]]+)['"]?\]/);
+                if (nameMatch) {
+                    constantName = nameMatch[1].replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase();
+                    description = `${nameMatch[1]} element`;
+                }
+            }
+            
+            addLocator(constantName, description, selector, 'locator');
+            addAction(constantName, 'toContainText', textValue);
+            continue;
+        }
+        
+        // 11. Extract getByLabel with actions
+        match = line.match(/await\s+page\.getByLabel\(['"]([^'"]+)['"]\)\.click\(\)/);
+        if (match) {
+            const label = match[1];
+            const constantName = label.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_LABEL';
+            addLocator(constantName, `${label} label`, `page.getByLabel('${label}')`, 'getByLabel');
+            addAction(constantName, 'click');
+            continue;
+        }
+        
+        match = line.match(/await\s+page\.getByLabel\(['"]([^'"]+)['"]\)\.fill\(['"]([^'"]*)['"]\)/);
+        if (match) {
+            const [, label, value] = match;
+            const constantName = label.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_LABEL';
+            addLocator(constantName, `${label} label`, `page.getByLabel('${label}')`, 'getByLabel');
+            addAction(constantName, 'fill', value);
+            continue;
+        }
+        
+        // 12. Extract getByPlaceholder with actions
+        match = line.match(/await\s+page\.getByPlaceholder\(['"]([^'"]+)['"]\)\.click\(\)/);
+        if (match) {
+            const placeholder = match[1];
+            const constantName = placeholder.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_PLACEHOLDER';
+            addLocator(constantName, `field with placeholder "${placeholder}"`, `page.getByPlaceholder('${placeholder}')`, 'getByPlaceholder');
+            addAction(constantName, 'click');
+            continue;
+        }
+        
+        match = line.match(/await\s+page\.getByPlaceholder\(['"]([^'"]+)['"]\)\.fill\(['"]([^'"]*)['"]\)/);
+        if (match) {
+            const [, placeholder, value] = match;
+            const constantName = placeholder.replace(/[^a-zA-Z0-9]+/g, '_').toUpperCase() + '_PLACEHOLDER';
+            addLocator(constantName, `field with placeholder "${placeholder}"`, `page.getByPlaceholder('${placeholder}')`, 'getByPlaceholder');
+            addAction(constantName, 'fill', value);
+            continue;
         }
     }
     
-    // Extract actions (click, fill, type, etc.)
-    const clickRegex = /\.click\(\)/g;
-    const fillRegex = /\.fill\(['"]([^'"]*)['"]\)/g;
-    const typeRegex = /\.type\(['"]([^'"]*)['"]\)/g;
+    console.log(`\n📊 Parsed ${locators.length} locators and ${actions.length} actions from recorded test:`);
+    actions.forEach((action, index) => {
+        console.log(`   ${index + 1}. ${action.actionType.toUpperCase()}: ${action.constantName}${action.param ? ` (param: ${action.param})` : ''}`);
+    });
     
     return {
         url,
@@ -513,9 +728,14 @@ function updateOrCreatePageFile(moduleName, locators, pageFilePath) {
 
 // Helper function to generate method name from constant name
 function generateMethodName(constantName, action = 'click') {
-    const lowerName = constantName.toLowerCase().replace(/_/g, '');
+    // Convert CONSTANT_NAME to camelCase (e.g., POPULAR_ITEMS_LINK -> Popularitemslink)
+    const parts = constantName.toLowerCase().split('_');
+    let camelCase = parts.map((part, index) => 
+        index === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)
+    ).join('');
+    
     const actionVerb = action === 'fill' ? 'fill' : action === 'type' ? 'enter' : 'click';
-    return actionVerb + lowerName.charAt(0).toUpperCase() + lowerName.slice(1);
+    return actionVerb + camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
 }
 
 // Helper function to update or create Steps file
@@ -551,7 +771,34 @@ export default class ${moduleName}Steps {
         // Add methods for each locator
         locators.forEach(locator => {
             const methodName = generateMethodName(locator.constantName);
-            content += `
+            
+            // Determine element type and generate appropriate methods
+            if (locator.constantName.includes('LISTBOX') || locator.constantName.includes('DROPDOWN') || locator.constantName.includes('SELECT') || locator.description.includes('select')) {
+                // Generate selectByValue method for dropdown elements
+                content += `
+    /**
+     * Select option from ${locator.description}
+     */
+    public async ${methodName}(option: string) {
+        await test.step(\`Select option from ${locator.description}\`, async () => {
+            await this.ui.dropdown(${moduleName}Page.${locator.constantName}, ${moduleName}Constants.${locator.constantName}).selectByValue(option);
+        });
+    }
+`;
+                addedMethods.push(methodName);
+            } else if (locator.constantName.includes('TEXTAREA') || locator.constantName.includes('TEXTBOX') || locator.constantName.includes('INPUT') || locator.constantName.includes('EMAIL') || locator.constantName.includes('PLACEHOLDER') || locator.description.includes('email') || locator.description.includes('input') || locator.description.includes('textarea')) {
+                // Generate both fill and click methods for input fields
+                const fillMethodName = methodName.replace('click', 'fill');
+                content += `
+    /**
+     * Fill ${locator.description}
+     */
+    public async ${fillMethodName}(text: string) {
+        await test.step(\`Fill ${locator.description}\`, async () => {
+            await this.ui.editBox(${moduleName}Page.${locator.constantName}, ${moduleName}Constants.${locator.constantName}).fill(text);
+        });
+    }
+
     /**
      * Click on ${locator.description}
      */
@@ -561,7 +808,42 @@ export default class ${moduleName}Steps {
         });
     }
 `;
-            addedMethods.push(methodName);
+                addedMethods.push(fillMethodName);
+                addedMethods.push(methodName);
+            } else {
+                // Standard click method
+                content += `
+    /**
+     * Click on ${locator.description}
+     */
+    public async ${methodName}() {
+        await test.step(\`Click on ${locator.description}\`, async () => {
+            await this.ui.element(${moduleName}Page.${locator.constantName}, ${moduleName}Constants.${locator.constantName}).click();
+        });
+    }
+`;
+                addedMethods.push(methodName);
+            }
+            
+            // Add validation method for all elements
+            const validateMethodName = 'validate' + methodName.substring(5).charAt(0).toUpperCase() + methodName.substring(6);
+            content += `
+    /**
+     * Validate ${locator.description} is visible
+     */
+    public async ${validateMethodName}(expectedText?: string) {
+        await test.step(\`Validate ${locator.description}\$\{expectedText ? ' contains: ' + expectedText : ' is visible'\}\`, async () => {
+            const element = this.ui.element(${moduleName}Page.${locator.constantName}, ${moduleName}Constants.${locator.constantName});
+            const isVisible = await element.isVisible(${ACTION_TIMEOUT_SECONDS});
+            Assert.assertTrue(isVisible, ${moduleName}Constants.${locator.constantName});
+            if (expectedText) {
+                const actualText = await element.getTextContent();
+                Assert.assertContains(actualText || '', expectedText, ${moduleName}Constants.${locator.constantName});
+            }
+        });
+    }
+`;
+            addedMethods.push(validateMethodName);
         });
         
         content += `}\n`;
@@ -596,7 +878,42 @@ export default class ${moduleName}Steps {
             const methodRegex = new RegExp(`public\\s+async\\s+${methodName}\\s*\\(`, 'i');
             
             if (!methodRegex.test(content)) {
-                const newMethod = `
+                let newMethod = '';
+                
+                // Determine element type
+                if (locator.constantName.includes('LISTBOX') || locator.constantName.includes('DROPDOWN') || locator.constantName.includes('SELECT') || locator.description.includes('select')) {
+                    newMethod = `
+    /**
+     * Select option from ${locator.description}
+     */
+    public async ${methodName}(option: string) {
+        await test.step(\`Select option from ${locator.description}\`, async () => {
+            await this.ui.dropdown(${moduleName}Page.${locator.constantName}, ${moduleName}Constants.${locator.constantName}).selectByValue(option);
+        });
+    }
+`;
+                    addedMethods.push(methodName);
+                } else if (locator.constantName.includes('TEXTAREA') || locator.constantName.includes('TEXTBOX') || locator.constantName.includes('INPUT') || locator.constantName.includes('EMAIL') || locator.constantName.includes('PLACEHOLDER') || locator.description.includes('email') || locator.description.includes('input') || locator.description.includes('textarea')) {
+                    // Add fill method
+                    const fillMethodName = methodName.replace('click', 'fill');
+                    const fillMethodRegex = new RegExp(`public\\s+async\\s+${fillMethodName}\\s*\\(`, 'i');
+                    
+                    if (!fillMethodRegex.test(content)) {
+                        newMethod += `
+    /**
+     * Fill ${locator.description}
+     */
+    public async ${fillMethodName}(text: string) {
+        await test.step(\`Fill ${locator.description}\`, async () => {
+            await this.ui.editBox(${moduleName}Page.${locator.constantName}, ${moduleName}Constants.${locator.constantName}).fill(text);
+        });
+    }
+`;
+                        addedMethods.push(fillMethodName);
+                    }
+                    
+                    // Add click method
+                    newMethod += `
     /**
      * Click on ${locator.description}
      */
@@ -606,10 +923,48 @@ export default class ${moduleName}Steps {
         });
     }
 `;
+                    addedMethods.push(methodName);
+                } else {
+                    newMethod = `
+    /**
+     * Click on ${locator.description}
+     */
+    public async ${methodName}() {
+        await test.step(\`Click on ${locator.description}\`, async () => {
+            await this.ui.element(${moduleName}Page.${locator.constantName}, ${moduleName}Constants.${locator.constantName}).click();
+        });
+    }
+`;
+                    addedMethods.push(methodName);
+                }
+                
+                // Add validation method
+                const validateMethodName = 'validate' + methodName.substring(5).charAt(0).toUpperCase() + methodName.substring(6);
+                const validateMethodRegex = new RegExp(`public\\s+async\\s+${validateMethodName}\\s*\\(`, 'i');
+                
+                if (!validateMethodRegex.test(content)) {
+                    newMethod += `
+    /**
+     * Validate ${locator.description} is visible
+     */
+    public async ${validateMethodName}(expectedText?: string) {
+        await test.step(\`Validate ${locator.description}\$\{expectedText ? ' contains: ' + expectedText : ' is visible'\}\`, async () => {
+            const element = this.ui.element(${moduleName}Page.${locator.constantName}, ${moduleName}Constants.${locator.constantName});
+            const isVisible = await element.isVisible(${ACTION_TIMEOUT_SECONDS});
+            Assert.assertTrue(isVisible, ${moduleName}Constants.${locator.constantName});
+            if (expectedText) {
+                const actualText = await element.getTextContent();
+                Assert.assertContains(actualText || '', expectedText, ${moduleName}Constants.${locator.constantName});
+            }
+        });
+    }
+`;
+                    addedMethods.push(validateMethodName);
+                }
+                
                 // Insert before closing brace
                 const insertPosition = content.lastIndexOf('}');
                 content = content.slice(0, insertPosition) + newMethod + content.slice(insertPosition);
-                addedMethods.push(methodName);
             }
         });
         
@@ -713,6 +1068,203 @@ function createPageObjectFiles(specFileName, specFilePath) {
         return result;
     } catch (error) {
         console.error(`❌ Error creating Page Object files: ${error.message}`);
+        console.error(error.stack);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+// STEP 3: Helper function to refactor spec file to use Page Object Model pattern
+function refactorSpecFile(specFilePath, moduleName) {
+    try {
+        console.log('\n🔧 STEP 3: Refactoring Spec File to Page Object Model');
+        
+        // CRITICAL: Read the recorded test from playwright-latest-codegen.spec.ts first
+        const recordedTestPath = path.join(process.cwd(), 'playwright-latest-codegen.spec.ts');
+        let recordedActions = [];
+        
+        if (fs.existsSync(recordedTestPath)) {
+            console.log('📖 Reading recorded test from playwright-latest-codegen.spec.ts');
+            const recordedContent = fs.readFileSync(recordedTestPath, 'utf8');
+            const parsedRecorded = parsePlaywrightCode(recordedContent);
+            recordedActions = parsedRecorded.actions;
+            console.log(`✅ Found ${recordedActions.length} actions in recorded test`);
+        }
+        
+        // Helper to convert constant name to method name
+        function constantToMethodName(constantName, actionType) {
+            const parts = constantName.toLowerCase().split('_');
+            let camelCase = parts.map((part, index) => 
+                index === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)
+            ).join('');
+            
+            let prefix = '';
+            if (actionType === 'fill') {
+                prefix = 'fill';
+            } else if (actionType === 'selectOption') {
+                // Use 'click' prefix for selectOption to match generated method names
+                prefix = 'click';
+            } else if (actionType === 'toBeVisible' || actionType === 'toContainText') {
+                prefix = 'validate';
+            } else {
+                prefix = 'click';
+            }
+            
+            return prefix + camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
+        }
+        
+        // Read the current spec file
+        const specContent = fs.readFileSync(specFilePath, 'utf8');
+        
+        // Parse all test cases with COMPLETE match to preserve them
+        // Matches both raw format: test('test', async ({ page }) => {...});
+        // and refactored format: test('TC_01_...', async () => {...});
+        const testCaseRegex = /\/\*\*[\s\S]*?\*\s*Test Case:\s*(.+?)\n[\s\S]*?\*\s*Description:\s*(.+?)\n[\s\S]*?\*\s*Module:\s*(.+?)\n[\s\S]*?\*\s*Type:\s*(.+?)\n[\s\S]*?\*\s*Browser:\s*(.+?)\n[\s\S]*?\*\s*URL:\s*(.+?)\n[\s\S]*?\*\s*Generated:\s*(.+?)\n[\s\S]*?\*\/\s*\ntest\(([^,]+),\s*async\s*\((?:\s*\{\s*page\s*\}|\s*)\s*\)\s*=>\s*\{([\s\S]*?)\n\}\);/g;
+        
+        const testCases = [];
+        let match;
+        
+        while ((match = testCaseRegex.exec(specContent)) !== null) {
+            const testBody = match[9].trim();
+            // Check if already refactored by looking for module.method() pattern
+            const isRefactored = new RegExp(`${moduleName.toLowerCase()}\\.\\w+\\(`).test(testBody);
+            
+            testCases.push({
+                testCaseId: match[1].trim(),
+                description: match[2].trim(),
+                module: match[3].trim(),
+                type: match[4].trim(),
+                browser: match[5].trim(),
+                url: match[6].trim(),
+                generated: match[7].trim(),
+                testParams: match[8].trim(),
+                testBody: testBody,
+                fullMatch: match[0],
+                isAlreadyRefactored: isRefactored
+            });
+        }
+        
+        if (testCases.length === 0) {
+            console.log('⚠️  No test cases found to refactor');
+            return { success: false, message: 'No test cases found' };
+        }
+        
+        // Scenario 2 detection: Multiple test cases = preserve existing ones
+        const isScenario2 = testCases.length > 1;
+        
+        if (isScenario2) {
+            console.log(`🔄 SCENARIO 2: Appending to existing spec file with ${testCases.length} test case(s)`);
+            console.log(`   ⚠️  CRITICAL: Existing test cases MUST be preserved exactly!`);
+        } else {
+            console.log(`🆕 SCENARIO 1: Creating new spec file with first test case`);
+        }
+        
+        // Build refactored imports
+        const refactoredImports = `import ${moduleName}Steps from "@uiSteps/${moduleName}Steps";
+import { test } from "@base-test";
+import Allure from "@allure";
+`;
+        
+        // Build test setup
+        const testSetup = `
+let ${moduleName.toLowerCase()}: ${moduleName}Steps;
+test.beforeEach(async ({ page }) => {
+    ${moduleName.toLowerCase()} = new ${moduleName}Steps(page);
+});
+`;
+        
+        // Build refactored test cases
+        let refactoredTests = '';
+        let preservedCount = 0;
+        let refactoredCount = 0;
+        
+        testCases.forEach((tc, index) => {
+            const isLastTestCase = index === testCases.length - 1;
+            // For Scenario 1: First test should use recorded actions
+            // For Scenario 2: Only the last test (new one) should use recorded actions
+            const isNewTestCase = !isScenario2 || (isLastTestCase && isScenario2);
+            
+            // SCENARIO 2: Preserve existing refactored test cases EXACTLY
+            if (tc.isAlreadyRefactored && !isNewTestCase) {
+                console.log(`   ✅ PRESERVING: ${tc.testCaseId} (already refactored)`);
+                refactoredTests += tc.fullMatch + '\n\n';
+                preservedCount++;
+            } else {
+                // Refactor this test case (new or first test case)
+                console.log(`   🔄 REFACTORING: ${tc.testCaseId}`);
+                
+                const testId = tc.testCaseId.replace(/\s+/g, '_');
+                const testName = `'${testId} - ${tc.description}'`;
+                
+                let testCase = `
+/**
+ * Test Case: ${tc.testCaseId}
+ * Description: ${tc.description}
+ * Module: ${tc.module}
+ * Type: ${tc.type}
+ * Browser: ${tc.browser}
+ * URL: ${tc.url}
+ * Generated: ${tc.generated}
+ */
+test(${testName}, async () => {
+    Allure.attachDetails('${tc.description}', '${testId}');
+`;
+                
+                // Use recorded actions if this is a new test case and we have them
+                if (isNewTestCase && recordedActions.length > 0) {
+                    console.log(`      📝 Using ${recordedActions.length} actions from recorded test`);
+                    testCase += `    await ${moduleName.toLowerCase()}.launchPage();\n`;
+                    
+                    recordedActions.forEach(action => {
+                        const methodName = constantToMethodName(action.constantName, action.actionType);
+                        
+                        if (action.param !== null && action.param !== undefined) {
+                            testCase += `    await ${moduleName.toLowerCase()}.${methodName}('${action.param}');\n`;
+                        } else {
+                            testCase += `    await ${moduleName.toLowerCase()}.${methodName}();\n`;
+                        }
+                    });
+                } else {
+                    // No recorded actions, just add launchPage
+                    testCase += `    await ${moduleName.toLowerCase()}.launchPage();\n`;
+                }
+                
+                testCase += `});
+`;
+                
+                refactoredTests += testCase + '\n';
+                refactoredCount++;
+            }
+        });
+        
+        // Combine all parts
+        const refactoredContent = refactoredImports + testSetup + refactoredTests;
+        
+        // Write refactored spec file
+        fs.writeFileSync(specFilePath, refactoredContent, 'utf8');
+        
+        console.log(`\n✅ Spec file refactored successfully`);
+        console.log(`   📝 File: ${path.basename(specFilePath)}`);
+        console.log(`   📊 Total test cases: ${testCases.length}`);
+        if (isScenario2) {
+            console.log(`   ✅ Preserved: ${preservedCount} existing test case(s)`);
+            console.log(`   ➕ Refactored: ${refactoredCount} new test case(s)`);
+        } else {
+            console.log(`   ✨ Refactored: ${refactoredCount} test case(s)`);
+        }
+        console.log(`   🎯 Applied Page Object Model pattern\n`);
+        
+        return {
+            success: true,
+            refactoredTestCount: testCases.length,
+            preservedCount: preservedCount,
+            moduleUsed: moduleName
+        };
+        
+    } catch (error) {
+        console.error(`❌ Error refactoring spec file: ${error.message}`);
         console.error(error.stack);
         return {
             success: false,
@@ -966,7 +1518,7 @@ const server = http.createServer((req, res) => {
                 console.log(`✅ Test case saved to TESTING_FRAMEWORK_CONTEXT.md (${elements.length} elements extracted)`);
                 console.log(`✅ Test file ${fileResult.isNewFile ? 'created' : 'updated'}: ${fileResult.testFilePath}`);
                 
-                // Create Page Object files after spec file is created/updated
+                // STEP 2: Create Page Object files after spec file is created/updated
                 const pageObjectResult = createPageObjectFiles(fileResult.testFileName, fileResult.testFilePath);
                 
                 if (pageObjectResult.success) {
@@ -974,6 +1526,25 @@ const server = http.createServer((req, res) => {
                     if (allFiles.length > 0) {
                         console.log(`✅ Page Object files created/updated: ${allFiles.join(', ')}`);
                     }
+                }
+                
+                // STEP 3: Refactor the spec file to use Page Object Model
+                let refactorResult = { success: false };
+                if (pageObjectResult.success && pageObjectResult.moduleName) {
+                    refactorResult = refactorSpecFile(fileResult.testFilePath, pageObjectResult.moduleName);
+                }
+                
+                // STEP 4: Auto-run the test with auto-fix mechanism (async, don't wait)
+                if (refactorResult.success && pageObjectResult.moduleName) {
+                    console.log(`\n🚀 AUTO-RUN: Triggering automated test execution...`);
+                    // Run asynchronously without blocking the response
+                    setImmediate(async () => {
+                        try {
+                            await autoRunTest(fileResult.testFilePath, pageObjectResult.moduleName);
+                        } catch (error) {
+                            console.error(`Auto-run error: ${error.message}`);
+                        }
+                    });
                 }
                 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -992,6 +1563,9 @@ const server = http.createServer((req, res) => {
                         addedLocators: pageObjectResult.addedLocators || [],
                         addedMethods: pageObjectResult.addedMethods || []
                     },
+                    refactored: refactorResult.success,
+                    refactoredTestCount: refactorResult.refactoredTestCount || 0,
+                    autoRunTriggered: refactorResult.success,
                 }));
             } catch (error) {
                 console.error(`Error saving test case: ${error.message}`);
