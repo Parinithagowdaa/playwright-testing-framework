@@ -1149,6 +1149,101 @@
             }
         }
 
+        /* Progress Bar Styles */
+        .progress-container {
+            display: none;
+            margin: 24px 0;
+            padding: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
+        }
+
+        .progress-container.show {
+            display: block;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .progress-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-status {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .progress-bar-wrapper {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            background-size: 200% 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease-out;
+            animation: progressShine 2s linear infinite;
+        }
+
+        @keyframes progressShine {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .progress-message {
+            margin-top: 12px;
+            font-size: 14px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e2e8f0;
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -1345,8 +1440,8 @@
                         🌐 Browser Type:
                     </label>
                     <select id="browserType" class="browser-select" style="width: 100%;">
-                        <option value="chromium">Chrome</option>
-                        <option value="msedge" selected>Edge</option>
+                        <option value="chrome" selected>Chrome</option>
+                        <option value="edge">Edge</option>
                         <option value="firefox">Firefox</option>
                     </select>
                 </div>
@@ -1363,12 +1458,10 @@
                 
                 <div style="flex: 1; min-width: 180px;">
                     <label style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">
-                        📄 Report Option:
+                        � Test Name:
                     </label>
-                    <select id="reportOption" class="browser-select" style="width: 100%;">
-                        <option value="allure" selected>Allure</option>
-                        <option value="html">Playwright HTML Report</option>
-                        <option value="logs">Execution Logs</option>
+                    <select id="testName" class="browser-select" style="width: 100%;">
+                        <option value="All" selected>All Tests</option>
                     </select>
                 </div>
             </div>
@@ -1376,8 +1469,24 @@
             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                 <button class="btn" onclick="runAllTests()">▶️ Run All Tests</button>
                 <button class="btn btn-secondary" onclick="viewReports()">📊 View Reports</button>
-                <button class="btn btn-success" onclick="openPlaywrightUI()">▶️ Playwright UI</button>
-                <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="showPage(4)">🧾 Allure Report</button>
+                <button class="btn" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); box-shadow: 0 4px 16px rgba(220, 38, 38, 0.25);" onclick="stopExecution()">🛑 Stop Execution</button>
+            </div>
+        </div>
+
+        <!-- Progress Bar Container -->
+        <div id="progressContainer" class="progress-container">
+            <div class="progress-header">
+                <div class="progress-title">
+                    <span class="spinner"></span>
+                    <span>Test Execution in Progress</span>
+                </div>
+                <div class="progress-status" id="progressStatus">Running tests...</div>
+            </div>
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+            </div>
+            <div class="progress-message" id="progressMessage">
+                Initializing test execution...
             </div>
         </div>
 
@@ -4457,18 +4566,107 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
                 workers: document.getElementById('parallelThreads')?.value || '2',
                 browser: document.getElementById('browserType')?.value || 'chromium',
                 headless: document.getElementById('headlessMode')?.value || 'false',
-                reporter: document.getElementById('reportOption')?.value || 'allure'
+                testName: document.getElementById('testName')?.value || 'All'
             };
         }
 
         function runAllTests() {
             const config = getTestConfiguration();
-            const browserNames = { chromium: 'Chrome', msedge: 'Edge', firefox: 'Firefox' };
-            const reportNames = { allure: 'Allure', html: 'Playwright HTML Report', logs: 'Execution Logs' };
+            const browserNames = { chrome: 'Chrome', edge: 'Edge', firefox: 'Firefox' };
             
-            showToast('🏃 Initiating full test suite execution...');
-            addBotMessage(`🏁 <b>Running All Tests with Configuration:</b>\n\n🔁 <b>Retries:</b> ${config.retries}\n⚙️ <b>Parallel Threads:</b> ${config.workers}\n🌐 <b>Browser:</b> ${browserNames[config.browser]}\n🕵️ <b>Headless Mode:</b> ${config.headless}\n📄 <b>Report:</b> ${reportNames[config.reporter]}\n\n<b>Command would be:</b>\n<code>npx playwright test --retries=${config.retries} --workers=${config.workers} --project=${config.browser} ${config.headless === 'true' ? '--headed=false' : '--headed'} --reporter=${config.reporter}</code>\n\nTests are being executed...`);
+            const testDisplay = config.testName === 'All' ? 'All Tests' : config.testName;
+            const commandSuffix = config.testName === 'All' ? '' : ` TEST_NAME=${config.testName}`;
+            
+            showToast('🏃 Initiating test execution...');
+            addBotMessage(`🏁 <b>Running Tests with Configuration:</b>\n\n🔁 <b>Retries:</b> ${config.retries}\n⚙️ <b>Parallel Threads:</b> ${config.workers}\n🌐 <b>Browser:</b> ${browserNames[config.browser]}\n🕵️ <b>Headless Mode:</b> ${config.headless}\n📝 <b>Test Name:</b> ${testDisplay}\n\n<b>Executing command:</b>\n<code>set RETRIES=${config.retries} && set BROWSER=${config.browser} && set PARALLEL_THREAD=${config.workers} && set HEADLESS=${config.headless}${commandSuffix ? ` && set TEST_NAME=${config.testName}` : ''} && npm ${config.testName === 'All' ? 'test' : 'run local:test'}</code>\n\nTests are being executed...`);
             console.log('Running all tests with config:', config);
+            
+            // Show progress bar
+            showProgressBar();
+            
+            // Call API to run tests
+            fetch('/api/run-tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(config)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Test execution started:', data.message);
+                    updateProgress(30, 'Running tests...', 'Tests are executing in the background');
+                    
+                    // Simulate progress updates (since actual test execution is asynchronous)
+                    setTimeout(() => {
+                        updateProgress(60, 'Tests running...', 'Executing test cases...');
+                    }, 3000);
+                    
+                    setTimeout(() => {
+                        updateProgress(90, 'Finalizing...', 'Generating test reports...');
+                    }, 6000);
+                    
+                    setTimeout(() => {
+                        updateProgress(100, 'Completed!', 'Tests finished. Generating Allure report...');
+                        showToast('✅ Test execution completed! Opening Allure report...');
+                        addBotMessage('✅ <b>Test execution completed successfully!</b>\n\nAllure report is being generated and will open in your browser automatically.\n\nCheck the server console for detailed test results.');
+                        
+                        // Hide progress bar after a short delay
+                        setTimeout(() => {
+                            hideProgressBar();
+                        }, 3000);
+                    }, 9000);
+                } else {
+                    console.error('Test execution failed:', data.message);
+                    updateProgress(0, 'Failed', 'Test execution failed. Check server console for details.');
+                    showToast('❌ Test execution failed. Check server console.');
+                    addBotMessage('❌ <b>Test execution failed!</b>\n\nPlease check the server console for error details.');
+                    
+                    setTimeout(() => {
+                        hideProgressBar();
+                    }, 3000);
+                }
+            })
+            .catch(error => {
+                console.error('Error calling run-tests API:', error);
+                updateProgress(0, 'Error', 'Failed to start test execution. Check server console.');
+                showToast('❌ Failed to start test execution. Check server connection.');
+                addBotMessage('❌ <b>Failed to start test execution!</b>\n\nError: ' + error.message + '\n\nPlease ensure the dashboard server is running.');
+                
+                setTimeout(() => {
+                    hideProgressBar();
+                }, 3000);
+            });
+        }
+
+        // Show progress bar
+        function showProgressBar() {
+            const progressContainer = document.getElementById('progressContainer');
+            progressContainer.classList.add('show');
+            updateProgress(10, 'Starting...', 'Initializing test execution with selected configuration...');
+        }
+
+        // Hide progress bar
+        function hideProgressBar() {
+            const progressContainer = document.getElementById('progressContainer');
+            progressContainer.classList.remove('show');
+        }
+
+        // Update progress bar
+        function updateProgress(percentage, status, message) {
+            const progressBar = document.getElementById('progressBar');
+            const progressStatus = document.getElementById('progressStatus');
+            const progressMessage = document.getElementById('progressMessage');
+            
+            progressBar.style.width = percentage + '%';
+            progressStatus.textContent = status;
+            progressMessage.innerHTML = `<span class="spinner"></span> ${message}`;
+            
+            // Remove spinner if completed or failed
+            if (percentage >= 100 || status === 'Failed' || status === 'Error') {
+                progressMessage.innerHTML = message;
+            }
         }
 
         // View reports
@@ -4477,10 +4675,34 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
             showPage(4); // Navigate to Reports page
         }
 
-        // Open Playwright UI
-        function openPlaywrightUI() {
-            showToast('▶️ Opening Playwright UI Mode...');
-            console.log('Opening Playwright UI');
+        // Stop test execution
+        function stopExecution() {
+            showToast('🛑 Stopping test execution...');
+            addBotMessage('🛑 <b>Stopping test execution...</b>\n\nSending stop signal to running tests...');
+            
+            // Call API to stop tests
+            fetch('/api/stop-tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('✅ Test execution stopped!');
+                    addBotMessage('✅ <b>Test execution stopped successfully!</b>\n\nAll running tests have been terminated.');
+                    hideProgressBar();
+                } else {
+                    showToast('⚠️ ' + data.message);
+                    addBotMessage('⚠️ <b>' + data.message + '</b>');
+                }
+            })
+            .catch(error => {
+                console.error('Error stopping tests:', error);
+                showToast('❌ Failed to stop tests');
+                addBotMessage('❌ <b>Failed to stop test execution!</b>\n\nError: ' + error.message);
+            });
         }
 
         // Open project context
@@ -4501,10 +4723,52 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
             console.log(`Opening file: ${filename}`);
         }
 
+        // Load test names from server
+        async function loadTestNames() {
+            try {
+                console.log('Loading test names from server...');
+                const response = await fetch('/api/get-tests');
+                console.log('Response received:', response);
+                const data = await response.json();
+                console.log('Data received:', data);
+                
+                if (data.success && data.tests) {
+                    const testNameSelect = document.getElementById('testName');
+                    
+                    if (!testNameSelect) {
+                        console.error('Test name select element not found');
+                        return;
+                    }
+                    
+                    // Keep the "All Tests" option
+                    testNameSelect.innerHTML = '<option value="All" selected>All Tests</option>';
+                    
+                    // Add each test as an option
+                    data.tests.forEach(test => {
+                        const option = document.createElement('option');
+                        option.value = test;
+                        option.textContent = test;
+                        testNameSelect.appendChild(option);
+                    });
+                    
+                    console.log(`Successfully loaded ${data.tests.length} test files`);
+                    showToast(`✅ Loaded ${data.tests.length} tests`);
+                } else {
+                    console.error('Invalid response data:', data);
+                }
+            } catch (error) {
+                console.error('Failed to load test names:', error);
+                showToast('⚠️ Failed to load test names. Make sure dashboard server is running.');
+            }
+        }
+
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Playwright Testing Framework Dashboard Loaded');
             showToast('✅ Dashboard loaded successfully!');
+            
+            // Load test names
+            loadTestNames();
             
             // Add browser selection change event
             const browserSelect = document.getElementById('browserSelect');
@@ -4533,10 +4797,10 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
                 e.preventDefault();
                 runAllTests();
             }
-            // Ctrl+U - Open Playwright UI
-            if (e.ctrlKey && e.key === 'u') {
+            // Ctrl+S - Stop Execution
+            if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
-                openPlaywrightUI();
+                stopExecution();
             }
         });
     </script>

@@ -2,17 +2,21 @@ import { PlaywrightTestConfig } from "@playwright/test";
 import dotenv from 'dotenv';
 import Browser from "./src/framework/manager/Browser";
 
-dotenv.config();
+// Load .env file but don't override existing environment variables
+dotenv.config({ override: false });
+
+// Trim browser value to remove any trailing/leading spaces
+const browserValue = (process.env.BROWSER || 'chrome').trim().toLowerCase();
 
 const timeInMin: number = 60 * 1000;
 const config: PlaywrightTestConfig = {
   use: {
-    browserName: Browser.type(process.env.BROWSER.toLowerCase()),
-    headless: false,
-    channel: Browser.channel(process.env.BROWSER.toLowerCase()),
+    browserName: Browser.type(browserValue),
+    headless: process.env.HEADLESS === 'true',
+    channel: Browser.channel(browserValue),
     launchOptions: {
       args: ["--start-maximized", "--disable-extensions", "--disable-plugins"],
-      headless: false,
+      headless: process.env.HEADLESS === 'true',
       timeout: Number.parseInt(process.env.BROWSER_LAUNCH_TIMEOUT, 10),
       slowMo: 100,
       downloadsPath: "./test-results/downloads",
@@ -58,7 +62,7 @@ const config: PlaywrightTestConfig = {
     },
     {
       name: "suite",
-      testMatch: /\.*(test|spec)\.ts$/,
+      testMatch: /.*\.spec\.ts$/,
     },
   ],
 };

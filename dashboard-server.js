@@ -8,6 +8,9 @@ const { autoRunTest } = require('./auto-test-runner');
 const PORT = 3456;
 const ACTION_TIMEOUT_SECONDS = Number.parseInt(process.env.ACTION_TIMEOUT || '1', 10) * 60;
 
+// Global variable to track running test process
+let runningTestProcess = null;
+
 // Function to extract elements from Playwright code
 function extractElementsFromCode(code) {
     const elements = [];
@@ -1604,6 +1607,151 @@ const server = http.createServer((req, res) => {
             }
             res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
             res.end(data);
+        });
+    } else if (req.url === '/api/get-tests' && req.method === 'GET') {
+        // Get list of test files from src/tests directory
+        const testsPath = path.join(__dirname, 'src', 'tests');
+        
+        fs.readdir(testsPath, (err, files) => {
+            if (err) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: 'Failed to read tests directory' }));
+                return;
+            }
+            
+            // Filter only .spec.ts files and remove the .spec.ts extension
+            const testFiles = files
+                .filter(file => file.endsWith('.spec.ts'))
+                .map(file => file.replace('.spec.ts', ''))
+                .sort();
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, tests: testFiles }));
+        });
+    } else if (req.url === '/api/stop-tests' && req.method === 'POST') {
+        // Stop running tests
+        if (runningTestProcess) {
+            console.log('\n🛑 Stopping test execution...');
+            
+            // Kill the process tree (including child processes)
+            const isWindows = process.platform === 'win32';
+            if (isWindows) {
+                exec(`taskkill /pid ${runningTestProcess.pid} /T /F`, (error) => {
+                    if (error) {
+                        console.error(`Error stopping tests: ${error.message}`);
+                    } else {
+                        console.log('✅ Test execution stopped successfully');
+                    }
+                });
+            } else {
+                runningTestProcess.kill('SIGTERM');
+                console.log('✅ Test execution stopped successfully');
+            }
+            
+            runningTestProcess = null;
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                success: true, 
+                message: 'Test execution stopped.' 
+            }));
+        } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                success: false, 
+                message: 'No tests are currently running.' 
+            }));
+        }
+    } else if (req.url === '/api/run-tests' && req.method === 'POST') {
+        // Run tests with provided configuration
+        let body = '';
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        });
+        
+        req.on('end', () => {
+            try {
+                const config = JSON.parse(body);
+                const { retries, workers, browser, headless, testName } = config;
+                
+                console.log(`\n🚀 Starting test execution with configuration:`);
+                console.log(`   Retries: ${retries}`);
+                console.log(`   Parallel Threads: ${workers}`);
+                console.log(`   Browser: ${browser}`);
+                console.log(`   Headless: ${headless}`);
+                console.log(`   Test Name: ${testName || 'All Tests'}\n`);
+                
+                // Build command based on configuration (using cmd.exe to avoid PowerShell execution policy issues)
+                let command = '';
+                
+                if (testName && testName !== 'All') {
+                    // Scenario 1: Specific test selected
+                    command = `cmd.exe /c "set RETRIES=${retries} && set BROWSER=${browser} && set PARALLEL_THREAD=${workers} && set HEADLESS=${headless} && set TEST_NAME=${testName} && npm run local:test"`;
+                } else {
+                    // Scenario 2: All tests
+                    command = `cmd.exe /c "set RETRIES=${retries} && set BROWSER=${browser} && set PARALLEL_THREAD=${workers} && set HEADLESS=${headless} && npm test"`;
+                }
+                
+                console.log(`Executing command: ${command}\n`);
+                
+                // Execute the test command
+                runningTestProcess = exec(command, { 
+                    maxBuffer: 10 * 1024 * 1024,
+                    cwd: __dirname
+                }, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`\n❌ Test execution error: ${error.message}`);
+                        return;
+                    }
+                    
+                    if (stderr) {
+                        console.error(`\nTest stderr: ${stderr}`);
+                    }
+                    
+                    console.log(`\n✅ Test execution completed`);
+                    console.log(stdout);
+                    
+                    // After tests complete, automatically generate Allure report
+                    console.log(`\n📊 Generating Allure report...`);
+                    
+                    const allureResultsPath = path.join(process.cwd(), 'allure-results');
+                    if (fs.existsSync(allureResultsPath)) {
+                        const allureCommand = `cmd.exe /c "allure serve allure-results"`;
+                        exec(allureCommand, (allureError) => {
+                            if (allureError) {
+                                console.error(`Error generating Allure report: ${allureError.message}`);
+                            } else {
+                                console.log(`✅ Allure report opened in browser`);
+                            }
+                        });
+                    } else {
+                        console.log(`⚠️  No Allure results found`);
+                    }
+                    
+                    // Clear the running process reference
+                    runningTestProcess = null;
+                });
+                
+                // Stream test output to console
+                runningTestProcess.stdout.on('data', (data) => {
+                    console.log(data.toString());
+                });
+                
+                runningTestProcess.stderr.on('data', (data) => {
+                    console.error(data.toString());
+                });
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ 
+                    success: true, 
+                    message: 'Test execution started. Check server console for progress.' 
+                }));
+                
+            } catch (error) {
+                console.error(`Error parsing request: ${error.message}`);
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: 'Invalid request data' }));
+            }
         });
     } else {
         res.writeHead(404, { 'Content-Type': 'application/json' });
