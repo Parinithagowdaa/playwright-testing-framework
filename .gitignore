@@ -5,3 +5,7 @@
 node_modules
 **/*.test.ts
 /.vscode
+
+# Auto-generated files
+playwright-latest-codegen.spec.ts
+TESTING_FRAMEWORK_CONTEXT.md

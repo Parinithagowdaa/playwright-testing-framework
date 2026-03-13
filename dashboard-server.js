@@ -1446,66 +1446,13 @@ const server = http.createServer((req, res) => {
                 const testCaseData = JSON.parse(body);
                 console.log(`💾 Saving test case: ${testCaseData.name}`);
                 
-                // Read TESTING_FRAMEWORK_CONTEXT.md
-                const projectContextPath = path.join(process.cwd(), 'TESTING_FRAMEWORK_CONTEXT.md');
-                
-                if (!fs.existsSync(projectContextPath)) {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({
-                        success: false,
-                        message: 'TESTING_FRAMEWORK_CONTEXT.md file not found',
-                    }));
-                    return;
-                }
-                
-                let content = fs.readFileSync(projectContextPath, 'utf8');
-
-                // Extract elements from Playwright code
+                // TESTING_FRAMEWORK_CONTEXT.md update disabled - not required for test execution
+                // Extract elements from Playwright code (still needed for element count)
                 const elements = extractElementsFromCode(testCaseData.playwrightCode);
-
-                // Build the page elements section
-                let elementsSection = '';
-                if (elements.length > 0) {
-                    elementsSection = '\n\n### ' + testCaseData.name + " Page Elements\n\n```typescript\n";
-                    elements.forEach((el) => {
-                        // Include human-friendly description and locator metadata
-                        const locatorMeta = el.description;
-                        elementsSection += el.name + ' = ' + locatorMeta + ' // locator: ' + el.locatorType + '\n';
-                    });
-                    elementsSection += '```';
-                }
                 
-                // Build the test case entry with test scenario
+                // Get module name and type
                 const testCaseType = testCaseData.testCaseType || 'UI';
                 const moduleName = testCaseData.moduleName || 'General Tests';
-                const testCaseEntry = `${elementsSection}\n\n### ${testCaseData.name} Test\n\n**${testCaseData.name}**: ${testCaseData.description}\n- Module: ${moduleName}\n- Type: ${testCaseType}\n- ${testCaseData.steps}\n- Browser: ${testCaseData.browser}\n- URL: ${testCaseData.url}\n- Recorded: ${new Date(testCaseData.timestamp).toLocaleString()}`;
-
-                // Find the Contact Us test section and add after it
-                const contactUsTestIndex = content.indexOf('### Contact Us Tests');
-                if (contactUsTestIndex !== -1) {
-                    // Find the end of Contact Us test section (next ## heading)
-                    const nextSectionIndex = content.indexOf('\n## ', contactUsTestIndex + 1);
-                    if (nextSectionIndex !== -1) {
-                        const before = content.slice(0, nextSectionIndex);
-                        const after = content.slice(nextSectionIndex);
-                        content = `${before}${testCaseEntry}\n${after}`;
-                    } else {
-                        content += testCaseEntry;
-                    }
-                } else {
-                    // If Contact Us section not found, append at end of UI Test Scenarios
-                    const uiTestDataIndex = content.indexOf('## UI Test Data');
-                    if (uiTestDataIndex !== -1) {
-                        const before = content.slice(0, uiTestDataIndex);
-                        const after = content.slice(uiTestDataIndex);
-                        content = `${before}${testCaseEntry}\n\n${after}`;
-                    } else {
-                        content += testCaseEntry;
-                    }
-                }
-
-                // Write back to file
-                fs.writeFileSync(projectContextPath, content, 'utf8');
 
                 // Create or update spec file using helper function
                 const testsDir = path.join(process.cwd(), 'src', 'tests');
@@ -1515,7 +1462,7 @@ const server = http.createServer((req, res) => {
 
                 const fileResult = createOrUpdateSpecFile(testCaseData, moduleName, testCaseType, testsDir);
 
-                console.log(`✅ Test case saved to TESTING_FRAMEWORK_CONTEXT.md (${elements.length} elements extracted)`);
+                console.log(`✅ Extracted ${elements.length} elements from test`);
                 console.log(`✅ Test file ${fileResult.isNewFile ? 'created' : 'updated'}: ${fileResult.testFilePath}`);
                 
                 // STEP 2: Create Page Object files after spec file is created/updated
