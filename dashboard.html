@@ -401,7 +401,14 @@
             align-items: center;
         }
 
-        .btn-update, .btn-save, .btn-cancel, .btn-delete-test-case {
+        .test-case-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #6366f1;
+        }
+
+        .btn-update, .btn-save, .btn-cancel, .btn-delete-test-case, .btn-run, .btn-capture-screenshots {
             padding: 6px 16px;
             border: none;
             border-radius: 6px;
@@ -409,6 +416,19 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-run {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+        }
+
+        .btn-run:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
         }
 
         .btn-update {
@@ -431,6 +451,16 @@
             transform: translateY(-2px);
         }
 
+        .btn-capture-screenshots {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            color: white;
+        }
+
+        .btn-capture-screenshots:hover {
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            transform: translateY(-2px);
+        }
+
         .btn-save {
             background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
             color: white;
@@ -448,6 +478,10 @@
 
         .btn-cancel:hover {
             background: #cbd5e1;
+        }
+
+        .btn-icon {
+            font-size: 14px;
         }
 
         .test-steps-container {
@@ -1321,6 +1355,266 @@
         .btn-cancel:hover {
             background: #cbd5e1;
         }
+
+        /* Assertion Modal Styles */
+        .assertion-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .assertion-modal.show {
+            display: flex;
+        }
+
+        .assertion-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .assertion-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 2px solid #e2e8f0;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+        }
+
+        .assertion-modal-header h2 {
+            font-size: 20px;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .assertion-status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .assertion-status-badge.pass {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .assertion-status-badge.fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .assertion-tabs {
+            display: flex;
+            gap: 4px;
+            padding: 16px 24px 0 24px;
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .assertion-tab {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .assertion-tab:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+        }
+
+        .assertion-tab.active {
+            background: white;
+            color: #6366f1;
+            border-bottom: 2px solid #6366f1;
+        }
+
+        .assertion-tab-icon {
+            font-size: 16px;
+        }
+
+        .assertion-tab-content {
+            display: none;
+            padding: 24px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .assertion-tab-content.active {
+            display: block;
+        }
+
+        .assertion-snapshot-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .assertion-snapshot-image {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .assertion-snapshot-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 16px;
+            border: 2px dashed #cbd5e1;
+        }
+
+        .assertion-text-container {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #6366f1;
+        }
+
+        .assertion-text-row {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .assertion-text-row:last-child {
+            border-bottom: none;
+        }
+
+        .assertion-text-label {
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .assertion-text-value {
+            color: #1e293b;
+            word-break: break-word;
+        }
+
+        .assertion-code-container {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .assertion-code-container code {
+            color: #e2e8f0;
+        }
+
+        .assertion-modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 20px 24px;
+            border-top: 2px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .btn-assertion-action {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-download:hover {
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-copy:hover {
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-close-modal {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        .btn-close-modal:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-view-details {
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-view-details:hover {
+            box-shadow: 0 3px 8px rgba(99, 102, 241, 0.35);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -2088,6 +2382,51 @@
         let currentEditingTestCase = null;
         let currentEditingApiTestCase = null;
 
+        // Assertion Data Storage
+        // Key format: "moduleIndex-tcIndex-stepIndex" for UI tests, "api-moduleIndex-tcIndex-stepIndex" for API tests
+        let assertionData = {
+            // Sample assertion data for demonstration
+            "0-0-2": {
+                testCase: "LoginTest",
+                stepNumber: 3,
+                stepDescription: "Click on the Login button",
+                assertionType: "Element Visibility",
+                expected: "Login button should be visible and clickable",
+                actual: "Login button found and clickable",
+                status: "PASS",
+                timestamp: "2026-03-24 10:30:45",
+                code: `// Verify login button is visible\nawait expect(page.locator('#loginBtn')).toBeVisible();\n\n// Verify login button is enabled\nawait expect(page.locator('#loginBtn')).toBeEnabled();`,
+                screenshot: null // Will be populated when screenshots are captured
+            },
+            "0-1-1": {
+                testCase: "DatabaseTest",
+                stepNumber: 2,
+                stepDescription: "Execute MSSQL query from test data",
+                assertionType: "Database Query",
+                expected: "Query executes successfully with affected rows count > 0",
+                actual: "Query executed, 5 rows affected",
+                status: "PASS",
+                timestamp: "2026-03-24 10:35:12",
+                code: `// Execute database query\nconst result = await db.executeQuery(query);\n\n// Verify rows affected\nawait expect(result.rowsAffected).toBeGreaterThan(0);`,
+                screenshot: null
+            },
+            "0-2-3": {
+                testCase: "ImageCompare",
+                stepNumber: 4,
+                stepDescription: "Compare Login Section with masked elements",
+                assertionType: "Visual Regression",
+                expected: "Screenshot matches baseline with tolerance 0.70",
+                actual: "Screenshot comparison passed with 0.65 difference",
+                status: "PASS",
+                timestamp: "2026-03-24 10:40:22",
+                code: `// Capture screenshot\nawait page.screenshot({ path: 'screenshots/login-section.png' });\n\n// Compare with baseline\nawait expect(page).toHaveScreenshot('login-baseline.png', {\n  maxDiffPixelRatio: 0.30\n});`,
+                screenshot: "screenshots/login-section.png"
+            }
+        };
+
+        // Current assertion being viewed
+        let currentAssertion = null;
+
         // Load saved tests from TESTING_FRAMEWORK_CONTEXT.md via server
         async function loadSavedTests() {
             try {
@@ -2197,8 +2536,20 @@
                                 </div>
                                 <div class="test-case-actions" onclick="event.stopPropagation()">
                                     ${!isEditing ? 
-                                        `<button class="btn-update" onclick="editTestCase(${moduleIndex}, ${tcIndex})">Update</button>
-                                         <button class="btn-delete-test-case" onclick="deleteTestCase(${moduleIndex}, ${tcIndex})">Delete</button>` :
+                                        `<input type="checkbox" class="test-case-checkbox" 
+                                                onchange="toggleTestCaseSelection(this, ${moduleIndex}, ${tcIndex})">
+                                         <button class="btn-run" onclick="runTestCase(${moduleIndex}, ${tcIndex})">
+                                            <span class="btn-icon">▶</span>Run
+                                         </button>
+                                         <button class="btn-update" onclick="editTestCase(${moduleIndex}, ${tcIndex})">
+                                            <span class="btn-icon">✏</span>Update
+                                         </button>
+                                         <button class="btn-delete-test-case" onclick="deleteTestCase(${moduleIndex}, ${tcIndex})">
+                                            <span class="btn-icon">🗑</span>Delete
+                                         </button>
+                                         <button class="btn-capture-screenshots" id="captureBtn${moduleIndex}-${tcIndex}" onclick="captureScreenshotsForTest(${moduleIndex}, ${tcIndex}, this)">
+                                            <span class="btn-icon">📸</span>Capture Screenshots
+                                         </button>` :
                                         `<button class="btn-save" onclick="saveTestCase(${moduleIndex}, ${tcIndex})">Save</button>
                                          <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>`
                                     }
@@ -2208,14 +2559,22 @@
                     `;
 
                     testCase.steps.forEach((step, stepIndex) => {
+                        // Check if this step has assertion data
+                        const hasAssertion = assertionData[`${moduleIndex}-${tcIndex}-${stepIndex}`] !== undefined;
+
                         html += `
                             <div class="test-step-item" id="step${moduleIndex}-${tcIndex}-${stepIndex}">
                                 <div class="step-number">${stepIndex + 1}</div>
                                 <div class="step-text" id="stepText${moduleIndex}-${tcIndex}-${stepIndex}">${step}</div>
+                                ${hasAssertion && !isEditing ? `
+                                    <button class="btn-view-details" onclick="viewAssertion(${moduleIndex}, ${tcIndex}, ${stepIndex}); event.stopPropagation();">
+                                        🔍 View Details
+                                    </button>
+                                ` : ''}
                                 ${isEditing ? `
                                     <div class="step-actions">
-                                        <button class="icon-btn edit" onclick="editStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Edit">✏️</button>
-                                        <button class="icon-btn delete" onclick="deleteStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Delete">🗑️</button>
+                                        <button class="icon-btn edit" onclick="editStep(${moduleIndex}, ${tcIndex}, ${stepIndex}); event.stopPropagation();" title="Edit">✏️</button>
+                                        <button class="icon-btn delete" onclick="deleteStep(${moduleIndex}, ${tcIndex}, ${stepIndex}); event.stopPropagation();" title="Delete">🗑️</button>
                                     </div>
                                 ` : ''}
                             </div>
@@ -2450,6 +2809,461 @@
             showToast(`🗑️ Test case "${testCase.name}" deleted successfully`);
         }
 
+        // Global object to track selected test cases for batch execution
+        const selectedTestCases = new Set();
+
+        // Toggle test case selection via checkbox
+        function toggleTestCaseSelection(checkbox, moduleIndex, tcIndex) {
+            const key = `${moduleIndex}-${tcIndex}`;
+            if (checkbox.checked) {
+                selectedTestCases.add(key);
+            } else {
+                selectedTestCases.delete(key);
+            }
+            console.log('Selected test cases:', Array.from(selectedTestCases));
+        }
+
+        // Run a single test case
+        function runTestCase(moduleIndex, tcIndex) {
+            const modules = Object.keys(testScenariosData);
+            const moduleName = modules[moduleIndex];
+            const testCase = testScenariosData[moduleName][tcIndex];
+            
+            if (!testCase) {
+                showToast('❌ Test case not found');
+                return;
+            }
+            
+            showToast(`▶️ Running test: ${testCase.name} (${testCase.id})`);
+            addBotMessage(`🏁 <b>Running Test:</b> ${testCase.name} (${testCase.id})\n\n<b>Description:</b> ${testCase.description}\n\n<b>Steps:</b>\n${testCase.steps.map((step, i) => `${i + 1}. ${step}`).join('\n')}\n\nTest execution initiated...`);
+            
+            // Call API to run specific test
+            const config = getTestConfiguration();
+            fetch('/api/run-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...config,
+                    moduleName: moduleName,
+                    testCaseId: testCase.id,
+                    testCaseName: testCase.name
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Test execution started:', data.message);
+                    showToast(`✅ Test "${testCase.name}" execution started`);
+                } else {
+                    showToast(`❌ Failed to run test: ${data.error || 'Unknown error'}`);
+                    addBotMessage(`❌ <b>Test Execution Failed:</b> ${data.error || 'Unknown error'}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error running test:', error);
+                showToast(`❌ Error running test: ${error.message}`);
+                addBotMessage(`❌ <b>Error:</b> ${error.message}`);
+            });
+        }
+
+        // Build a Playwright trace-style snapshot that matches the generated code
+        function generateSnapshotHtml(stepText, stepNumber, assertionType, expected, code) {
+            // Extract the assertion line(s) from the generated code
+            const codeLines = (code || '').split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            const actionLine  = codeLines.find(l => !l.startsWith('//')) || codeLines[0] || '';
+            const assertLines = codeLines.filter(l => l.includes('expect(') || l.startsWith('await expect'));
+            const commentLine = codeLines.find(l => l.startsWith('//')) || `// Step ${stepNumber}: ${stepText}`;
+
+            // Derive locator + matcher from the first expect() call
+            let locator = '', matcher = '', expectedVal = expected || '';
+            const expectMatch = assertLines[0] && assertLines[0].match(/expect\((.+?)\)\.(\w+)\(([^)]*)\)/);
+            if (expectMatch) {
+                locator     = expectMatch[1];
+                matcher     = expectMatch[2];
+                expectedVal = expectMatch[3].replace(/^['"`]|['"`]$/g, '') || expected || '—';
+            }
+
+            // Color-code by assertion type
+            const typeColors = {
+                'URL Assertion':        ['#3b82f6','#dbeafe','#1d4ed8'],
+                'Element Visibility':   ['#8b5cf6','#ede9fe','#5b21b6'],
+                'Input Value Assertion':['#10b981','#dcfce7','#065f46'],
+                'Selection Assertion':  ['#f59e0b','#fef3c7','#92400e'],
+                'Custom Assertion':     ['#06b6d4','#cffafe','#0e7490'],
+                'File Upload Assertion':['#ec4899','#fce7f3','#9d174d'],
+                'Step Completion':      ['#6366f1','#ede9fe','#3730a3'],
+            };
+            const [accentColor, bgColor, textColor] = typeColors[assertionType] || ['#6366f1','#ede9fe','#3730a3'];
+
+            // Build assert rows for each expect() line
+            const assertRows = assertLines.map(line => {
+                const m = line.match(/expect\((.+?)\)\.(\w+)\(([^)]*)\)/);
+                if (!m) return `<div style="color:#86efac;font-size:12px;font-family:monospace;padding:2px 0;">${escapeHtml(line)}</div>`;
+                const loc = m[1], fn = m[2], arg = m[3].replace(/^['"`]|['"`]$/g,'') || '—';
+                return `
+                    <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #334155;">
+                        <span style="color:#4ade80;font-size:11px;margin-top:2px;flex-shrink:0;">✓</span>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-family:monospace;font-size:12px;color:#e2e8f0;word-break:break-all;">
+                                <span style="color:#7dd3fc;">expect</span>(<span style="color:#fcd34d;">${escapeHtml(loc)}</span>).<span style="color:#86efac;">${fn}</span>(<span style="color:#fca5a5;">${escapeHtml(arg)}</span>)
+                            </div>
+                            <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
+                                Expected&nbsp;&nbsp;<span style="color:#86efac;">${escapeHtml(arg || '—')}</span>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            return `
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;">
+
+                    <!-- Header: step info -->
+                    <div style="background:${bgColor};padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid ${accentColor}33;">
+                        <div style="background:${accentColor};color:white;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;white-space:nowrap;">
+                            STEP ${stepNumber}
+                        </div>
+                        <div style="font-size:13px;font-weight:600;color:${textColor};flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(stepText)}</div>
+                        <div style="background:#10b981;color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700;white-space:nowrap;">✓ PASS</div>
+                    </div>
+
+                    <!-- Action row: the recorded line -->
+                    <div style="background:#f8fafc;padding:10px 14px;border-bottom:1px solid #e2e8f0;">
+                        <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Recorded Action</div>
+                        <div style="background:#1e293b;border-radius:6px;padding:10px 12px;font-family:monospace;font-size:12px;color:#e2e8f0;word-break:break-all;">
+                            <span style="color:#64748b;">${escapeHtml(commentLine)}</span>
+                            ${actionLine ? `<br><span style="color:#93c5fd;">await </span><span style="color:#e2e8f0;">${escapeHtml(actionLine.replace(/^await\s*/,''))}</span>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Assertions section (matches the Code tab exactly) -->
+                    <div style="background:#0f172a;padding:12px 14px;">
+                        <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Assertion Output</div>
+                        ${assertRows || `<div style="color:#64748b;font-size:12px;font-family:monospace;">// No explicit assertion for this step</div>`}
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="background:#f1f5f9;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#64748b;">
+                        <span>${assertionType}</span>
+                        <span style="color:#10b981;font-weight:600;">Captured ${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </div>`;
+        }
+
+        // Generate assertion data for a single step from its text description
+        function generateStepAssertionData(stepText, stepNumber, testCaseName) {
+            const lower = stepText.toLowerCase();
+            let assertionType, expected, actual, code;
+
+            if (/navigate|go to|open\s+https?/i.test(lower)) {
+                const urlMatch = stepText.match(/(https?:\/\/[^\s]+)/);
+                const url = urlMatch ? urlMatch[1] : 'the page';
+                assertionType = 'URL Assertion';
+                expected = `Page navigated to ${url}`;
+                actual = 'Page URL matches expected destination';
+                code = `// Step ${stepNumber}: ${stepText}\nawait expect(page).toHaveURL(${urlMatch ? `'${url}'` : '/.*/'});\nawait expect(page).toHaveTitle(/.+/);`;
+
+            } else if (/click|press|tap/i.test(lower)) {
+                const elem = stepText.replace(/^click\s+(?:on\s+)?/i, '').replace(/\bbutton\b|\blink\b|\bicon\b/gi, '').trim() || 'element';
+                assertionType = 'Element Visibility';
+                expected = `"${elem}" is visible and enabled`;
+                actual = 'Element is visible and interactive';
+                code = `// Step ${stepNumber}: ${stepText}\nawait expect(page.getByText('${elem}', { exact: false })).toBeVisible();\nawait expect(page.getByText('${elem}', { exact: false })).toBeEnabled();`;
+
+            } else if (/enter|type|fill|input/i.test(lower)) {
+                const valMatch = stepText.match(/['"]([^'"]+)['"]/);
+                const val = valMatch ? valMatch[1] : '';
+                const fieldMatch = stepText.match(/(?:in(?:to)?|on)\s+(?:the\s+)?(?:field\s+)?['"]?([A-Za-z][A-Za-z0-9 ]{1,30}?)['"]?\s*(?:field|input|box|textbox)?$/i);
+                const field = fieldMatch ? fieldMatch[1].trim() : 'input field';
+                assertionType = 'Input Value Assertion';
+                expected = val ? `"${field}" field contains value "${val}"` : `"${field}" field is filled`;
+                actual = val ? 'Field has the expected value' : 'Field is not empty';
+                code = val
+                    ? `// Step ${stepNumber}: ${stepText}\nawait expect(page.getByLabel('${field}')).toHaveValue('${val}');`
+                    : `// Step ${stepNumber}: ${stepText}\nawait expect(page.getByLabel('${field}')).not.toBeEmpty();`;
+
+            } else if (/select|choose|pick/i.test(lower)) {
+                const valMatch = stepText.match(/['"]([^'"]+)['"]/);
+                const val = valMatch ? valMatch[1] : 'option';
+                assertionType = 'Selection Assertion';
+                expected = `Option "${val}" is selected`;
+                actual = 'Dropdown has expected selection';
+                code = `// Step ${stepNumber}: ${stepText}\nawait expect(page.locator('select')).toHaveValue('${val}');`;
+
+            } else if (/verify|assert|check|should|must|expect/i.test(lower)) {
+                assertionType = 'Custom Assertion';
+                expected = stepText;
+                actual = 'Assertion condition verified';
+                code = `// Step ${stepNumber}: ${stepText}\nawait expect(page.locator('.target')).toBeVisible();\nawait expect(page.locator('.target')).toHaveText(/.+/);`;
+
+            } else if (/upload|attach/i.test(lower)) {
+                assertionType = 'File Upload Assertion';
+                expected = 'File uploaded successfully';
+                actual = 'File input has attachment';
+                code = `// Step ${stepNumber}: ${stepText}\nawait expect(page.locator('[type="file"]')).toBeAttached();`;
+
+            } else {
+                assertionType = 'Step Completion';
+                expected = `Step completed: ${stepText.substring(0, 60)}`;
+                actual = 'Step executed without errors';
+                code = `// Step ${stepNumber}: ${stepText}\nawait expect(page).not.toHaveURL('about:blank');\nawait expect(page.locator('body')).toBeVisible();`;
+            }
+
+            return {
+                testCase: testCaseName,
+                stepNumber: stepNumber,
+                stepDescription: stepText,
+                assertionType: assertionType,
+                expected: expected,
+                actual: actual,
+                status: 'Generated',
+                timestamp: new Date().toLocaleString(),
+                screenshot: null,
+                code: code,
+                snapshotHtml: generateSnapshotHtml(stepText, stepNumber, assertionType, expected, code)
+            };
+        }
+
+        // Capture screenshots for a specific test case.
+        // Calls /api/capture-screenshots and WAITS for the backend to finish running the
+        // Playwright test before returning — the response contains screenshot URLs directly.
+        async function captureScreenshotsForTest(moduleIndex, tcIndex, btn) {
+            const modules = Object.keys(testScenariosData);
+            const moduleName = modules[moduleIndex];
+            const testCase = testScenariosData[moduleName][tcIndex];
+
+            if (!testCase) { showToast('❌ Test case not found'); return; }
+
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn-icon">⏳</span>Capturing...'; }
+
+            // Generate assertion text + code immediately so View Details buttons appear
+            testCase.steps.forEach((step, stepIndex) => {
+                const key = `${moduleIndex}-${tcIndex}-${stepIndex}`;
+                assertionData[key] = generateStepAssertionData(step, stepIndex + 1, testCase.name);
+            });
+            renderTestScenarios();
+            showToast(`📸 Running Playwright test — please wait (may take up to 2 min)...`);
+
+            const BASE = 'http://localhost:3456';
+            let realScreenshotsCaptured = 0;
+
+            try {
+                // Single request — backend waits for test to complete, returns screenshot URLs
+                const resp = await fetch(`${BASE}/api/capture-screenshots`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    // 3-minute timeout to wait for Playwright test to complete
+                    signal: AbortSignal.timeout ? AbortSignal.timeout(180000) : undefined,
+                    body: JSON.stringify({
+                        moduleName:   moduleName,
+                        testCaseId:   testCase.id,
+                        testCaseName: testCase.name,
+                        steps:        testCase.steps
+                    })
+                });
+
+                if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
+                const data = await resp.json();
+                const shots = data.screenshots || [];
+
+                shots.forEach((s) => {
+                    const si  = s.stepIndex !== undefined ? s.stepIndex : 0;
+                    const key = `${moduleIndex}-${tcIndex}-${si}`;
+                    if (assertionData[key]) {
+                        // Add cache-buster so browser fetches fresh image (don't save ?t= to metadata)
+                        assertionData[key].screenshot = `${BASE}${s.url}?t=${Date.now()}`;
+                        assertionData[key].status     = 'Captured';
+                        realScreenshotsCaptured++;
+                    }
+                });
+
+            } catch (err) {
+                console.info('Screenshot backend error:', err.message);
+                showToast('⚠️ Backend error — make sure dashboard-server.js is running');
+            }
+
+            if (btn) { btn.disabled = false; btn.innerHTML = '<span class="btn-icon">📸</span>Capture Screenshots'; }
+            renderTestScenarios();
+
+            // If the assertion modal is currently open for one of these steps, refresh it live
+            if (currentAssertion && realScreenshotsCaptured > 0) {
+                const openKey = Object.keys(assertionData).find(k => assertionData[k] === currentAssertion);
+                if (openKey) {
+                    // Re-trigger viewAssertion for the currently open step
+                    const parts = openKey.split('-');
+                    if (parts.length === 3) viewAssertion(Number(parts[0]), Number(parts[1]), Number(parts[2]));
+                }
+            }
+
+            if (realScreenshotsCaptured > 0) {
+                showToast(`✅ ${realScreenshotsCaptured} screenshot(s) captured for "${testCase.name}"`);
+                addBotMessage(`✅ <b>Screenshots Captured!</b>\n\nLoaded <b>${realScreenshotsCaptured}</b> real Playwright screenshot(s) for: <b>${testCase.name}</b>\n\nClick <b>🔍 View Details</b> on each step to view the screenshot.`);
+            } else {
+                showToast(`ℹ️ Assertion data ready — no screenshots returned from backend`);
+                addBotMessage(`⚠️ <b>No screenshots found.</b>\n\nThe test ran but screenshots were not saved.\n\n<b>Check:</b>\n1. <code>node dashboard-server.js</code> is running\n2. The test spec file exists and runs successfully`);
+            }
+        }
+
+        // View assertion details for a specific step
+        function viewAssertion(moduleIndex, tcIndex, stepIndex, isApiTest = false) {
+            const key = isApiTest ? `api-${moduleIndex}-${tcIndex}-${stepIndex}` : `${moduleIndex}-${tcIndex}-${stepIndex}`;
+            const assertion = assertionData[key];
+            
+            if (!assertion) {
+                showToast('ℹ️ No assertion data available for this step');
+                return;
+            }
+            
+            currentAssertion = assertion;
+            
+            // Populate modal with assertion data
+            document.getElementById('assertionStatusBadge').textContent = assertion.status;
+            document.getElementById('assertionStatusBadge').className = `assertion-status-badge ${assertion.status.toLowerCase()}`;
+            
+            // Text tab
+            document.getElementById('assertionTextTestCase').textContent = assertion.testCase;
+            document.getElementById('assertionTextStepNumber').textContent = assertion.stepNumber;
+            document.getElementById('assertionTextStepDesc').textContent = assertion.stepDescription;
+            document.getElementById('assertionTextType').textContent = assertion.assertionType;
+            document.getElementById('assertionTextExpected').textContent = assertion.expected;
+            document.getElementById('assertionTextActual').textContent = assertion.actual;
+            document.getElementById('assertionTextStatus').textContent = assertion.status;
+            document.getElementById('assertionTextTimestamp').textContent = assertion.timestamp;
+            
+            // Snapshot tab
+            const snapshotContainer = document.getElementById('assertionSnapshotImageContainer');
+            document.getElementById('assertionSnapshotStep').textContent = assertion.stepDescription;
+
+            if (assertion.screenshot) {
+                // Real screenshot from Playwright trace — display it
+                const src = assertion.screenshot;
+                snapshotContainer.innerHTML = `
+                    <div style="border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 4px 16px rgba(0,0,0,0.10);">
+                        <div style="background:#1e293b;padding:8px 12px;display:flex;align-items:center;gap:6px;">
+                            <div style="width:10px;height:10px;border-radius:50%;background:#ef4444;"></div>
+                            <div style="width:10px;height:10px;border-radius:50%;background:#f59e0b;"></div>
+                            <div style="width:10px;height:10px;border-radius:50%;background:#10b981;"></div>
+                            <div style="flex:1;background:#0f172a;border-radius:4px;padding:3px 10px;font-size:11px;color:#94a3b8;margin:0 8px;font-family:monospace;">
+                                Playwright Screenshot — Step ${assertion.stepNumber}
+                            </div>
+                            <span style="background:#10b981;color:white;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;">✓ CAPTURED</span>
+                        </div>
+                        <img src="${src}" alt="Playwright screenshot step ${assertion.stepNumber}"
+                             style="width:100%;display:block;max-height:400px;object-fit:contain;background:#f8fafc;"
+                             onerror="this.parentElement.innerHTML='<div style=padding:20px;text-align:center;color:#ef4444;>⚠️ Screenshot could not be loaded.<br><small style=color:#64748b;>${src}</small></div>'">
+                        <div style="background:#f8fafc;padding:8px 12px;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#64748b;">
+                            <span>${assertion.assertionType}</span>
+                            <span style="color:#10b981;font-weight:600;">${assertion.timestamp}</span>
+                        </div>
+                    </div>`;
+            } else {
+                // No real screenshot yet — show clear placeholder
+                snapshotContainer.innerHTML = `
+                    <div class="assertion-snapshot-placeholder" style="padding:40px 20px;text-align:center;color:#64748b;">
+                        <div style="font-size:48px;margin-bottom:12px;">📸</div>
+                        <div style="font-size:15px;font-weight:600;color:#374151;margin-bottom:8px;">No screenshot captured yet</div>
+                        <div style="font-size:13px;">Click <strong>📸 Capture Screenshots</strong> on the test case<br>to take real browser screenshots from Playwright</div>
+                    </div>
+                `;
+            }
+            
+            // Code tab
+            document.getElementById('assertionCodeContent').innerHTML = `<code>${escapeHtml(assertion.code)}</code>`;
+            
+            // Show modal
+            document.getElementById('assertionModal').classList.add('show');
+            
+            // Reset to first tab
+            switchAssertionTab('snapshot');
+        }
+
+        // Close assertion modal
+        function closeAssertionModal() {
+            document.getElementById('assertionModal').classList.remove('show');
+            currentAssertion = null;
+        }
+
+        // Switch between assertion tabs
+        function switchAssertionTab(tabName) {
+            // Remove active class from all tabs and content
+            document.querySelectorAll('.assertion-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.assertion-tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab and content
+            document.querySelector(`.assertion-tab[onclick*="${tabName}"]`).classList.add('active');
+            document.getElementById(`assertionTab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.add('active');
+        }
+
+        // Download assertion data
+        function downloadAssertion() {
+            if (!currentAssertion) {
+                showToast('❌ No assertion data to download');
+                return;
+            }
+            
+            const data = {
+                testCase: currentAssertion.testCase,
+                stepNumber: currentAssertion.stepNumber,
+                stepDescription: currentAssertion.stepDescription,
+                assertionType: currentAssertion.assertionType,
+                expected: currentAssertion.expected,
+                actual: currentAssertion.actual,
+                status: currentAssertion.status,
+                timestamp: currentAssertion.timestamp,
+                code: currentAssertion.code
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `assertion-${currentAssertion.testCase}-step${currentAssertion.stepNumber}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('✅ Assertion data downloaded');
+        }
+
+        // Copy assertion code to clipboard
+        function copyAssertionCode() {
+            if (!currentAssertion) {
+                showToast('❌ No assertion code to copy');
+                return;
+            }
+            
+            navigator.clipboard.writeText(currentAssertion.code)
+                .then(() => {
+                    showToast('✅ Assertion code copied to clipboard');
+                })
+                .catch(err => {
+                    console.error('Failed to copy:', err);
+                    showToast('❌ Failed to copy code');
+                });
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            const assertionModal = document.getElementById('assertionModal');
+            if (event.target === assertionModal) {
+                closeAssertionModal();
+            }
+        });
+
         // Render API Tests Tree (same structure as Test Scenarios)
         function renderApiTests() {
             const container = document.getElementById('apiTestsTree');
@@ -2497,14 +3311,22 @@
                     `;
 
                     testCase.steps.forEach((step, stepIndex) => {
+                        // Check if this step has assertion data
+                        const hasAssertion = assertionData[`api-${moduleIndex}-${tcIndex}-${stepIndex}`] !== undefined;
+
                         html += `
                             <div class="test-step-item" id="apiStep${moduleIndex}-${tcIndex}-${stepIndex}">
                                 <div class="step-number">${stepIndex + 1}</div>
                                 <div class="step-text" id="apiStepText${moduleIndex}-${tcIndex}-${stepIndex}">${step}</div>
+                                ${hasAssertion && !isEditing ? `
+                                    <button class="btn-view-details" onclick="viewAssertion(${moduleIndex}, ${tcIndex}, ${stepIndex}, true); event.stopPropagation();">
+                                        🔍 View Details
+                                    </button>
+                                ` : ''}
                                 ${isEditing ? `
                                     <div class="step-actions">
-                                        <button class="icon-btn edit" onclick="editApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Edit">✏️</button>
-                                        <button class="icon-btn delete" onclick="deleteApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Delete">🗑️</button>
+                                        <button class="icon-btn edit" onclick="editApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex}); event.stopPropagation();" title="Edit">✏️</button>
+                                        <button class="icon-btn delete" onclick="deleteApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex}); event.stopPropagation();" title="Delete">🗑️</button>
                                     </div>
                                 ` : ''}
                             </div>
@@ -2663,11 +3485,64 @@
             showToast(`✅ Test case "${testCase.name}" deleted successfully`);
         }
 
+        // Restore previously captured screenshots into assertionData from the server's
+        // persisted metadata.json files — called on every page load so screenshots
+        // are always available without needing to re-capture.
+        async function loadSavedScreenshots() {
+            try {
+                const resp = await fetch('http://localhost:3456/api/all-screenshots');
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const metaList = data.metadata || [];
+                if (metaList.length === 0) return;
+
+                const BASE = 'http://localhost:3456';
+                let restored = 0;
+
+                for (const meta of metaList) {
+                    // Find the matching module + test case index in testScenariosData
+                    const moduleNames = Object.keys(testScenariosData);
+                    for (let mi = 0; mi < moduleNames.length; mi++) {
+                        const tcList = testScenariosData[moduleNames[mi]];
+                        for (let ti = 0; ti < tcList.length; ti++) {
+                            const tc = tcList[ti];
+                            // Match by testCaseId or testCaseName
+                            if (tc.id !== meta.testCaseId && tc.name !== meta.testCaseName) continue;
+
+                            // Found — restore screenshot URLs and generate assertion data
+                            for (const s of (meta.screenshots || [])) {
+                                const si = s.stepIndex;
+                                const key = `${mi}-${ti}-${si}`;
+                                if (!assertionData[key]) {
+                                    const stepText = tc.steps[si] || `Step ${si + 1}`;
+                                    assertionData[key] = generateStepAssertionData(stepText, si + 1, tc.name);
+                                }
+                                // Strip any stale cache-buster and add a fresh one
+                                const cleanUrl = s.url.split('?')[0];
+                                assertionData[key].screenshot = `${BASE}${cleanUrl}?t=${Date.now()}`;
+                                assertionData[key].status = 'Captured';
+                                restored++;
+                            }
+                        }
+                    }
+                }
+
+                if (restored > 0) {
+                    console.log(`Restored ${restored} screenshot(s) from saved metadata`);
+                    renderTestScenarios();
+                }
+            } catch (e) {
+                // Server may not be running yet — silently ignore
+                console.debug('loadSavedScreenshots:', e.message);
+            }
+        }
+
         // Initialize test scenarios on page load
         document.addEventListener('DOMContentLoaded', async function() {
             await loadSavedTests(); // Load saved tests first
             renderTestScenarios();
             renderApiTests();
+            await loadSavedScreenshots(); // Restore any previously captured screenshots
         });
 
         // File selection handlers
@@ -4868,6 +5743,110 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
                     <button type="submit" class="btn">💾 Save</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Assertion Viewing Modal -->
+    <div id="assertionModal" class="assertion-modal">
+        <div class="assertion-modal-content">
+            <div class="assertion-modal-header">
+                <h2>
+                    <span>🔍 Assertion Details</span>
+                    <span id="assertionStatusBadge" class="assertion-status-badge pass">PASS</span>
+                </h2>
+                <button class="close-btn" onclick="closeAssertionModal()">&times;</button>
+            </div>
+            
+            <div class="assertion-tabs">
+                <button class="assertion-tab active" onclick="switchAssertionTab('snapshot')">
+                    <span class="assertion-tab-icon">📸</span>
+                    Snapshot
+                </button>
+                <button class="assertion-tab" onclick="switchAssertionTab('text')">
+                    <span class="assertion-tab-icon">📝</span>
+                    Text
+                </button>
+                <button class="assertion-tab" onclick="switchAssertionTab('code')">
+                    <span class="assertion-tab-icon">💻</span>
+                    Code
+                </button>
+            </div>
+            
+            <!-- Snapshot Tab -->
+            <div id="assertionTabSnapshot" class="assertion-tab-content active">
+                <div class="assertion-snapshot-container">
+                    <div id="assertionSnapshotImageContainer">
+                        <div class="assertion-snapshot-placeholder">
+                            📸 No screenshot available<br>
+                            <small style="margin-top: 8px;">Capture screenshots using the "Capture Screenshots" button</small>
+                        </div>
+                    </div>
+                    <div style="font-size: 13px; color: #64748b;">
+                        <strong>Step:</strong> <span id="assertionSnapshotStep"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Text Tab -->
+            <div id="assertionTabText" class="assertion-tab-content">
+                <div class="assertion-text-container">
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Test Case:</div>
+                        <div class="assertion-text-value" id="assertionTextTestCase"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Step Number:</div>
+                        <div class="assertion-text-value" id="assertionTextStepNumber"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Step Description:</div>
+                        <div class="assertion-text-value" id="assertionTextStepDesc"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Assertion Type:</div>
+                        <div class="assertion-text-value" id="assertionTextType"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Expected Result:</div>
+                        <div class="assertion-text-value" id="assertionTextExpected"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Actual Result:</div>
+                        <div class="assertion-text-value" id="assertionTextActual"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Status:</div>
+                        <div class="assertion-text-value" id="assertionTextStatus"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Timestamp:</div>
+                        <div class="assertion-text-value" id="assertionTextTimestamp"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Code Tab -->
+            <div id="assertionTabCode" class="assertion-tab-content">
+                <div class="assertion-code-container">
+                    <pre id="assertionCodeContent"><code>// Playwright assertion code will be displayed here
+await expect(page.locator('#element')).toBeVisible();
+await expect(page.locator('#element')).toHaveText('Expected Text');</code></pre>
+                </div>
+            </div>
+            
+            <div class="assertion-modal-actions">
+                <button class="btn-assertion-action btn-download" onclick="downloadAssertion()">
+                    <span>⬇️</span>
+                    Download
+                </button>
+                <button class="btn-assertion-action btn-copy" onclick="copyAssertionCode()">
+                    <span>📋</span>
+                    Copy Code
+                </button>
+                <button class="btn-assertion-action btn-close-modal" onclick="closeAssertionModal()">
+                    Close
+                </button>
+            </div>
         </div>
     </div>
 </body>

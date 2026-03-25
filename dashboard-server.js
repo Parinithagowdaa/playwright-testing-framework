@@ -1753,6 +1753,298 @@ const server = http.createServer((req, res) => {
                 res.end(JSON.stringify({ success: false, message: 'Invalid request data' }));
             }
         });
+    } else if (req.url === '/api/run-test' && req.method === 'POST') {
+        // Run a single specific test case
+        let body = '';
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        });
+        
+        req.on('end', () => {
+            try {
+                const config = JSON.parse(body);
+                const { moduleName, testCaseId, testCaseName, retries, workers, browser, headless } = config;
+                
+                console.log(`\n🚀 Running single test case:`);
+                console.log(`   Module: ${moduleName}`);
+                console.log(`   Test ID: ${testCaseId}`);
+                console.log(`   Test Name: ${testCaseName}`);
+                console.log(`   Configuration: Browser=${browser}, Headless=${headless}, Retries=${retries}, Workers=${workers}\n`);
+                
+                // Build command to run specific test
+                const command = `cmd.exe /c "set RETRIES=${retries || 2} && set BROWSER=${browser || 'chromium'} && set PARALLEL_THREAD=${workers || 2} && set HEADLESS=${headless || 'false'} && set TEST_NAME=${testCaseId} && npm run local:test"`;
+                
+                console.log(`Executing command: ${command}\n`);
+                
+                // Execute the test command
+                const testProcess = exec(command, { 
+                    maxBuffer: 10 * 1024 * 1024,
+                    cwd: __dirname
+                }, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`\n❌ Test execution error: ${error.message}`);
+                        return;
+                    }
+                    
+                    if (stderr) {
+                        console.error(`\nTest stderr: ${stderr}`);
+                    }
+                    
+                    console.log(`\n✅ Test "${testCaseName}" execution completed`);
+                    console.log(stdout);
+                });
+                
+                // Stream test output to console
+                testProcess.stdout.on('data', (data) => {
+                    console.log(data.toString());
+                });
+                
+                testProcess.stderr.on('data', (data) => {
+                    console.error(data.toString());
+                });
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ 
+                    success: true, 
+                    message: `Test "${testCaseName}" (${testCaseId}) execution started` 
+                }));
+                
+            } catch (error) {
+                console.error(`Error parsing request: ${error.message}`);
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: error.message }));
+            }
+        });
+    } else if (req.url === '/api/capture-screenshots' && req.method === 'POST') {
+        // Capture real browser screenshots by running the Playwright code as a standalone
+        // Node.js script — completely bypasses the test runner and its config.
+        // Steps:
+        //   1. Read playwright-latest-codegen.spec.ts (or supplied playwrightCode)
+        //   2. Extract every "await page.*" action line
+        //   3. Build a standalone CJS script that launches chromium directly and
+        //      takes page.screenshot() after each action
+        //   4. Execute with "node" — no npx playwright test, no config files
+        //   5. Return screenshot URLs directly in the response
+        let body = '';
+        req.on('data', chunk => { body += chunk.toString(); });
+        req.on('end', () => {
+            try {
+                const { moduleName, testCaseId, testCaseName, steps, playwrightCode: bodyCode } = JSON.parse(body);
+                console.log(`\n📸 Capturing screenshots for: ${testCaseName}`);
+
+                const screenshotsDir = path.join(__dirname, 'screenshots', moduleName || 'default', testCaseId || 'unknown');
+                fs.mkdirSync(screenshotsDir, { recursive: true });
+                for (const f of fs.readdirSync(screenshotsDir)) {
+                    try { fs.unlinkSync(path.join(screenshotsDir, f)); } catch (_) {}
+                }
+
+                const stepCount = Array.isArray(steps) ? steps.length : 5;
+                // URL-encode each path segment so spaces in module/testCase names don't break URLs
+                const safeModule = encodeURIComponent(moduleName || 'default');
+                const safeId     = encodeURIComponent(testCaseId || 'unknown');
+                const relBase    = `${safeModule}/${safeId}`;
+
+                // ── Get Playwright source code ────────────────────────────────────────
+                const codegenPath = path.join(__dirname, 'playwright-latest-codegen.spec.ts');
+                let playwrightCode = bodyCode || '';
+                if (!playwrightCode && fs.existsSync(codegenPath)) {
+                    playwrightCode = fs.readFileSync(codegenPath, 'utf8');
+                }
+                if (!playwrightCode) {
+                    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                    res.end(JSON.stringify({ success: false, screenshots: [], error: 'No Playwright code found. Record a test first using Start Recording.' }));
+                    return;
+                }
+
+                // ── Extract action lines (every "await page.*" that isn't a screenshot) ──
+                const lines = playwrightCode.split('\n');
+                const actionLines = [];
+                let inMultiLine = false;
+                let multiLineBuf = '';
+
+                for (const line of lines) {
+                    if (inMultiLine) {
+                        multiLineBuf += '\n' + line;
+                        if (line.trim().endsWith(';') || line.trim().endsWith(')') || line.trim().endsWith(');')) {
+                            actionLines.push(multiLineBuf.trim());
+                            inMultiLine = false;
+                            multiLineBuf = '';
+                        }
+                        continue;
+                    }
+                    const trimmed = line.trim();
+                    if (/^await\s+page\.(?!screenshot)/.test(trimmed)) {
+                        if (!trimmed.endsWith(';') && !trimmed.endsWith(')')) {
+                            inMultiLine = true;
+                            multiLineBuf = trimmed;
+                        } else {
+                            actionLines.push(trimmed);
+                        }
+                    }
+                }
+                console.log(`   Extracted ${actionLines.length} action line(s) from Playwright code`);
+
+                if (actionLines.length === 0) {
+                    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                    res.end(JSON.stringify({ success: false, screenshots: [], error: 'No page actions found in the Playwright code.' }));
+                    return;
+                }
+
+                // ── Build standalone Node.js (CJS) runner script ─────────────────────
+                // Uses chromium directly — no test runner, no config, no env vars needed.
+                const sdirEscaped = screenshotsDir.replace(/\\/g, '\\\\');
+                const actionBlock = actionLines.map((line, idx) => {
+                    return `  // Step ${idx + 1}\n  ${line}\n  await page.screenshot({ path: path.join('${sdirEscaped}', 'step-${idx}.png'), fullPage: false });`;
+                }).join('\n\n');
+
+                const runnerScript = `
+'use strict';
+const { chromium } = require('@playwright/test');
+const path = require('path');
+
+(async () => {
+  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const context = await browser.newContext({ viewport: { width: 1280, height: 720 }, ignoreHTTPSErrors: true });
+  const page = await context.newPage();
+  page.setDefaultTimeout(30000);
+  page.setDefaultNavigationTimeout(30000);
+
+${actionBlock}
+
+  await browser.close();
+  console.log('DONE');
+})().catch(err => {
+  console.error('RUNNER_ERROR:', err.message);
+  process.exit(1);
+});
+`.trim();
+
+                const runnerPath = path.join(__dirname, '_pw_capture_runner.cjs');
+                fs.writeFileSync(runnerPath, runnerScript, 'utf8');
+                console.log(`   Runner written → ${path.basename(runnerPath)}`);
+
+                exec(`node "${runnerPath}"`, { cwd: __dirname, maxBuffer: 10 * 1024 * 1024, timeout: 120000 }, (error, stdout, stderr) => {
+                    try { fs.unlinkSync(runnerPath); } catch (_) {}
+                    if (stdout) console.log(stdout);
+                    if (stderr) console.log(stderr);
+                    if (error) console.log(`⚠️  Runner error: ${error.message.split('\n')[0]}`);
+
+                    // Collect screenshots that were actually saved
+                    const saved = [];
+                    for (let i = 0; i < actionLines.length; i++) {
+                        const p = path.join(screenshotsDir, `step-${i}.png`);
+                        if (fs.existsSync(p)) saved.push(i);
+                    }
+                    console.log(`   Screenshots saved: ${saved.length} / ${actionLines.length}`);
+
+                    if (saved.length === 0) {
+                        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                        res.end(JSON.stringify({ success: false, screenshots: [],
+                            error: 'Test ran but no screenshots were saved. The page actions may have failed (check if the site is reachable).' }));
+                        return;
+                    }
+
+                    // Build response: map each test step to the best available screenshot
+                    const screenshots = [];
+                    for (let i = 0; i < stepCount; i++) {
+                        // Find closest saved screenshot index ≤ i
+                        const bestIdx = saved.filter(s => s <= i).pop() ?? saved[0];
+                        screenshots.push({
+                            stepIndex: i,
+                            url: `/screenshots/${relBase}/step-${bestIdx}.png`
+                        });
+                    }
+
+                    // Persist metadata so screenshots survive page refreshes
+                    const metadata = {
+                        testCaseName,
+                        moduleName: moduleName || 'default',
+                        testCaseId: testCaseId || 'unknown',
+                        capturedAt: new Date().toISOString(),
+                        screenshots
+                    };
+                    fs.writeFileSync(
+                        path.join(screenshotsDir, 'metadata.json'),
+                        JSON.stringify(metadata, null, 2), 'utf8'
+                    );
+
+                    console.log(`✅ Returning ${screenshots.length} screenshot(s) for "${testCaseName}"`);
+                    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                    res.end(JSON.stringify({ success: true, screenshots }));
+                });
+
+            } catch (error) {
+                console.error(`capture-screenshots error: ${error.message}`);
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: error.message }));
+            }
+        });
+    } else if (req.url.startsWith('/screenshots/') && req.method === 'GET') {
+        // Serve captured screenshot images statically
+        // Decode %20 etc so spaces in module/testCase names resolve to real file paths
+        const decodedUrl = decodeURIComponent(req.url.split('?')[0]);
+        const filePath = path.join(__dirname, decodedUrl);
+        fs.readFile(filePath, (err, data) => {
+            if (err) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: 'Screenshot not found' }));
+                return;
+            }
+            const ext = path.extname(filePath).toLowerCase();
+            const mimeTypes = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
+            res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'image/png', 'Access-Control-Allow-Origin': '*' });
+            res.end(data);
+        });
+    } else if (req.url === '/api/all-screenshots' && req.method === 'GET') {
+        // Return all persisted screenshot metadata so the dashboard can restore
+        // assertionData after a page refresh.
+        const screenshotsRoot = path.join(__dirname, 'screenshots');
+        const allMetadata = [];
+        const walkScreenshots = (dir) => {
+            if (!fs.existsSync(dir)) return;
+            for (const entry of fs.readdirSync(dir)) {
+                const fp = path.join(dir, entry);
+                if (fs.statSync(fp).isDirectory()) walkScreenshots(fp);
+                else if (entry === 'metadata.json') {
+                    try {
+                        const meta = JSON.parse(fs.readFileSync(fp, 'utf8'));
+                        allMetadata.push(meta);
+                    } catch (_) {}
+                }
+            }
+        };
+        walkScreenshots(screenshotsRoot);
+        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        res.end(JSON.stringify({ success: true, metadata: allMetadata }));
+
+    } else if (req.url === '/api/list-screenshots' && req.method === 'POST') {
+        // Return list of captured screenshot file paths for a test case
+        let body = '';
+        req.on('data', chunk => { body += chunk.toString(); });
+        req.on('end', () => {
+            try {
+                const { moduleName, testCaseId } = JSON.parse(body);
+                const screenshotsDir = path.join(__dirname, 'screenshots', moduleName, testCaseId);
+                if (!fs.existsSync(screenshotsDir)) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: true, screenshots: [] }));
+                    return;
+                }
+                const files = fs.readdirSync(screenshotsDir)
+                    .filter(f => /\.(png|jpg|jpeg|webp)$/i.test(f))
+                    .sort()
+                    .map((f, idx) => ({
+                        stepIndex: idx,
+                        url: `/screenshots/${moduleName}/${testCaseId}/${f}`,
+                        filename: f
+                    }));
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, screenshots: files }));
+            } catch (e) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: e.message }));
+            }
+        });
     } else {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: 'Not found' }));
