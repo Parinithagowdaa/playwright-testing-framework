@@ -1288,6 +1288,90 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    // Helper function: Map test step descriptions to Playwright action indices
+    function mapStepsToActions(testSteps, playwrightActions) {
+        return testSteps.map((stepDesc, stepIdx) => {
+            const lower = stepDesc.toLowerCase();
+            
+            // Try to find the best matching Playwright action for this test step
+            let actionIndex = -1;
+            let bestScore = 0;
+            
+            playwrightActions.forEach((action, actIdx) => {
+                const actionLower = action.toLowerCase();
+                let score = 0;
+                
+                // Match patterns - check for launch/navigate first
+                if (/navigate|launch|open|goto/i.test(lower) && /launchpage|goto|navigate/i.test(action)) {
+                    score = 10;
+                }
+                else if (/click/i.test(lower) && /click/i.test(action)) {
+                    // Extract what's being clicked from the step description
+                    const stepTarget = lower.match(/click\s+(?:on\s+)?(.+?)(?:\s+button|\s*$)/i);
+                    if (stepTarget && stepTarget[1]) {
+                        const target = stepTarget[1].replace(/[^\w\s]/g, '').trim();
+                        // Match against action name (e.g., clickSeeOfferButton contains "seeoffer")
+                        const actionWords = action.replace(/[^\w]/g, '').toLowerCase();
+                        const targetWords = target.replace(/\s+/g, '').toLowerCase();
+                        
+                        if (actionWords.includes(targetWords) || targetWords.includes('seeoffer') && actionWords.includes('seeoffer')) {
+                            score = 10;
+                        } else if (actionWords.includes('click')) {
+                            score = 5; // Generic click match
+                        }
+                    } else {
+                        score = 5;
+                    }
+                }
+                else if (/close.*tab|close.*window/i.test(lower) && /close/i.test(action)) score = 10;
+                else if (/enter|fill|type|input/i.test(lower) && /fill|type|keyboard\.type/i.test(action)) score = 8;
+                else if (/select|choose/i.test(lower) && /selectoption|locator.*select/i.test(action)) score = 8;
+                else if (/download/i.test(lower) && /click.*download|waitforevent.*download/i.test(action)) score = 9;
+                else if (/upload|attach/i.test(lower) && /setinputfiles|input.*file/i.test(action)) score = 9;
+                else if (/logout|sign out/i.test(lower) && /click.*logout|click.*signout/i.test(action)) score = 9;
+                
+                // Prefer sequential actions (prevent mapping to already-used actions)
+                if (score > 0) {
+                    // Check if this action has already been mapped in previous steps
+                    let alreadyMapped = false;
+                    for (let i = 0; i < stepIdx; i++) {
+                        // We're building the map, so check if we would have mapped this action before
+                        if (actIdx <= i && score <= 8) {
+                            alreadyMapped = true;
+                            break;
+                        }
+                    }
+                    
+                    // Bonus for sequential ordering (step 0 → action 0, step 1 → action 1, etc.)
+                    if (actIdx === stepIdx) {
+                        score += 2;
+                    }
+                    
+                    if (alreadyMapped) {
+                        score = Math.max(0, score - 3);
+                    }
+                }
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    actionIndex = actIdx;
+                }
+            });
+            
+            // For steps with no direct match, use sequential mapping as fallback
+            if (actionIndex === -1 && stepIdx < playwrightActions.length) {
+                actionIndex = stepIdx;
+            }
+            
+            return {
+                stepIndex: stepIdx,
+                stepDescription: stepDesc,
+                actionIndex: actionIndex,
+                matched: bestScore > 0
+            };
+        });
+    }
+
     if (req.url === '/get-playwright-code' && req.method === 'GET') {
         // Serve the latest generated Playwright code (if available)
         const codePath = path.join(process.cwd(), 'playwright-latest-codegen.spec.ts');
@@ -1753,6 +1837,7 @@ const server = http.createServer((req, res) => {
                 res.end(JSON.stringify({ success: false, message: 'Invalid request data' }));
             }
         });
+    
     } else if (req.url === '/api/run-test' && req.method === 'POST') {
         // Run a single specific test case
         let body = '';
@@ -1771,8 +1856,84 @@ const server = http.createServer((req, res) => {
                 console.log(`   Test Name: ${testCaseName}`);
                 console.log(`   Configuration: Browser=${browser}, Headless=${headless}, Retries=${retries}, Workers=${workers}\n`);
                 
-                // Build command to run specific test
-                const command = `cmd.exe /c "set RETRIES=${retries || 2} && set BROWSER=${browser || 'chromium'} && set PARALLEL_THREAD=${workers || 2} && set HEADLESS=${headless || 'false'} && set TEST_NAME=${testCaseId} && npm run local:test"`;
+                // Comprehensive map of test case names to their spec files
+                const testFileMap = {
+                    // UI Test Scenarios
+                    'Valid Login': 'LoginTest',
+                    'Invalid Login': 'LoginTest',
+                    'Login from Create Account Page': 'LoginTest',
+                    'Create Account': 'CreateAccountTest',
+                    'Contact Us': 'SecondModule',
+                    'Download PDF File': 'DownloadTest',
+                    'Download PDF': 'DownloadTest',
+                    'PDF Comparison': 'DownloadTest',
+                    'Image Comparison Test': 'ImageCompareTest',
+                    'Database CRUD Operations': 'DatabaseTest',
+                    'Products': 'Products',
+                    // REST API Test Scenarios
+                    'Get All Users': 'RESTUserTest',
+                    'Get Single User': 'RESTUserTest',
+                    'Add New User': 'RESTUserTest',
+                    'Update User': 'RESTUserTest',
+                    // SOAP API Test Scenarios
+                    'Account Create Request': 'SOAPAccountServiceTest',
+                    'Account Login Request': 'SOAPAccountServiceTest',
+                    'Account Logout Request': 'SOAPAccountServiceTest',
+                    // Database Test Scenarios
+                    'Database Test': 'DatabaseTest'
+                };
+                
+                // Determine the spec file to run
+                let specFile = testFileMap[testCaseName];
+                
+                // If not in map, try intelligent derivation for newly recorded tests
+                if (!specFile) {
+                    // Try to match common patterns:
+                    // 1. If test ID looks like a spec file name (e.g., "DownloadTest", "ImageCompare")
+                    if (/^[A-Z][a-zA-Z]+Test$/.test(testCaseId)) {
+                        specFile = testCaseId;
+                    } else if (/^[A-Z][a-zA-Z]+$/.test(testCaseId)) {
+                        specFile = `${testCaseId}Test`;
+                    } else {
+                        // 2. Extract from test case name (remove spaces, add "Test" suffix if needed)
+                        const derivedName = testCaseName.replace(/\s+/g, '');
+                        // Check if it already ends with "Test"
+                        specFile = derivedName.endsWith('Test') ? derivedName : `${derivedName}Test`;
+                    }
+                    console.log(`⚠️  No mapping found for "${testCaseName}", auto-derived spec file: ${specFile}`);
+                }
+                
+                // Build command to run specific test - use TEST_NAME env var which is required by local project
+                // The local project in playwright.config.ts uses testMatch with TEST_NAME
+                // Generate grep pattern based on test ID format to match exact test
+                let grepPattern = testCaseId;
+                
+                if (/^TC\d+$/.test(testCaseId)) {
+                    // Simple ID like TC01, TC02, TC03 -> add underscore: TC01_
+                    // This matches TC01_ValidLogin but not TC01-TCN_CreateAccount
+                    grepPattern = `${testCaseId}_`;
+                } else if (testCaseId.includes('-TCN') || testCaseId.includes('-TC')) {
+                    // Data-driven test IDs like TC01-TCN or TC01-TC02 -> map to actual test name pattern
+                    // Extract the base TC number and use spec file name
+                    const baseTCNum = testCaseId.match(/TC(\d+)/)?.[0] || 'TC\\d+';
+                    grepPattern = `${baseTCNum}_${specFile}`;
+                } else if (/^[A-Z][a-zA-Z]+(?:Test)?$/.test(testCaseId)) {
+                    // IDs that are spec file names themselves (e.g., "DownloadTest", "ImageCompare")
+                    // Use the test case name or ID as pattern
+                    grepPattern = testCaseId.replace(/\s+/g, '');
+                } else if (/^[A-Z_]+$/.test(testCaseId)) {
+                    // Newly recorded tests have IDs in format: USER_PROFILE_TEST (all caps with underscores)
+                    // For these, we need to search for the test case name in the actual test file
+                    // Since spec files may not follow a predictable pattern, try using the test case name as grep
+                    // Convert back to a more flexible pattern
+                    const flexiblePattern = testCaseId.replace(/_/g, '.*');
+                    grepPattern = flexiblePattern;
+                    console.log(`   Detected newly recorded test ID format, using flexible pattern: ${grepPattern}`);
+                }
+                
+                console.log(`   Using grep pattern: ${grepPattern} for spec file: ${specFile}`);
+                
+                const command = `cmd.exe /c "set RETRIES=${retries || 2} && set BROWSER=${browser || 'chromium'} && set PARALLEL_THREAD=${workers || 2} && set HEADLESS=${headless || 'false'} && set TEST_NAME=${specFile} && npx playwright test --project=local --grep=${grepPattern}"`;
                 
                 console.log(`Executing command: ${command}\n`);
                 
@@ -1806,7 +1967,7 @@ const server = http.createServer((req, res) => {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ 
                     success: true, 
-                    message: `Test "${testCaseName}" (${testCaseId}) execution started` 
+                    message: `Test "${testCaseName}" (${testCaseId}) execution started. Running ${specFile} tests with grep: ${testCaseId}` 
                 }));
                 
             } catch (error) {
@@ -1816,21 +1977,14 @@ const server = http.createServer((req, res) => {
             }
         });
     } else if (req.url === '/api/capture-screenshots' && req.method === 'POST') {
-        // Capture real browser screenshots by running the Playwright code as a standalone
-        // Node.js script — completely bypasses the test runner and its config.
-        // Steps:
-        //   1. Read playwright-latest-codegen.spec.ts (or supplied playwrightCode)
-        //   2. Extract every "await page.*" action line
-        //   3. Build a standalone CJS script that launches chromium directly and
-        //      takes page.screenshot() after each action
-        //   4. Execute with "node" — no npx playwright test, no config files
-        //   5. Return screenshot URLs directly in the response
+        // Capture screenshots by intelligently mapping test steps to Playwright actions
         let body = '';
         req.on('data', chunk => { body += chunk.toString(); });
         req.on('end', () => {
             try {
                 const { moduleName, testCaseId, testCaseName, steps, playwrightCode: bodyCode } = JSON.parse(body);
                 console.log(`\n📸 Capturing screenshots for: ${testCaseName}`);
+                console.log(`   Test steps provided: ${steps ? steps.length : 0}`);
 
                 const screenshotsDir = path.join(__dirname, 'screenshots', moduleName || 'default', testCaseId || 'unknown');
                 fs.mkdirSync(screenshotsDir, { recursive: true });
@@ -1838,25 +1992,62 @@ const server = http.createServer((req, res) => {
                     try { fs.unlinkSync(path.join(screenshotsDir, f)); } catch (_) {}
                 }
 
-                const stepCount = Array.isArray(steps) ? steps.length : 5;
-                // URL-encode each path segment so spaces in module/testCase names don't break URLs
                 const safeModule = encodeURIComponent(moduleName || 'default');
                 const safeId     = encodeURIComponent(testCaseId || 'unknown');
                 const relBase    = `${safeModule}/${safeId}`;
 
                 // ── Get Playwright source code ────────────────────────────────────────
-                const codegenPath = path.join(__dirname, 'playwright-latest-codegen.spec.ts');
+                // First try to determine the spec file from testCaseName
+                const testFileMap = {
+                    'Valid Login': 'LoginTest',
+                    'Invalid Login': 'LoginTest',
+                    'Login from Create Account Page': 'LoginTest',
+                    'Create Account': 'CreateAccountTest',
+                    'Contact Us': 'SecondModule',
+                    'Download PDF File': 'DownloadTest',
+                    'Download PDF': 'DownloadTest',
+                    'PDF Comparison': 'DownloadTest',
+                    'Image Comparison Test': 'ImageCompareTest',
+                    'Database CRUD Operations': 'DatabaseTest',
+                    'Products': 'Products',
+                    'Get All Users': 'RESTUserTest',
+                    'Get Single User': 'RESTUserTest',
+                    'Add New User': 'RESTUserTest',
+                    'Update User': 'RESTUserTest',
+                    'Account Create Request': 'SOAPAccountServiceTest',
+                    'Account Login Request': 'SOAPAccountServiceTest',
+                    'Account Logout Request': 'SOAPAccountServiceTest'
+                };
+                
                 let playwrightCode = bodyCode || '';
-                if (!playwrightCode && fs.existsSync(codegenPath)) {
-                    playwrightCode = fs.readFileSync(codegenPath, 'utf8');
+                let specFile = testFileMap[testCaseName];
+                
+                // Try to read from the spec file if we found a mapping
+                if (specFile && !playwrightCode) {
+                    const specFilePath = path.join(__dirname, 'src', 'tests', `${specFile}.spec.ts`);
+                    console.log(`   Looking for spec file: ${specFilePath}`);
+                    if (fs.existsSync(specFilePath)) {
+                        playwrightCode = fs.readFileSync(specFilePath, 'utf8');
+                        console.log(`   ✓ Loaded code from ${specFile}.spec.ts`);
+                    }
                 }
+                
+                // Fall back to codegen file if no spec file found
+                if (!playwrightCode) {
+                    const codegenPath = path.join(__dirname, 'playwright-latest-codegen.spec.ts');
+                    if (fs.existsSync(codegenPath)) {
+                        playwrightCode = fs.readFileSync(codegenPath, 'utf8');
+                        console.log(`   ✓ Loaded code from playwright-latest-codegen.spec.ts`);
+                    }
+                }
+                
                 if (!playwrightCode) {
                     res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
                     res.end(JSON.stringify({ success: false, screenshots: [], error: 'No Playwright code found. Record a test first using Start Recording.' }));
                     return;
                 }
 
-                // ── Extract action lines (every "await page.*" that isn't a screenshot) ──
+                // ── Extract action lines ──
                 const lines = playwrightCode.split('\n');
                 const actionLines = [];
                 let inMultiLine = false;
@@ -1873,7 +2064,12 @@ const server = http.createServer((req, res) => {
                         continue;
                     }
                     const trimmed = line.trim();
-                    if (/^await\s+page\.(?!screenshot)/.test(trimmed)) {
+                    // Match both direct page actions (await page.click) and Page Object Model (await products.clickButton())
+                    // But exclude screenshot commands and test lifecycle (beforeEach, etc.)
+                    if (/^await\s+\w+\.(?!screenshot|beforeEach|afterEach)/.test(trimmed) && 
+                        !trimmed.includes('test.beforeEach') &&
+                        !trimmed.includes('test.afterEach') &&
+                        !trimmed.includes('test.step')) {
                         if (!trimmed.endsWith(';') && !trimmed.endsWith(')')) {
                             inMultiLine = true;
                             multiLineBuf = trimmed;
@@ -1882,7 +2078,7 @@ const server = http.createServer((req, res) => {
                         }
                     }
                 }
-                console.log(`   Extracted ${actionLines.length} action line(s) from Playwright code`);
+                console.log(`   Extracted ${actionLines.length} Playwright action(s)`);
 
                 if (actionLines.length === 0) {
                     res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
@@ -1890,11 +2086,224 @@ const server = http.createServer((req, res) => {
                     return;
                 }
 
-                // ── Build standalone Node.js (CJS) runner script ─────────────────────
-                // Uses chromium directly — no test runner, no config, no env vars needed.
+                // ── Detect if using Page Object Model ──
+                const isPageObjectModel = actionLines.some(line => 
+                    /^await\s+(\w+)\./.test(line) && !/^await\s+page\./.test(line) && !/^await\s+context\./.test(line)
+                );
+                console.log(`   Code pattern: ${isPageObjectModel ? 'Page Object Model' : 'Direct page actions'}`);
+
+                // ── Map test steps to Playwright actions ──
+                const stepActionMap = mapStepsToActions(steps || [], actionLines);
+                console.log(`   Mapped ${stepActionMap.filter(m => m.actionIndex !== -1).length} steps to Playwright actions`);
+
+                // ── Handle Page Object Model tests differently ──
+                if (isPageObjectModel && specFile) {
+                    // For Page Object Model, use intelligent mapping to match steps to actual actions
+                    console.log(`   Running Page Object Model test with screenshot instrumentation: ${specFile}`);
+                    
+                    // Build a map of which actions to execute for which steps
+                    const actionsToRun = [];
+                    stepActionMap.forEach((mapping, stepIdx) => {
+                        actionsToRun.push({
+                            stepIndex: stepIdx,
+                            stepDescription: mapping.stepDescription,
+                            actionIndex: mapping.actionIndex,
+                            action: mapping.actionIndex >= 0 ? actionLines[mapping.actionIndex] : null
+                        });
+                    });
+                    
+                    console.log(`   Action plan:`);
+                    actionsToRun.forEach(a => {
+                        console.log(`     Step ${a.stepIndex + 1}: "${a.stepDescription}" → ${a.action ? 'Action ' + (a.actionIndex + 1) : 'No action (screenshot only)'}`);
+                    });
+                    
+                    // Use browser automation to execute actions and capture screenshots
+                    const { chromium } = require('@playwright/test');
+                    (async () => {
+                        try {
+                            const browser = await chromium.launch({ headless: true });
+                            const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+                            const page = await context.newPage();
+                            page.setDefaultTimeout(30000);
+                            
+                            console.log(`   Starting screenshot capture for ${steps.length} steps...`);
+                            const screenshots = [];
+                            let lastActionIndex = -1;
+                            
+                            for (let stepIdx = 0; stepIdx < actionsToRun.length; stepIdx++) {
+                                const { stepDescription, actionIndex } = actionsToRun[stepIdx];
+                                
+                                // Execute the action if it's a new action (not already executed)
+                                if (actionIndex >= 0 && actionIndex !== lastActionIndex) {
+                                    const actionLine = actionLines[actionIndex];
+                                    
+                                    // Parse and execute the action
+                                    if (/launchPage|goto/i.test(actionLine)) {
+                                        await page.goto('http://advantageonlineshopping.com/#/');
+                                        await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+                                    } else if (/clickSeeOfferButton/i.test(actionLine) || /SEE\s*OFFER/i.test(actionLine)) {
+                                        await page.locator("button:has-text('SEE OFFER')").click({ timeout: 10000 }).catch(() => {});
+                                        await page.waitForTimeout(1500);
+                                    } else if (/clickAddToCartButton/i.test(actionLine) || /ADD\s*TO\s*CART/i.test(actionLine)) {
+                                        await page.locator("button:has-text('ADD TO CART')").click({ timeout: 10000 }).catch(() => {});
+                                        await page.waitForTimeout(1500);
+                                    } else if (/clickCheckout/i.test(actionLine) || /CHECKOUT/i.test(actionLine)) {
+                                        await page.locator("button:has-text('CHECKOUT')").click({ timeout: 10000 }).catch(() => {});
+                                        await page.waitForTimeout(1500);
+                                    }
+                                    
+                                    lastActionIndex = actionIndex;
+                                } else if (actionIndex === -1) {
+                                    // No action in test file - this is a manually added step
+                                    // Try to parse the step description and execute appropriate action
+                                    const stepLower = stepDescription.toLowerCase();
+                                    console.log(`   🔧 Manually added step detected, attempting to execute: "${stepDescription}"`);
+                                    
+                                    // Check for "go to X page" pattern - treat as click action
+                                    const goToPageMatch = stepDescription.match(/go\s+to\s+(.+?)\s*page/i);
+                                    if (goToPageMatch && goToPageMatch[1]) {
+                                        const pageName = goToPageMatch[1].trim();
+                                        console.log(`   Attempting to navigate to page: ${pageName}`);
+                                        
+                                        // Try to find and click the link/button for this page
+                                        const selectors = [
+                                            `a:has-text("${pageName}")`,
+                                            `button:has-text("${pageName}")`,
+                                            `[href*="${pageName.toLowerCase()}" i]`,
+                                            `#menuUser`, // For login specifically
+                                            `a[href*="login" i]`,
+                                            `text="${pageName}"`,
+                                            `[aria-label*="${pageName}" i]`
+                                        ];
+                                        
+                                        let clicked = false;
+                                        for (const selector of selectors) {
+                                            try {
+                                                const element = page.locator(selector).first();
+                                                if (await element.isVisible({ timeout: 2000 }).catch(() => false)) {
+                                                    await element.click({ timeout: 5000 });
+                                                    await page.waitForTimeout(1500);
+                                                    console.log(`   ✓ Clicked to navigate to ${pageName} page`);
+                                                    clicked = true;
+                                                    break;
+                                                }
+                                            } catch (e) {
+                                                // Try next selector
+                                            }
+                                        }
+                                        
+                                        if (!clicked) {
+                                            console.log(`   ⚠ Could not find navigation element for ${pageName} page`);
+                                        }
+                                    } else if (/navigate\s+to\s+http|goto\s+http|open\s+http/i.test(stepLower)) {
+                                        // Extract URL from step description
+                                        const urlMatch = stepDescription.match(/https?:\/\/[^\s]+/i);
+                                        if (urlMatch) {
+                                            await page.goto(urlMatch[0]).catch(() => {});
+                                            await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+                                            console.log(`   ✓ Navigated to ${urlMatch[0]}`);
+                                        }
+                                    } else if (/click/i.test(stepLower)) {
+                                        // Extract button/element text from step description
+                                        const clickMatch = stepDescription.match(/click\s+(?:on\s+)?(?:the\s+)?['"]?([^'"]+?)['"]?\s*(?:button|link|element|icon)?$/i);
+                                        if (clickMatch && clickMatch[1]) {
+                                            const elementText = clickMatch[1].trim();
+                                            console.log(`   Attempting to click: ${elementText}`);
+                                            
+                                            // Try multiple selector strategies
+                                            const selectors = [
+                                                `button:has-text("${elementText}")`,
+                                                `a:has-text("${elementText}")`,
+                                                `text="${elementText}"`,
+                                                `[aria-label*="${elementText}" i]`,
+                                                `[title*="${elementText}" i]`,
+                                                `#${elementText.replace(/\s+/g, '')}` // Try ID without spaces
+                                            ];
+                                            
+                                            let clicked = false;
+                                            for (const selector of selectors) {
+                                                try {
+                                                    const element = page.locator(selector).first();
+                                                    if (await element.isVisible({ timeout: 2000 }).catch(() => false)) {
+                                                        await element.click({ timeout: 5000 });
+                                                        await page.waitForTimeout(1500);
+                                                        console.log(`   ✓ Executed click on: ${elementText}`);
+                                                        clicked = true;
+                                                        break;
+                                                    }
+                                                } catch (e) {
+                                                    // Try next selector
+                                                }
+                                            }
+                                            
+                                            if (!clicked) {
+                                                console.log(`   ⚠ Could not find element to click: ${elementText}`);
+                                            }
+                                        }
+                                    } else if (/enter|type|fill|input/i.test(stepLower)) {
+                                        // Extract field name and value
+                                        const fillMatch = stepDescription.match(/(?:enter|type|fill)\s+['"]?([^'"]+?)['"]?\s+(?:in|into|to)\s+['"]?([^'"]+?)['"]?/i);
+                                        if (fillMatch) {
+                                            const value = fillMatch[1].trim();
+                                            const fieldName = fillMatch[2].trim();
+                                            await page.locator(`input[placeholder*="${fieldName}" i], input[name*="${fieldName}" i]`).first().fill(value, { timeout: 5000 }).catch(() => {});
+                                            await page.waitForTimeout(1000);
+                                        }
+                                    }
+                                    
+                                    // Even if we couldn't parse/execute, wait a moment for any ongoing animations
+                                    await page.waitForTimeout(500);
+                                }
+                                
+                                // Capture screenshot after action (or without action)
+                                await page.screenshot({ path: path.join(screenshotsDir, `step-${stepIdx}.png`), fullPage: false });
+                                screenshots.push({ 
+                                    stepIndex: stepIdx, 
+                                    stepDescription: stepDescription, 
+                                    url: `/screenshots/${relBase}/step-${stepIdx}.png` 
+                                });
+                                console.log(`   ✓ Captured step ${stepIdx + 1}/${actionsToRun.length}: ${stepDescription}`);
+                            }
+                            
+                            await browser.close();
+                            
+                            console.log(`   Screenshots captured: ${screenshots.length} / ${steps.length} steps`);
+                            
+                            if (screenshots.length === 0) {
+                                res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                                res.end(JSON.stringify({ success: false, screenshots: [], error: 'No screenshots captured.' }));
+                                return;
+                            }
+                            
+                            res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                            res.end(JSON.stringify({ success: true, screenshots }));
+                            
+                        } catch (err) {
+                            console.error(`   Screenshot capture error: ${err.message}`);
+                            res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                            res.end(JSON.stringify({ success: false, screenshots: [], error: err.message }));
+                        }
+                    })();
+                    return;
+                }
+
+                // ── Build runner script with step-aware screenshots (for direct page actions) ──
                 const sdirEscaped = screenshotsDir.replace(/\\/g, '\\\\');
-                const actionBlock = actionLines.map((line, idx) => {
-                    return `  // Step ${idx + 1}\n  ${line}\n  await page.screenshot({ path: path.join('${sdirEscaped}', 'step-${idx}.png'), fullPage: false });`;
+                const actionBlock = actionLines.map((line, actionIdx) => {
+                    // Find which step(s) this action belongs to
+                    const relatedSteps = stepActionMap
+                        .map((mapping, stepIdx) => ({ stepIdx, mapping }))
+                        .filter(({ mapping }) => mapping.actionIndex === actionIdx);
+                    
+                    const comments = relatedSteps.map(({ stepIdx, mapping }) => 
+                        `  // Test Step ${stepIdx + 1}: ${mapping.stepDescription}`
+                    ).join('\n');
+                    
+                    const screenshots = relatedSteps.map(({ stepIdx }) =>
+                        `  await page.screenshot({ path: path.join('${sdirEscaped}', 'step-${stepIdx}.png'), fullPage: false });`
+                    ).join('\n');
+                    
+                    return `${comments}\n  ${line}${screenshots ? '\n' + screenshots : ''}`;
                 }).join('\n\n');
 
                 const runnerScript = `
@@ -1930,29 +2339,25 @@ ${actionBlock}
                     if (error) console.log(`⚠️  Runner error: ${error.message.split('\n')[0]}`);
 
                     // Collect screenshots that were actually saved
-                    const saved = [];
-                    for (let i = 0; i < actionLines.length; i++) {
+                    // Collect screenshots that were actually saved
+                    const screenshots = [];
+                    for (let i = 0; i < (steps || []).length; i++) {
                         const p = path.join(screenshotsDir, `step-${i}.png`);
-                        if (fs.existsSync(p)) saved.push(i);
+                        if (fs.existsSync(p)) {
+                            screenshots.push({
+                                stepIndex: i,
+                                stepDescription: steps[i],
+                                url: `/screenshots/${relBase}/step-${i}.png`
+                            });
+                        }
                     }
-                    console.log(`   Screenshots saved: ${saved.length} / ${actionLines.length}`);
+                    console.log(`   Screenshots captured: ${screenshots.length} / ${(steps || []).length} steps`);
 
-                    if (saved.length === 0) {
+                    if (screenshots.length === 0) {
                         res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
                         res.end(JSON.stringify({ success: false, screenshots: [],
-                            error: 'Test ran but no screenshots were saved. The page actions may have failed (check if the site is reachable).' }));
+                            error: 'Test ran but no screenshots were saved. Some steps may not have corresponding Playwright actions.' }));
                         return;
-                    }
-
-                    // Build response: map each test step to the best available screenshot
-                    const screenshots = [];
-                    for (let i = 0; i < stepCount; i++) {
-                        // Find closest saved screenshot index ≤ i
-                        const bestIdx = saved.filter(s => s <= i).pop() ?? saved[0];
-                        screenshots.push({
-                            stepIndex: i,
-                            url: `/screenshots/${relBase}/step-${bestIdx}.png`
-                        });
                     }
 
                     // Persist metadata so screenshots survive page refreshes
@@ -2044,6 +2449,200 @@ ${actionBlock}
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: false, error: e.message }));
             }
+        });
+    } else if (req.url === '/api/delete-testcase' && req.method === 'POST') {
+        // Delete a test case from spec file
+        let body = '';
+        req.on('data', chunk => { body += chunk.toString(); });
+        req.on('end', () => {
+            try {
+                const { moduleName, testCaseId, testCaseName } = JSON.parse(body);
+                console.log(`\n🗑️ Deleting test case: ${testCaseName} (${testCaseId})`);
+                console.log(`   Module: ${moduleName}`);
+                
+                // Map test case to spec file
+                const testFileMap = {
+                    'Valid Login': 'LoginTest',
+                    'Invalid Login': 'LoginTest',
+                    'Login from Create Account Page': 'LoginTest',
+                    'Create Account': 'CreateAccountTest',
+                    'Contact Us': 'SecondModule',
+                    'Download PDF File': 'DownloadTest',
+                    'Download PDF': 'DownloadTest',
+                    'PDF Comparison': 'DownloadTest',
+                    'Image Comparison Test': 'ImageCompareTest',
+                    'Database CRUD Operations': 'DatabaseTest',
+                    'Products': 'Products',
+                    'Get All Users': 'RESTUserTest',
+                    'Get Single User': 'RESTUserTest',
+                    'Add New User': 'RESTUserTest',
+                    'Update User': 'RESTUserTest',
+                    'Account Create Request': 'SOAPAccountServiceTest',
+                    'Account Login Request': 'SOAPAccountServiceTest',
+                    'Account Logout Request': 'SOAPAccountServiceTest'
+                };
+                
+                let specFileName = testFileMap[testCaseName];
+                if (!specFileName) {
+                    specFileName = testCaseName.replace(/\s+/g, '');
+                    if (!specFileName.endsWith('Test')) specFileName += 'Test';
+                }
+                
+                const specFilePath = path.join(__dirname, 'src', 'tests', `${specFileName}.spec.ts`);
+                
+                if (!fs.existsSync(specFilePath)) {
+                    console.log(`⚠️  Spec file not found: ${specFilePath}`);
+                    // Even if spec file doesn't exist, consider it a success (already deleted)
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        message: 'Test case deleted (spec file not found, likely already removed)',
+                        specFile: specFileName
+                    }));
+                    return;
+                }
+                
+                let content = fs.readFileSync(specFilePath, 'utf8');
+                const originalContent = content;
+                
+                // Try to find and remove the test based on ID pattern
+                // Pattern 1: Data-driven tests (test with TestID from Excel)
+                const dataDrivenPattern = new RegExp(
+                    `const data\\d+\\s*=\\s*ExcelUtil\\.getTestData\\([^,]+,\\s*["']${testCaseId}[_-]?.*?["']\\);[\\s\\S]*?test\\(\\s*\`\\$\\{data\\d+\\.TestID\\}[\\s\\S]*?\\}\\);`,
+                    'gm'
+                );
+                
+                // Pattern 2: Simple test with ID in name
+                const simpleTestPattern = new RegExp(
+                    `test\\([^{]*${testCaseId}[^{]*\\{[\\s\\S]*?\\}\\);`,
+                    'gm'
+                );
+                
+                // Try to remove using patterns
+                let removedCount = 0;
+                content = content.replace(dataDrivenPattern, () => { removedCount++; return ''; });
+                if (removedCount === 0) {
+                    content = content.replace(simpleTestPattern, () => { removedCount++; return ''; });
+                }
+                
+                // Clean up extra blank lines
+                content = content.replace(/\n\n\n+/g, '\n\n');
+                
+                if (removedCount > 0 && content !== originalContent) {
+                    fs.writeFileSync(specFilePath, content, 'utf8');
+                    console.log(`✅ Deleted ${removedCount} test(s) from ${specFileName}.spec.ts`);
+                    
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        message: `Test case "${testCaseName}" deleted successfully`,
+                        specFile: specFileName,
+                        testsRemoved: removedCount
+                    }));
+                } else {
+                    console.log(`⚠️  Could not find test with ID "${testCaseId}" in ${specFileName}.spec.ts`);
+                    // Still return success to avoid showing error to user
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        message: 'Test case removed from dashboard (not found in spec file)',
+                        specFile: specFileName,
+                        testsRemoved: 0
+                    }));
+                }
+                
+            } catch (error) {
+                console.error(`❌ Error deleting test case: ${error.message}`);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: false,
+                    error: error.message
+                }));
+            }
+        });
+    } else if (req.url === '/api/update-testcase' && req.method === 'POST') {
+        // Update test case steps
+        let body = '';
+        req.on('data', chunk => { body += chunk.toString(); });
+        req.on('end', () => {
+            try {
+                const { moduleName, testCaseId, testCaseName, steps, description } = JSON.parse(body);
+                console.log(`\n📝 Updating test case: ${testCaseName} (${testCaseId})`);
+                console.log(`   Module: ${moduleName}`);
+                console.log(`   Steps: ${steps.length}`);
+                
+                // Store updates in a JSON file for persistence
+                const updatesFilePath = path.join(__dirname, 'test-updates.json');
+                let updates = {};
+                
+                if (fs.existsSync(updatesFilePath)) {
+                    updates = JSON.parse(fs.readFileSync(updatesFilePath, 'utf8'));
+                }
+                
+                // Store the updated test data
+                updates[testCaseId] = {
+                    moduleName,
+                    testCaseName,
+                    description: description || '',
+                    steps,
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                fs.writeFileSync(updatesFilePath, JSON.stringify(updates, null, 2), 'utf8');
+                
+                console.log(`✅ Test case updates saved to test-updates.json`);
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: true,
+                    message: `Test case "${testCaseName}" updated successfully`,
+                    testCaseId,
+                    stepsCount: steps.length
+                }));
+                
+            } catch (error) {
+                console.error(`❌ Error updating test case: ${error.message}`);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: false,
+                    error: error.message
+                }));
+            }
+        });
+    } else if (req.url === '/api/get-test-updates' && req.method === 'GET') {
+        // Get all test updates
+        try {
+            const updatesFilePath = path.join(__dirname, 'test-updates.json');
+            
+            if (!fs.existsSync(updatesFilePath)) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, updates: {} }));
+                return;
+            }
+            
+            const updates = JSON.parse(fs.readFileSync(updatesFilePath, 'utf8'));
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, updates }));
+            
+        } catch (error) {
+            console.error(`❌ Error loading test updates: ${error.message}`);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: error.message }));
+        }
+    } else if (req.url === '/chatbot.js' && req.method === 'GET') {
+        // Serve the chatbot.js file
+        const chatbotPath = path.join(__dirname, 'chatbot.js');
+        
+        fs.readFile(chatbotPath, 'utf8', (err, data) => {
+            if (err) {
+                console.error('❌ Error loading chatbot.js:', err);
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end('chatbot.js not found');
+                return;
+            }
+            res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
+            res.end(data);
         });
     } else {
         res.writeHead(404, { 'Content-Type': 'application/json' });

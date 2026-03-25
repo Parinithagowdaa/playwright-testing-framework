@@ -2265,6 +2265,17 @@
                         "Compare with tolerance of 0.70 (theme variations allowed)",
                         "Compare with tolerance of 0.00 (exact match required)"
                     ]
+                },
+                {
+                    id: "PRODUCTS",
+                    name: "Products",
+                    description: "Products - Newly recorded test",
+                    steps: [
+                        "Navigate to http://advantageonlineshopping.com/#/",
+                        "Click on SEE OFFER button",
+                        "Click on ADD TO CART button",
+                        "Click on CHECKOUT ($449.99) button"
+                    ]
                 }
             ]
         };
@@ -2384,50 +2395,87 @@
 
         // Assertion Data Storage
         // Key format: "moduleIndex-tcIndex-stepIndex" for UI tests, "api-moduleIndex-tcIndex-stepIndex" for API tests
-        let assertionData = {
-            // Sample assertion data for demonstration
-            "0-0-2": {
-                testCase: "LoginTest",
-                stepNumber: 3,
-                stepDescription: "Click on the Login button",
-                assertionType: "Element Visibility",
-                expected: "Login button should be visible and clickable",
-                actual: "Login button found and clickable",
-                status: "PASS",
-                timestamp: "2026-03-24 10:30:45",
-                code: `// Verify login button is visible\nawait expect(page.locator('#loginBtn')).toBeVisible();\n\n// Verify login button is enabled\nawait expect(page.locator('#loginBtn')).toBeEnabled();`,
-                screenshot: null // Will be populated when screenshots are captured
-            },
-            "0-1-1": {
-                testCase: "DatabaseTest",
-                stepNumber: 2,
-                stepDescription: "Execute MSSQL query from test data",
-                assertionType: "Database Query",
-                expected: "Query executes successfully with affected rows count > 0",
-                actual: "Query executed, 5 rows affected",
-                status: "PASS",
-                timestamp: "2026-03-24 10:35:12",
-                code: `// Execute database query\nconst result = await db.executeQuery(query);\n\n// Verify rows affected\nawait expect(result.rowsAffected).toBeGreaterThan(0);`,
-                screenshot: null
-            },
-            "0-2-3": {
-                testCase: "ImageCompare",
-                stepNumber: 4,
-                stepDescription: "Compare Login Section with masked elements",
-                assertionType: "Visual Regression",
-                expected: "Screenshot matches baseline with tolerance 0.70",
-                actual: "Screenshot comparison passed with 0.65 difference",
-                status: "PASS",
-                timestamp: "2026-03-24 10:40:22",
-                code: `// Capture screenshot\nawait page.screenshot({ path: 'screenshots/login-section.png' });\n\n// Compare with baseline\nawait expect(page).toHaveScreenshot('login-baseline.png', {\n  maxDiffPixelRatio: 0.30\n});`,
-                screenshot: "screenshots/login-section.png"
-            }
-        };
+        // Assertions are generated dynamically when viewing steps or capturing screenshots
+        let assertionData = {};
 
         // Current assertion being viewed
         let currentAssertion = null;
 
         // Load saved tests from TESTING_FRAMEWORK_CONTEXT.md via server
+        // Load test updates from backend
+        async function loadTestUpdates() {
+            try {
+                const response = await fetch('http://localhost:3456/api/get-test-updates');
+                const result = await response.json();
+                
+                console.log('📥 Load test updates result:', result);
+                
+                if (result.success && result.updates && Object.keys(result.updates).length > 0) {
+                    console.log('📥 Found updates for:', Object.keys(result.updates));
+                    
+                    // Apply updates to testScenariosData
+                    Object.keys(result.updates).forEach(testId => {
+                        const update = result.updates[testId];
+                        console.log(`📥 Applying update for test ID: ${testId}`, update);
+                        
+                        let found = false;
+                        // Find and update the test in testScenariosData
+                        Object.keys(testScenariosData).forEach(module => {
+                            const testIndex = testScenariosData[module].findIndex(t => t.id === testId);
+                            if (testIndex !== -1) {
+                                console.log(`✅ Found test in module "${module}" at index ${testIndex}`);
+                                console.log('   Old steps:', testScenariosData[module][testIndex].steps);
+                                console.log('   New steps:', update.steps);
+                                
+                                testScenariosData[module][testIndex].steps = update.steps.slice();
+                                if (update.description) {
+                                    testScenariosData[module][testIndex].description = update.description;
+                                }
+                                found = true;
+                            }
+                        });
+                        
+                        if (!found) {
+                            console.warn(`⚠️ Could not find test with ID: ${testId}`);
+                        }
+                    });
+                    console.log(`✅ Applied ${Object.keys(result.updates).length} test update(s)`);
+                } else {
+                    console.log('ℹ️ No test updates found');
+                }
+            } catch (error) {
+                console.error('Error loading test updates:', error);
+            }
+        }
+        
+        // Get deleted test IDs from localStorage
+        function getDeletedTestIds() {
+            const deleted = localStorage.getItem('deletedTestIds');
+            return deleted ? JSON.parse(deleted) : [];
+        }
+        
+        // Add a test ID to deleted list
+        function markTestAsDeleted(testId) {
+            const deleted = getDeletedTestIds();
+            if (!deleted.includes(testId)) {
+                deleted.push(testId);
+                localStorage.setItem('deletedTestIds', JSON.stringify(deleted));
+            }
+        }
+        
+        // Remove deleted tests from testScenariosData
+        function filterDeletedTests() {
+            const deletedIds = getDeletedTestIds();
+            if (deletedIds.length === 0) return;
+            
+            Object.keys(testScenariosData).forEach(moduleName => {
+                testScenariosData[moduleName] = testScenariosData[moduleName].filter(
+                    test => !deletedIds.includes(test.id)
+                );
+            });
+            console.log(`Filtered out ${deletedIds.length} deleted test(s)`);
+        }
+        
         async function loadSavedTests() {
             try {
                 const response = await fetch('http://localhost:3456/get-saved-tests');
@@ -2536,9 +2584,7 @@
                                 </div>
                                 <div class="test-case-actions" onclick="event.stopPropagation()">
                                     ${!isEditing ? 
-                                        `<input type="checkbox" class="test-case-checkbox" 
-                                                onchange="toggleTestCaseSelection(this, ${moduleIndex}, ${tcIndex})">
-                                         <button class="btn-run" onclick="runTestCase(${moduleIndex}, ${tcIndex})">
+                                        `<button class="btn-run" onclick="runTestCase(${moduleIndex}, ${tcIndex})">
                                             <span class="btn-icon">▶</span>Run
                                          </button>
                                          <button class="btn-update" onclick="editTestCase(${moduleIndex}, ${tcIndex})">
@@ -2559,14 +2605,11 @@
                     `;
 
                     testCase.steps.forEach((step, stepIndex) => {
-                        // Check if this step has assertion data
-                        const hasAssertion = assertionData[`${moduleIndex}-${tcIndex}-${stepIndex}`] !== undefined;
-
                         html += `
                             <div class="test-step-item" id="step${moduleIndex}-${tcIndex}-${stepIndex}">
                                 <div class="step-number">${stepIndex + 1}</div>
                                 <div class="step-text" id="stepText${moduleIndex}-${tcIndex}-${stepIndex}">${step}</div>
-                                ${hasAssertion && !isEditing ? `
+                                ${!isEditing ? `
                                     <button class="btn-view-details" onclick="viewAssertion(${moduleIndex}, ${tcIndex}, ${stepIndex}); event.stopPropagation();">
                                         🔍 View Details
                                     </button>
@@ -2680,13 +2723,53 @@
         }
 
         // Save test case changes
-        function saveTestCase(moduleIndex, tcIndex) {
-            // Commit: remove backup and exit edit mode
-            const key = `${moduleIndex}-${tcIndex}`;
-            if (editBackups[key]) delete editBackups[key];
-            currentEditingTestCase = null;
-            renderTestScenarios();
-            showToast('✅ Test case saved successfully!');
+        async function saveTestCase(moduleIndex, tcIndex) {
+            const modules = Object.keys(testScenariosData);
+            const moduleName = modules[moduleIndex];
+            const testCase = testScenariosData[moduleName][tcIndex];
+            
+            console.log('💾 Saving test case:', {
+                id: testCase.id,
+                name: testCase.name,
+                stepsCount: testCase.steps.length,
+                steps: testCase.steps
+            });
+            
+            try {
+                showToast('💾 Saving test case updates...');
+                
+                // Call backend API to persist the changes
+                const response = await fetch('http://localhost:3456/api/update-testcase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        moduleName: moduleName,
+                        testCaseId: testCase.id,
+                        testCaseName: testCase.name,
+                        description: testCase.description,
+                        steps: testCase.steps
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('💾 Save result:', result);
+                
+                if (result.success) {
+                    // Commit: remove backup and exit edit mode
+                    const key = `${moduleIndex}-${tcIndex}`;
+                    if (editBackups[key]) delete editBackups[key];
+                    currentEditingTestCase = null;
+                    renderTestScenarios();
+                    showToast('✅ Test case saved permanently!');
+                } else {
+                    showToast(`❌ Failed to save: ${result.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error saving test case:', error);
+                showToast(`❌ Error saving test case: ${error.message}`);
+            }
         }
 
         // Cancel edit mode
@@ -2714,6 +2797,16 @@
             const testCase = testScenariosData[moduleName][tcIndex];
             
             testCase.steps.push('New test step - click edit to modify');
+            
+            // Generate assertion data for the new step
+            const newStepIndex = testCase.steps.length - 1;
+            const key = `${moduleIndex}-${tcIndex}-${newStepIndex}`;
+            assertionData[key] = generateStepAssertionData(
+                testCase.steps[newStepIndex], 
+                newStepIndex + 1, 
+                testCase.name
+            );
+            
             renderTestScenarios();
             
             // Keep edit mode and expanded state
@@ -2730,7 +2823,7 @@
                 stepsContainer.classList.add('expanded');
             }
             
-            showToast('✅ New step added');
+            showToast('✅ New step added with assertion data');
         }
 
         // Edit a test step (inline editing)
@@ -2753,9 +2846,20 @@
             
             const modules = Object.keys(testScenariosData);
             const moduleName = modules[moduleIndex];
+            const testCase = testScenariosData[moduleName][tcIndex];
+            
             // Strip any leading numbering like "1. " from saved step text
             const cleaned = newText.replace(/^\s*\d+\.\s*/, '');
-            testScenariosData[moduleName][tcIndex].steps[stepIndex] = cleaned;
+            testCase.steps[stepIndex] = cleaned;
+            
+            // Regenerate assertion data for the updated step
+            const key = `${moduleIndex}-${tcIndex}-${stepIndex}`;
+            assertionData[key] = generateStepAssertionData(
+                cleaned,
+                stepIndex + 1,
+                testCase.name
+            );
+            console.log(`✅ Regenerated assertion data for updated step: ${cleaned.substring(0, 50)}...`);
             
             renderTestScenarios();
             
@@ -2764,7 +2868,7 @@
             const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
             stepsContainer.classList.add('expanded');
             
-            showToast('✅ Step updated');
+            showToast('✅ Step and assertion data updated');
         }
 
         // Delete a test step
@@ -2775,7 +2879,24 @@
             
             const modules = Object.keys(testScenariosData);
             const moduleName = modules[moduleIndex];
-            testScenariosData[moduleName][tcIndex].steps.splice(stepIndex, 1);
+            const testCase = testScenariosData[moduleName][tcIndex];
+            testCase.steps.splice(stepIndex, 1);
+            
+            // Remove assertion data for deleted step and reindex remaining steps
+            const baseKey = `${moduleIndex}-${tcIndex}`;
+            for (let i = stepIndex; i < testCase.steps.length + 1; i++) {
+                const currentKey = `${baseKey}-${i}`;
+                const nextKey = `${baseKey}-${i + 1}`;
+                
+                if (i === stepIndex) {
+                    // Delete the removed step's assertion data
+                    delete assertionData[currentKey];
+                } else if (assertionData[nextKey]) {
+                    // Shift assertion data for subsequent steps
+                    assertionData[currentKey] = assertionData[nextKey];
+                    delete assertionData[nextKey];
+                }
+            }
             
             renderTestScenarios();
             
@@ -2788,7 +2909,7 @@
         }
 
         // Delete entire test case
-        function deleteTestCase(moduleIndex, tcIndex) {
+        async function deleteTestCase(moduleIndex, tcIndex) {
             const modules = Object.keys(testScenariosData);
             const moduleName = modules[moduleIndex];
             const testCase = testScenariosData[moduleName][tcIndex];
@@ -2797,32 +2918,49 @@
                 return;
             }
             
-            // Remove the test case from the array
-            testScenariosData[moduleName].splice(tcIndex, 1);
-            
-            // Clear edit mode if this test case was being edited
-            if (currentEditingTestCase === `${moduleIndex}-${tcIndex}`) {
-                currentEditingTestCase = null;
+            try {
+                // Show loading toast
+                showToast('🗑️ Deleting test case...');
+                
+                // Call backend API to delete from spec file
+                const response = await fetch('/api/delete-testcase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        moduleName: moduleName,
+                        testCaseId: testCase.id,
+                        testCaseName: testCase.name
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Mark test as deleted in localStorage
+                    markTestAsDeleted(testCase.id);
+                    
+                    // Remove the test case from the in-memory array
+                    testScenariosData[moduleName].splice(tcIndex, 1);
+                    
+                    // Clear edit mode if this test case was being edited
+                    if (currentEditingTestCase === `${moduleIndex}-${tcIndex}`) {
+                        currentEditingTestCase = null;
+                    }
+                    
+                    renderTestScenarios();
+                    showToast(`✅ Test case "${testCase.name}" deleted permanently`);
+                } else {
+                    showToast(`❌ Failed to delete test case: ${result.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error deleting test case:', error);
+                showToast(`❌ Error deleting test case: ${error.message}`);
             }
-            
-            renderTestScenarios();
-            showToast(`🗑️ Test case "${testCase.name}" deleted successfully`);
         }
 
         // Global object to track selected test cases for batch execution
-        const selectedTestCases = new Set();
-
-        // Toggle test case selection via checkbox
-        function toggleTestCaseSelection(checkbox, moduleIndex, tcIndex) {
-            const key = `${moduleIndex}-${tcIndex}`;
-            if (checkbox.checked) {
-                selectedTestCases.add(key);
-            } else {
-                selectedTestCases.delete(key);
-            }
-            console.log('Selected test cases:', Array.from(selectedTestCases));
-        }
-
         // Run a single test case
         function runTestCase(moduleIndex, tcIndex) {
             const modules = Object.keys(testScenariosData);
@@ -2839,7 +2977,7 @@
             
             // Call API to run specific test
             const config = getTestConfiguration();
-            fetch('/api/run-test', {
+            fetch('http://localhost:3456/api/run-test', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -2856,6 +2994,7 @@
                 if (data.success) {
                     console.log('Test execution started:', data.message);
                     showToast(`✅ Test "${testCase.name}" execution started`);
+                    addBotMessage(`✅ <b>Test Execution Started!</b>\n\nTest: ${testCase.name}\n\nCheck the terminal running dashboard-server.js to see test output.`);
                 } else {
                     showToast(`❌ Failed to run test: ${data.error || 'Unknown error'}`);
                     addBotMessage(`❌ <b>Test Execution Failed:</b> ${data.error || 'Unknown error'}`);
@@ -2864,7 +3003,7 @@
             .catch(error => {
                 console.error('Error running test:', error);
                 showToast(`❌ Error running test: ${error.message}`);
-                addBotMessage(`❌ <b>Error:</b> ${error.message}`);
+                addBotMessage(`❌ <b>Error:</b> ${error.message}\n\nMake sure dashboard-server.js is running:\n<code>node dashboard-server.js</code>`);
             });
         }
 
@@ -2956,58 +3095,133 @@
             const lower = stepText.toLowerCase();
             let assertionType, expected, actual, code;
 
-            if (/navigate|go to|open\s+https?/i.test(lower)) {
-                const urlMatch = stepText.match(/(https?:\/\/[^\s]+)/);
-                const url = urlMatch ? urlMatch[1] : 'the page';
-                assertionType = 'URL Assertion';
-                expected = `Page navigated to ${url}`;
-                actual = 'Page URL matches expected destination';
-                code = `// Step ${stepNumber}: ${stepText}\nawait expect(page).toHaveURL(${urlMatch ? `'${url}'` : '/.*/'});\nawait expect(page).toHaveTitle(/.+/);`;
+            // 1. Launch/Open application
+            if (/^launch|^open\s+(?!dashboard)/i.test(stepText)) {
+                assertionType = 'Application Launch';
+                expected = 'Application opened and home page loaded';
+                actual = 'Page is ready and interactive';
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.goto('https://www.advantageonlineshopping.com/');\nawait expect(page).toHaveTitle(/Advantage/i);\nawait expect(page.locator('body')).toBeVisible();`;
 
-            } else if (/click|press|tap/i.test(lower)) {
-                const elem = stepText.replace(/^click\s+(?:on\s+)?/i, '').replace(/\bbutton\b|\blink\b|\bicon\b/gi, '').trim() || 'element';
-                assertionType = 'Element Visibility';
-                expected = `"${elem}" is visible and enabled`;
-                actual = 'Element is visible and interactive';
-                code = `// Step ${stepNumber}: ${stepText}\nawait expect(page.getByText('${elem}', { exact: false })).toBeVisible();\nawait expect(page.getByText('${elem}', { exact: false })).toBeEnabled();`;
+            // 2. Navigate to specific page/section
+            } else if (/navigate|go to|open\s+(?:to\s+)?(?:the\s+)?/i.test(lower)) {
+                let pageMatch = stepText.match(/navigate\s+to\s+(.*?)(?:\s+\(|$)/i) || 
+                               stepText.match(/go\s+to\s+(.*?)(?:\s+\(|$)/i) ||
+                               stepText.match(/open\s+(.*?)(?:\s+\(|$)/i);
+                const pageName = pageMatch ? pageMatch[1].trim() : 'page';
+                const isNewTab = /new\s+tab|new\s+window/i.test(stepText);
+                
+                assertionType = 'Navigation';
+                expected = isNewTab ? `${pageName} opened in new tab` : `Navigated to ${pageName}`;
+                actual = 'Target page loaded successfully';
+                code = `// Step ${stepNumber}: ${stepText}\n${isNewTab ? '// New tab handling\nconst [newPage] = await Promise.all([\n  context.waitForEvent(\'page\'),\n  page.click(\'selector-for-link\')\n]);\nawait newPage.waitForLoadState();' : 'await page.click(\'text=' + pageName + '\');\nawait page.waitForLoadState();'}\nawait expect(page).toHaveURL(/.*/);\nawait expect(page.locator('body')).toBeVisible();`;
 
+            // 3. Click button/link/element
+            } else if (/^click/i.test(stepText)) {
+                let elementMatch = stepText.match(/click\s+(?:on\s+)?['"](.+?)['"]|click\s+(?:on\s+)?(?:the\s+)?(.+?)(?:\s+button|\s+link|\s+icon|$)/i);
+                const element = elementMatch ? (elementMatch[1] || elementMatch[2]).trim() : 'element';
+                
+                assertionType = 'Button/Link Click';
+                expected = `Clicked on "${element}"`;
+                actual = `"${element}" is clickable and action performed`;
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.click('text=${element}');\n// OR: await page.getByRole('button', { name: '${element}' }).click();\nawait page.waitForLoadState('networkidle');`;
+
+            // 4. Enter/Fill input fields  
             } else if (/enter|type|fill|input/i.test(lower)) {
-                const valMatch = stepText.match(/['"]([^'"]+)['"]/);
-                const val = valMatch ? valMatch[1] : '';
-                const fieldMatch = stepText.match(/(?:in(?:to)?|on)\s+(?:the\s+)?(?:field\s+)?['"]?([A-Za-z][A-Za-z0-9 ]{1,30}?)['"]?\s*(?:field|input|box|textbox)?$/i);
-                const field = fieldMatch ? fieldMatch[1].trim() : 'input field';
-                assertionType = 'Input Value Assertion';
-                expected = val ? `"${field}" field contains value "${val}"` : `"${field}" field is filled`;
-                actual = val ? 'Field has the expected value' : 'Field is not empty';
-                code = val
-                    ? `// Step ${stepNumber}: ${stepText}\nawait expect(page.getByLabel('${field}')).toHaveValue('${val}');`
-                    : `// Step ${stepNumber}: ${stepText}\nawait expect(page.getByLabel('${field}')).not.toBeEmpty();`;
+                const valueMatch = stepText.match(/['"]([^'"]+)['"]/);
+                const value = valueMatch ? valueMatch[1] : 'value';
+                const fieldMatch = stepText.match(/(?:in(?:to)?|on|for)\s+(?:the\s+)?(.+?)(?:\s+field|\s+box|$)/i);
+                const field = fieldMatch ? fieldMatch[1].trim() : 'field';
+                
+                assertionType = 'Input Field';
+                expected = `Entered "${value}" in ${field}`;
+                actual = 'Field populated with correct value';
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.fill('[placeholder*="${field}" i], [name*="${field}" i]', '${value}');\n// OR: await page.getByLabel('${field}').fill('${value}');\nawait expect(page.locator('[name*="${field}" i]')).toHaveValue('${value}');`;
 
-            } else if (/select|choose|pick/i.test(lower)) {
-                const valMatch = stepText.match(/['"]([^'"]+)['"]/);
-                const val = valMatch ? valMatch[1] : 'option';
-                assertionType = 'Selection Assertion';
-                expected = `Option "${val}" is selected`;
-                actual = 'Dropdown has expected selection';
-                code = `// Step ${stepNumber}: ${stepText}\nawait expect(page.locator('select')).toHaveValue('${val}');`;
+            // 5. Select from dropdown
+            } else if (/select|choose/i.test(lower) && !(/account/i.test(lower))) {
+                const valueMatch = stepText.match(/['"]([^'"]+)['"]/);
+                const value = valueMatch ? valueMatch[1] : 'option';
+                
+                assertionType = 'Dropdown Selection';
+                expected = `Selected "${value}" from dropdown`;
+                actual = 'Option selected successfully';
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.selectOption('select', '${value}');\n// OR: await page.locator('select').selectOption({ label: '${value}' });\nawait expect(page.locator('select')).toHaveValue('${value}');`;
 
-            } else if (/verify|assert|check|should|must|expect/i.test(lower)) {
-                assertionType = 'Custom Assertion';
+            // 6. Verify/Validate/Check assertions
+            } else if (/verify|validate|check\s+(?:that|if)|assert|confirm/i.test(lower)) {
+                const contentMatch = stepText.match(/(?:verify|validate|check|assert|confirm)\s+(?:that\s+)?(.+?)(?:\s+is\s+|\s+contains?\s+|$)/i);
+                const condition = contentMatch ? contentMatch[1].trim() : stepText;
+                
+                // Special cases
+                if (/success|display|appear|visible/i.test(lower)) {
+                    assertionType = 'Element Visibility';
+                    expected = `${condition} is displayed`;
+                    actual = 'Element is visible on page';
+                    code = `// Step ${stepNumber}: ${stepText}\nawait expect(page.locator('[class*="success" i]')).toBeVisible();\n// OR verify specific text:\nawait expect(page.locator('body')).toContainText('success', { ignoreCase: true });`;
+                } else if (/pdf|page|file/i.test(lower)) {
+                    const numberMatch = stepText.match(/(\d+)/);
+                    const number = numberMatch ? numberMatch[1] : 'N';
+                    assertionType = 'PDF/File Verification';
+                    expected = condition;
+                    actual = 'PDF validation successful';
+                    code = `// Step ${stepNumber}: ${stepText}\n// PDF verification requires custom logic\nconst pdfPath = './downloads/file.pdf';\nconst pdfContent = fs.readFileSync(pdfPath);\n// Assert: expect(pdfContent).toBeDefined();`;
+                } else {
+                    assertionType = 'Custom Assertion';
+                    expected = condition;
+                    actual = 'Condition verified';
+                    code = `// Step ${stepNumber}: ${stepText}\nawait expect(page.locator('selector')).toBeVisible();\n// Replace 'selector' with actual element`;
+                }
+
+            // 7. Download operations
+            } else if (/download/i.test(lower)) {
+                const fileMatch = stepText.match(/download\s+(.+?)(?:\s+file|$)/i);
+                const fileName = fileMatch ? fileMatch[1].trim() : 'file';
+                
+                assertionType = 'File Download';
+                expected = `Downloaded ${fileName}`;
+                actual = 'File downloaded successfully';
+                code = `// Step ${stepNumber}: ${stepText}\nconst [download] = await Promise.all([\n  page.waitForEvent('download'),\n  page.click('text=${fileName}')\n]);\nconst path = await download.path();\nexpect(path).toBeTruthy();\nawait download.saveAs('./downloads/' + download.suggestedFilename());`;
+
+            // 8. Close tab/window
+            } else if (/close/i.test(lower) && /tab|window/i.test(lower)) {
+                assertionType = 'Tab/Window Close';
+                expected = 'Tab/window closed';
+                actual = 'Tab closed successfully';
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.close();\n// Then switch focus to remaining page if needed`;
+
+            // 9. Logout
+            } else if (/logout|sign\s*out|log\s*out/i.test(lower)) {
+                assertionType = 'User Logout';
+                expected = 'User logged out successfully';
+                actual = 'Logged out and redirected to home page';
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.click('[id*="logout" i], text=Logout');\nawait expect(page).toHaveURL(/.*/);\nawait expect(page.locator('text=Sign in')).toBeVisible();`;
+
+            // 10. Login operations
+            } else if (/login|sign\s*in|log\s*in/i.test(lower)) {
+                assertionType = 'User Login';
+                expected = 'User logged in successfully';
+                actual = 'Login successful and redirected';
+                code = `// Step ${stepNumber}: ${stepText}\n// Enter credentials and click login\nawait page.fill('[name="username"]', 'testuser');\nawait page.fill('[name="password"]', 'password123');\nawait page.click('button[type="submit"]');\nawait expect(page.locator('text=Welcome')).toBeVisible();`;
+
+            // 11. Compare/Upload files
+            } else if (/compare/i.test(lower) && /pdf|file|image|baseline/i.test(lower)) {
+                assertionType = 'File Comparison';
                 expected = stepText;
-                actual = 'Assertion condition verified';
-                code = `// Step ${stepNumber}: ${stepText}\nawait expect(page.locator('.target')).toBeVisible();\nawait expect(page.locator('.target')).toHaveText(/.+/);`;
+                actual = 'Files compared successfully';
+                code = `// Step ${stepNumber}: ${stepText}\n// Custom file comparison logic required\nconst actual = fs.readFileSync('./actual.pdf');\nconst expected = fs.readFileSync('./expected.pdf');\n// Use comparison library`;
 
             } else if (/upload|attach/i.test(lower)) {
-                assertionType = 'File Upload Assertion';
+                assertionType = 'File Upload';
                 expected = 'File uploaded successfully';
-                actual = 'File input has attachment';
-                code = `// Step ${stepNumber}: ${stepText}\nawait expect(page.locator('[type="file"]')).toBeAttached();`;
+                actual = 'File attached to upload field';
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.setInputFiles('input[type="file"]', './files/document.pdf');\nawait expect(page.locator('input[type="file"]')).toHaveValue(/.*document.*/);`;
 
+            // 12. Default - generic step
             } else {
-                assertionType = 'Step Completion';
-                expected = `Step completed: ${stepText.substring(0, 60)}`;
-                actual = 'Step executed without errors';
-                code = `// Step ${stepNumber}: ${stepText}\nawait expect(page).not.toHaveURL('about:blank');\nawait expect(page.locator('body')).toBeVisible();`;
+                assertionType = 'Step Execution';
+                expected = stepText;
+                actual = 'Step completed';
+                code = `// Step ${stepNumber}: ${stepText}\n// TODO: Add specific assertions for this step\nawait expect(page.locator('body')).toBeVisible();`;
             }
 
             return {
@@ -3067,14 +3281,27 @@
                 const data = await resp.json();
                 const shots = data.screenshots || [];
 
+                // Track which screenshot URLs have already been assigned to avoid duplicates
+                const usedScreenshots = new Set();
+
                 shots.forEach((s) => {
                     const si  = s.stepIndex !== undefined ? s.stepIndex : 0;
                     const key = `${moduleIndex}-${tcIndex}-${si}`;
-                    if (assertionData[key]) {
-                        // Add cache-buster so browser fetches fresh image (don't save ?t= to metadata)
+                    
+                    // Extract base URL without cache-buster to check for duplicates
+                    const baseUrl = s.url.split('?')[0];
+                    
+                    if (assertionData[key] && !usedScreenshots.has(baseUrl)) {
+                        // Add cache-buster so browser fetches fresh image
                         assertionData[key].screenshot = `${BASE}${s.url}?t=${Date.now()}`;
                         assertionData[key].status     = 'Captured';
+                        usedScreenshots.add(baseUrl);
                         realScreenshotsCaptured++;
+                        console.log(`✓ Screenshot matched: Step ${si + 1} - ${assertionData[key].stepDescription.substring(0, 40)}...`);
+                    } else if (assertionData[key] && usedScreenshots.has(baseUrl)) {
+                        console.log(`⏭️  Skipping duplicate screenshot for step ${si + 1}: ${baseUrl.split('/').pop()}`);
+                    } else {
+                        console.warn(`⚠️ No assertion data found for step ${si} (key: ${key})`);
                     }
                 });
 
@@ -3108,11 +3335,28 @@
         // View assertion details for a specific step
         function viewAssertion(moduleIndex, tcIndex, stepIndex, isApiTest = false) {
             const key = isApiTest ? `api-${moduleIndex}-${tcIndex}-${stepIndex}` : `${moduleIndex}-${tcIndex}-${stepIndex}`;
-            const assertion = assertionData[key];
+            let assertion = assertionData[key];
             
+            // If assertion doesn't exist, generate it dynamically from the test step
             if (!assertion) {
-                showToast('ℹ️ No assertion data available for this step');
-                return;
+                const modules = isApiTest ? Object.keys(apiTestsData) : Object.keys(testScenariosData);
+                const moduleName = modules[moduleIndex];
+                const testData = isApiTest ? apiTestsData : testScenariosData;
+                const testCase = testData[moduleName]?.[tcIndex];
+                
+                if (!testCase || !testCase.steps[stepIndex]) {
+                    showToast('❌ Test step not found');
+                    return;
+                }
+                
+                const stepText = testCase.steps[stepIndex];
+                const testCaseName = testCase.name || testCase.id;
+                
+                // Generate assertion data on the fly
+                assertion = generateStepAssertionData(stepText, stepIndex + 1, testCaseName);
+                assertionData[key] = assertion; // Cache it for future use
+                
+                console.log(`Generated assertion data for step ${stepIndex + 1}: ${stepText.substring(0, 50)}...`);
             }
             
             currentAssertion = assertion;
@@ -3135,7 +3379,13 @@
             const snapshotContainer = document.getElementById('assertionSnapshotImageContainer');
             document.getElementById('assertionSnapshotStep').textContent = assertion.stepDescription;
 
-            if (assertion.screenshot) {
+            // Validate screenshot exists and is for the correct step
+            const hasValidScreenshot = assertion.screenshot && 
+                                      assertion.screenshot !== 'null' && 
+                                      assertion.screenshot !== '' &&
+                                      assertion.status === 'Captured';
+
+            if (hasValidScreenshot) {
                 // Real screenshot from Playwright trace — display it
                 const src = assertion.screenshot;
                 snapshotContainer.innerHTML = `
@@ -3145,16 +3395,16 @@
                             <div style="width:10px;height:10px;border-radius:50%;background:#f59e0b;"></div>
                             <div style="width:10px;height:10px;border-radius:50%;background:#10b981;"></div>
                             <div style="flex:1;background:#0f172a;border-radius:4px;padding:3px 10px;font-size:11px;color:#94a3b8;margin:0 8px;font-family:monospace;">
-                                Playwright Screenshot — Step ${assertion.stepNumber}
+                                ${assertion.stepDescription.substring(0, 50)}${assertion.stepDescription.length > 50 ? '...' : ''}
                             </div>
                             <span style="background:#10b981;color:white;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;">✓ CAPTURED</span>
                         </div>
-                        <img src="${src}" alt="Playwright screenshot step ${assertion.stepNumber}"
+                        <img src="${src}" alt="Screenshot for: ${assertion.stepDescription}"
                              style="width:100%;display:block;max-height:400px;object-fit:contain;background:#f8fafc;"
-                             onerror="this.parentElement.innerHTML='<div style=padding:20px;text-align:center;color:#ef4444;>⚠️ Screenshot could not be loaded.<br><small style=color:#64748b;>${src}</small></div>'">
+                             onerror="this.parentElement.innerHTML='<div style=\\'padding:40px 20px;text-align:center;\\'><div style=\\'font-size:48px;margin-bottom:12px;\\'>⚠️</div><div style=\\'color:#ef4444;font-weight:600;margin-bottom:8px;\\'>Screenshot not found</div><div style=\\'font-size:13px;color:#64748b;\\'>The screenshot file may have been moved or deleted.<br>Click <strong>📸 Capture Screenshots</strong> to re-capture.</div></div>'">
                         <div style="background:#f8fafc;padding:8px 12px;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#64748b;">
-                            <span>${assertion.assertionType}</span>
-                            <span style="color:#10b981;font-weight:600;">${assertion.timestamp}</span>
+                            <span>📊 ${assertion.assertionType}</span>
+                            <span style="color:#10b981;font-weight:600;">🕐 ${assertion.timestamp}</span>
                         </div>
                     </div>`;
             } else {
@@ -3311,14 +3561,11 @@
                     `;
 
                     testCase.steps.forEach((step, stepIndex) => {
-                        // Check if this step has assertion data
-                        const hasAssertion = assertionData[`api-${moduleIndex}-${tcIndex}-${stepIndex}`] !== undefined;
-
                         html += `
                             <div class="test-step-item" id="apiStep${moduleIndex}-${tcIndex}-${stepIndex}">
                                 <div class="step-number">${stepIndex + 1}</div>
                                 <div class="step-text" id="apiStepText${moduleIndex}-${tcIndex}-${stepIndex}">${step}</div>
-                                ${hasAssertion && !isEditing ? `
+                                ${!isEditing ? `
                                     <button class="btn-view-details" onclick="viewAssertion(${moduleIndex}, ${tcIndex}, ${stepIndex}, true); event.stopPropagation();">
                                         🔍 View Details
                                     </button>
@@ -3392,10 +3639,42 @@
             showToast('ℹ️ Edit mode enabled. Add, edit, or delete steps.');
         }
 
-        function saveApiTestCase(moduleIndex, tcIndex) {
-            currentEditingApiTestCase = null;
-            renderApiTests();
-            showToast('✅ Test case saved successfully!');
+        async function saveApiTestCase(moduleIndex, tcIndex) {
+            const modules = Object.keys(apiTestsData);
+            const moduleName = modules[moduleIndex];
+            const testCase = apiTestsData[moduleName][tcIndex];
+            
+            try {
+                showToast('💾 Saving test case updates...');
+                
+                // Call backend API to persist the changes
+                const response = await fetch('http://localhost:3456/api/update-testcase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        moduleName: moduleName,
+                        testCaseId: testCase.id,
+                        testCaseName: testCase.name,
+                        description: testCase.description || testCase.endpoint,
+                        steps: testCase.steps
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentEditingApiTestCase = null;
+                    renderApiTests();
+                    showToast('✅ Test case saved permanently!');
+                } else {
+                    showToast(`❌ Failed to save: ${result.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error saving API test case:', error);
+                showToast(`❌ Error saving test case: ${error.message}`);
+            }
         }
 
         function cancelApiEdit() {
@@ -3540,10 +3819,38 @@
         // Initialize test scenarios on page load
         document.addEventListener('DOMContentLoaded', async function() {
             await loadSavedTests(); // Load saved tests first
+            await loadTestUpdates(); // Apply any saved updates
+            filterDeletedTests(); // Remove deleted tests
             renderTestScenarios();
             renderApiTests();
-            await loadSavedScreenshots(); // Restore any previously captured screenshots
+            
+            // Optional: Comment out this line if you want to start fresh without loading old screenshots
+            // await loadSavedScreenshots(); // Restore any previously captured screenshots
+            
+            console.log('Dashboard initialized. Use "Capture Screenshots" button to capture fresh screenshots for test steps.');
         });
+
+        // Clear all screenshot data (useful if screenshots are showing for wrong steps)
+        function clearAllScreenshots() {
+            if (!confirm('Clear all screenshot data? You will need to re-capture screenshots for all test cases.')) {
+                return;
+            }
+            
+            Object.keys(assertionData).forEach(key => {
+                if (assertionData[key]) {
+                    assertionData[key].screenshot = null;
+                    assertionData[key].status = 'Generated';
+                }
+            });
+            
+            renderTestScenarios();
+            renderApiTests();
+            showToast('✅ All screenshots cleared. Use "Capture Screenshots" button to re-capture.');
+            
+            // Request backend to clear saved metadata
+            fetch('http://localhost:3456/api/clear-screenshots', { method: 'POST' })
+                .catch(e => console.log('Backend clear request failed:', e.message));
+        }
 
         // File selection handlers
         function handleProjectContextSelect(event) {
@@ -4044,7 +4351,7 @@
         }
 
         // Save test case to TESTING_FRAMEWORK_CONTEXT.md
-        async function saveTestCase(event) {
+        async function saveNewTestCase(event) {
             event.preventDefault();
             
             const moduleName = document.getElementById('moduleName').value.trim();
@@ -5687,7 +5994,7 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
                 <h2>💾 Save Test Case</h2>
                 <button class="close-btn" onclick="closeTestCaseModal()">&times;</button>
             </div>
-            <form onsubmit="saveTestCase(event)">
+            <form onsubmit="saveNewTestCase(event)">
                 <div class="form-group">
                     <label>� Module Name:</label>
                     <input type="text" id="moduleName" placeholder="e.g., Login Module" required>
@@ -5849,5 +6156,18 @@ await expect(page.locator('#element')).toHaveText('Expected Text');</code></pre>
             </div>
         </div>
     </div>
+
+    <!-- Playwright Copilot floating chatbot -->
+    <div id="copilot-root"></div>
+    <script src="chatbot.js"></script>
+    <script>
+        // Initialize the Playwright Copilot after the page loads
+        window.addEventListener('DOMContentLoaded', function () {
+            if (typeof PlaywrightCopilot !== 'undefined') {
+                window._pwCopilot = new PlaywrightCopilot('copilot-root');
+                window._pwCopilot.init();
+            }
+        });
+    </script>
 </body>
 </html>
