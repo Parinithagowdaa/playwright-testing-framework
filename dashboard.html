@@ -1331,7 +1331,7 @@
                 <div class="logo">P</div>
                 Playwright Testing Framework Dashboard
             </h1>
-            <p>Comprehensive Test Automation - UI | REST API | SOAP API | Database Testing</p>
+            <p>Comprehensive Test Automation - UI</p>
         </header>
 
         <!-- Navigation Tabs -->
@@ -1349,18 +1349,12 @@
                     <span class="tab-icon">&#128203;</span>
                     <span>Test Scenarios</span>
                 </button>
-                <button class="tab-button" onclick="showPage(5)">
-                    <span class="tab-icon">🧪</span>
-                    <span>API Tests</span>
-                </button>
+                <!-- 'API Tests' tab removed to simplify UI (functionality preserved) -->
                 <button class="tab-button" onclick="showPage(3)">
                     <span class="tab-icon">📈</span>
                     <span>Reports</span>
                 </button>
-                <button class="tab-button" onclick="showPage(4)">
-                    <span class="tab-icon">⚙️</span>
-                    <span>Configuration</span>
-                </button>
+                <!-- 'Configuration' tab removed (page4 remains accessible via buttons) -->
             </div>
         </nav>
 
@@ -1458,8 +1452,8 @@
                 
                 <div style="flex: 1; min-width: 180px;">
                     <label style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">
-                        � Test Name:
-                    </label>
+                            🏷️ Test Name:
+                        </label>
                     <select id="testName" class="browser-select" style="width: 100%;">
                         <option value="All" selected>All Tests</option>
                     </select>
@@ -1551,7 +1545,7 @@
                 <p>🕘 Last test run: Successfully executed 18 test cases</p>
                 <p>✅ Success rate: 83% (15 passed, 2 failed, 1 skipped)</p>
                 <p>⏱️ Average execution time: 2m 45s</p>
-                <p>📚 Coverage: UI, REST API, SOAP API, Database</p>
+                    <p>📚 Coverage: UI functionality</p>
             </div>
         </div>
         </div>
@@ -1806,20 +1800,7 @@
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="panel" style="margin-top: 32px;">
-                <h2>
-                <span class="panel-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">📌</span>
-                Quick Actions
-            </h2>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                <button class="btn" onclick="runAllTests()">Run All Tests</button>
-                <button class="btn btn-secondary" onclick="viewReports()">View Reports</button>
-                <button class="btn btn-success" onclick="openPlaywrightUI()">Open Playwright UI</button>
-                <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="openProjectContext()">View Documentation</button>
-                <button class="btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);" onclick="openTerminal()">Open Terminal</button>
-            </div>
-        </div>
+        <!-- Quick Actions 'Action Buttons' removed as requested -->
 
         <!-- Footer -->
         <footer>
@@ -1863,18 +1844,30 @@
             document.getElementById('page' + pageIndex).classList.add('active');
             
             // Map page index to tab position
-            // Tab order: Dashboard(0), Record&Play(1), TestScenarios(2), APITests(5), Reports(3), Configuration(4)
+            // Current tab order: Dashboard(0), Record&Play(1), TestScenarios(2), Reports(3)
+            // Note: pages without a tab (page 4 - Configuration, page 5 - API Tests) will still render
             const pageToTabMap = {
                 0: 0, // Dashboard
                 1: 1, // Record & Play
                 2: 2, // Test Scenarios
-                5: 3, // API Tests
-                3: 4, // Reports
-                4: 5  // Configuration
+                3: 3  // Reports
             };
-            
-            // Activate the correct tab
-            tabs[pageToTabMap[pageIndex]].classList.add('active');
+
+                // Activate the correct tab if it exists (safe guard for pages that don't have a tab)
+                const mappedIndex = pageToTabMap.hasOwnProperty(pageIndex) ? pageToTabMap[pageIndex] : null;
+                if (typeof mappedIndex === 'number' && tabs[mappedIndex]) {
+                    tabs[mappedIndex].classList.add('active');
+                }
+
+                // Hide Quick Actions panel on Reports (3) and Record & Play (1)
+                const quickPanel = document.getElementById('quickActionsPanel');
+                if (quickPanel) {
+                    if (pageIndex === 3 || pageIndex === 1) {
+                        quickPanel.style.display = 'none';
+                    } else {
+                        quickPanel.style.display = '';
+                    }
+                }
         }
 
         // Test Scenarios Tree Structure Data (UI Tests only)
