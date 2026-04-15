@@ -4397,14 +4397,40 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
         }
 
         // Run specific test type
-        function runTest(type) {
+        async function runTest(type) {
             const config = getTestConfiguration();
             const browserNames = { chromium: 'Chrome', msedge: 'Edge', firefox: 'Firefox' };
             const reportNames = { allure: 'Allure', html: 'Playwright HTML Report', logs: 'Execution Logs' };
-            
+            const projectMap = { All: 'suite', REST: 'suite', SOAP: 'suite', Database: 'suite', Codegen: 'codegen' };
+            const project = projectMap[type] || 'suite';
+
             showToast(`▶️ Initiating ${type} test execution...`);
-            addBotMessage(`🏁 <b>Running ${type} Tests:</b>\n\n🔁 Retries: ${config.retries} | ⚙️ Workers: ${config.workers}\n🌐 Browser: ${browserNames[config.browser]} | 🕵️ Headless: ${config.headless}\n📄 Report: ${reportNames[config.reporter]}\n\nExecuting ${type} test suite...`);
-            console.log(`Running ${type} tests with config:`, config);
+            addBotMessage(`🏁 <b>Running ${type} Tests:</b>\n\n🔁 Retries: ${config.retries} | ⚙️ Workers: ${config.workers}\n🌐 Browser: ${browserNames[config.browser]} | 🕵️ Headless: ${config.headless}\n📄 Report: ${reportNames[config.reporter]}\n\nLaunching test runner...`);
+
+            try {
+                const response = await fetch('http://localhost:3456/run-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        project,
+                        browser: config.browser,
+                        workers: config.workers,
+                        retries: config.retries,
+                        headless: config.headless,
+                    }),
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast(`✅ ${type} tests started!`);
+                    addBotMessage(`✅ <b>${type} tests are now running.</b>\n\n<b>Command:</b>\n<code>${result.command}</code>\n\nCheck your terminal for live output.`);
+                } else {
+                    throw new Error(result.message || 'Failed to start tests');
+                }
+            } catch (error) {
+                showToast(`❌ Error: ${error.message}`);
+                const fallback = `npx playwright test --project=${project} --retries=${config.retries} --workers=${config.workers} ${config.headless === 'true' ? '' : '--headed'}`.trim();
+                addBotMessage(`❌ <b>Could not start tests via server.</b>\n\n<b>Run manually in your terminal:</b>\n<code>${fallback}</code>\n\n<b>Or start the dashboard server first:</b>\n<code>node dashboard-server.js</code>`);
+            }
         }
 
         // Run all tests
@@ -4419,14 +4445,38 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
             };
         }
 
-        function runAllTests() {
+        async function runAllTests() {
             const config = getTestConfiguration();
             const browserNames = { chromium: 'Chrome', msedge: 'Edge', firefox: 'Firefox' };
             const reportNames = { allure: 'Allure', html: 'Playwright HTML Report', logs: 'Execution Logs' };
-            
+            const command = `npx playwright test --project=suite --retries=${config.retries} --workers=${config.workers} ${config.headless === 'true' ? '' : '--headed'}`.trim();
+
             showToast('🏃 Initiating full test suite execution...');
-            addBotMessage(`🏁 <b>Running All Tests with Configuration:</b>\n\n🔁 <b>Retries:</b> ${config.retries}\n⚙️ <b>Parallel Threads:</b> ${config.workers}\n🌐 <b>Browser:</b> ${browserNames[config.browser]}\n🕵️ <b>Headless Mode:</b> ${config.headless}\n📄 <b>Report:</b> ${reportNames[config.reporter]}\n\n<b>Command would be:</b>\n<code>npx playwright test --retries=${config.retries} --workers=${config.workers} --project=${config.browser} ${config.headless === 'true' ? '--headed=false' : '--headed'} --reporter=${config.reporter}</code>\n\nTests are being executed...`);
-            console.log('Running all tests with config:', config);
+            addBotMessage(`🏁 <b>Running All Tests with Configuration:</b>\n\n🔁 <b>Retries:</b> ${config.retries}\n⚙️ <b>Parallel Threads:</b> ${config.workers}\n🌐 <b>Browser:</b> ${browserNames[config.browser]}\n🕵️ <b>Headless Mode:</b> ${config.headless}\n📄 <b>Report:</b> ${reportNames[config.reporter]}\n\n<b>Command:</b>\n<code>${command}</code>\n\nLaunching test runner...`);
+
+            try {
+                const response = await fetch('http://localhost:3456/run-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        project: 'suite',
+                        browser: config.browser,
+                        workers: config.workers,
+                        retries: config.retries,
+                        headless: config.headless,
+                    }),
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('✅ All tests started!');
+                    addBotMessage(`✅ <b>All tests are now running.</b>\n\n<b>Command:</b>\n<code>${result.command}</code>\n\nCheck your terminal for live output.`);
+                } else {
+                    throw new Error(result.message || 'Failed to start tests');
+                }
+            } catch (error) {
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage(`❌ <b>Could not start tests via server.</b>\n\n<b>Run manually in your terminal:</b>\n<code>${command}</code>\n\n<b>Or start the dashboard server first:</b>\n<code>node dashboard-server.js</code>`);
+            }
         }
 
         // View reports
