@@ -1,5 +1,5 @@
 const http = require('http');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
@@ -189,6 +189,65 @@ const server = http.createServer((req, res) => {
                     message: `Launching ${browser} with ${url}`,
                     command,
                     pid: playwrightProcess.pid,
+                }));
+            } catch (error) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: error.message }));
+            }
+        });
+    } else if (req.url === '/run-test' && req.method === 'POST') {
+        let body = '';
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        });
+
+        req.on('end', () => {
+            try {
+                const data = JSON.parse(body);
+                const { project, browser, workers, retries, headless } = data;
+
+                // Validate inputs to prevent command injection
+                const validProjects = ['local', 'suite', 'codegen'];
+                const validBrowsers = ['chrome', 'chromium', 'firefox', 'msedge', 'webkit'];
+                const safeProject = validProjects.includes(project) ? project : 'suite';
+                const safeBrowser = validBrowsers.includes(browser) ? browser : 'chromium';
+                const safeWorkers = /^\d+$/.test(String(workers)) ? String(workers) : '2';
+                const safeRetries = /^\d+$/.test(String(retries)) ? String(retries) : '0';
+
+                const spawnArgs = ['playwright', 'test',
+                    `--project=${safeProject}`,
+                    `--workers=${safeWorkers}`,
+                    `--retries=${safeRetries}`,
+                ];
+                if (headless !== 'true') {
+                    spawnArgs.push('--headed');
+                }
+
+                const displayCommand = `npx ${spawnArgs.join(' ')}`;
+                console.log(`▶️ Running Playwright tests...`);
+                console.log(`   Command: ${displayCommand}\n`);
+
+                const testProcess = spawn('npx', spawnArgs, {
+                    env: { ...process.env, BROWSER: safeBrowser },
+                    stdio: 'inherit',
+                });
+
+                testProcess.on('error', (err) => {
+                    console.error(`❌ Test run error: ${err.message}`);
+                });
+
+                testProcess.on('close', (code) => {
+                    console.log(`✅ Test run finished with exit code ${code}`);
+                });
+
+                console.log(`✅ Test run started (PID: ${testProcess.pid})`);
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: true,
+                    message: `Running tests: ${displayCommand}`,
+                    command: displayCommand,
+                    pid: testProcess.pid,
                 }));
             } catch (error) {
                 res.writeHead(500, { 'Content-Type': 'application/json' });

@@ -13,7 +13,9 @@
     "create:suite": "cd ./src/framework/manager & npx ts-node SuiteManager.ts",
     "test": "playwright test --project=suite",
     "local:test": "playwright test --project=local",
-    "local:test:ui": "playwright test --project=local --ui"
+    "local:test:ui": "playwright test --project=local --ui",
+    "codegen:test": "playwright test --project=codegen",
+    "dashboard": "node dashboard-server.js"
   },
   "keywords": [],
   "author": "Vinay Kumar B M",

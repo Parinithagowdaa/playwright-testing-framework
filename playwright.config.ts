@@ -60,6 +60,11 @@ const config: PlaywrightTestConfig = {
       name: "suite",
       testMatch: "*.test.ts",
     },
+    {
+      name: "codegen",
+      testDir: ".",
+      testMatch: "playwright-latest-codegen.spec.ts",
+    },
   ],
 };
 export default config;
