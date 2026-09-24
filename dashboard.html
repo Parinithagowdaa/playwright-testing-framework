@@ -287,6 +287,42 @@
             padding: 20px;
         }
 
+        /* Test Type Row (Level 1) */
+        .test-type-row {
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .test-type-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .test-type-header:hover {
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+        }
+
+        .test-type-content {
+            display: none;
+            background: #ffffff;
+            border: 2px solid #e0e7ff;
+            border-top: none;
+            padding: 16px;
+        }
+
+        .test-type-content.expanded {
+            display: block;
+        }
+
+        /* Module Row (Level 2) */
         .module-row {
             margin-bottom: 16px;
             border-radius: 10px;
@@ -401,7 +437,7 @@
             align-items: center;
         }
 
-        .btn-update, .btn-save, .btn-cancel, .btn-delete-test-case {
+        .btn-update, .btn-save, .btn-cancel, .btn-delete-test-case, .btn-run-test-case {
             padding: 6px 16px;
             border: none;
             border-radius: 6px;
@@ -409,6 +445,16 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+        }
+
+        .btn-run-test-case {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+        }
+
+        .btn-run-test-case:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
         }
 
         .btn-update {
@@ -448,6 +494,50 @@
 
         .btn-cancel:hover {
             background: #cbd5e1;
+        }
+
+        /* Action buttons for test types and modules */
+        .test-type-actions, .module-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-edit, .btn-run {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-edit {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-edit:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-run {
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-run:hover {
+            background: rgba(16, 185, 129, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
         }
 
         .test-steps-container {
@@ -548,6 +638,17 @@
         .icon-btn.check:hover {
             background: #10b981;
             color: white;
+        }
+
+        .icon-btn.run {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .icon-btn.run:hover {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+            transform: scale(1.1);
         }
 
         .btn-add-step {
@@ -1370,36 +1471,36 @@
         <div class="stats-grid">
             <div class="stat-card ui">
                 <h3>Total Test Cases</h3>
-                <div class="number">23</div>
+                <div class="number" id="dashboardTotalTests">0</div>
                 <div class="label">Test Scenarios</div>
             </div>
             <div class="stat-card rest">
-                <h3>Executed</h3>
-                <div class="number">18</div>
-                <div class="label">Tests Run</div>
+                <h3>Test Types</h3>
+                <div class="number" id="dashboardTestTypes">0</div>
+                <div class="label">Active Categories</div>
             </div>
             <div class="stat-card soap">
-                <h3>Passed (83%)</h3>
-                <div class="number">15</div>
-                <div class="label">Successful</div>
+                <h3>Modules</h3>
+                <div class="number" id="dashboardModules">0</div>
+                <div class="label">Organized Groups</div>
             </div>
             <div class="stat-card db">
-                <h3>Failed</h3>
-                <div class="number">2</div>
-                <div class="label">Need Attention</div>
+                <h3>Total Steps</h3>
+                <div class="number" id="dashboardSteps">0</div>
+                <div class="label">Test Actions</div>
             </div>
             <div class="stat-card ui">
-                <h3>Skipped</h3>
-                <div class="number">1</div>
-                <div class="label">Not Executed</div>
+                <h3>Largest Category</h3>
+                <div class="number" id="dashboardLargestType">-</div>
+                <div class="label" id="dashboardLargestTypeCount">0 Tests</div>
             </div>
         </div>
 
-        <!-- Quick Actions Panel -->
+        <!-- Test Execution Panel -->
         <div class="panel">
                 <h2>
                 <span class="panel-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">⚡</span>
-                Quick Actions
+                Test Execution
             </h2>
             
             <!-- Configuration Options Row -->
@@ -1491,53 +1592,10 @@
         </div>
 
         <!-- Test Summary Overview -->
-        <div class="main-grid">
+        <div class="main-grid" id="dashboardScenarioSummary">
             <div class="panel">
-                <h2>
-                    <span class="panel-icon ui">📋</span>
-                    Test Scenarios
-                </h2>
-                <p style="color: #64748b; margin-bottom: 16px;">20 comprehensive test scenarios: UI (8), Functional (4), Integration (3), System (2), Database (3)</p>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <button class="btn btn-small" onclick="showPage(2)">View All Tests</button>
-                    <button class="btn btn-small" onclick="runTest('All')">▶️ Run All Tests</button>
-                </div>
-            </div>
-
-            <div class="panel">
-                <h2>
-                    <span class="panel-icon rest">🔁</span>
-                    REST API Tests
-                </h2>
-                <p style="color: #64748b; margin-bottom: 16px;">5 REST API tests for user management and data operations</p>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <button class="btn btn-secondary btn-small" onclick="showPage(5)">View Tests</button>
-                    <button class="btn btn-secondary btn-small" onclick="runTest('REST')">▶️ Run Tests</button>
-                </div>
-            </div>
-
-            <div class="panel">
-                <h2>
-                    <span class="panel-icon soap">🧾</span>
-                    SOAP API Tests
-                </h2>
-                <p style="color: #64748b; margin-bottom: 16px;">5 SOAP API tests for account services and workflows</p>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <button class="btn btn-small" onclick="showPage(5)" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);">View Tests</button>
-                    <button class="btn btn-small" onclick="runTest('SOAP')" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);">▶️ Run Tests</button>
-                </div>
-            </div>
-
-            <div class="panel">
-                <h2>
-                    <span class="panel-icon db">🗄️</span>
-                    Database Tests
-                </h2>
-                <p style="color: #64748b; margin-bottom: 16px;">5 database validation tests for data integrity</p>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <button class="btn btn-success btn-small" onclick="showPage(2)">View All Tests</button>
-                    <button class="btn btn-success btn-small" onclick="runTest('Database')">▶️ Run Tests</button>
-                </div>
+                <h2><span class="panel-icon ui">📋</span>Test Scenarios</h2>
+                <p style="color: #64748b; margin-bottom: 16px;">Loading scenario summary...</p>
             </div>
         </div>
 
@@ -1548,10 +1606,11 @@
                 Recent Activity
             </h2>
             <div style="color: #64748b;">
-                <p>🕘 Last test run: Successfully executed 18 test cases</p>
-                <p>✅ Success rate: 83% (15 passed, 2 failed, 1 skipped)</p>
-                <p>⏱️ Average execution time: 2m 45s</p>
-                <p>📚 Coverage: UI, REST API, SOAP API, Database</p>
+                <p id="dashboardScenarioActivity">Loading test scenario coverage...</p>
+                <p id="dashboardModuleActivity"></p>
+                <p id="dashboardStepActivity"></p>
+                <p id="dashboardTypeActivity"></p>
+                <p id="dashboardRecordedActivity"></p>
             </div>
         </div>
         </div>
@@ -1560,36 +1619,36 @@
         <!-- Record & Play Page -->
         <div id="page1" class="page">
             <div class="main-grid">
-                <!-- File Selection Panel (Left) -->
+                <!-- Recording Controls Panel (Left) -->
                 <div class="panel">
                     <h2>
-                        <span class="panel-icon rest">🔁</span>
-                            File Selection
-                        </h2>
+                        <span class="panel-icon soap">⏺️</span>
+                        Recording Controls
+                    </h2>
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
-                            📁 Upload TESTING_FRAMEWORK_CONTEXT.md:
+                            🌐 Select Browser:
                         </label>
-                        <div class="file-selection">
-                            <div class="file-input-wrapper">
-                                <button class="btn btn-small" onclick="document.getElementById('projectContextInput').click()">📂 Select TESTING_FRAMEWORK_CONTEXT.md</button>
-                                <input type="file" id="projectContextInput" accept=".md" onchange="handleProjectContextSelect(event)" style="display: none;">
-                            </div>
-                            <p id="selectedProjectContext" style="margin: 0; color: #475569; font-weight: 600; font-size: 14px; flex-grow: 1;"></p>
+                        <select id="browserSelect" class="browser-select">
+                            <option value="chromium">Chrome</option>
+                            <option value="msedge">Edge</option>
+                            <option value="firefox">Firefox</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
+                            🌍 Application URL:
+                        </label>
+                        <input type="text" id="appUrl" class="browser-select" style="width: 100%;" value="http://advantageonlineshopping.com/" placeholder="Enter application URL (e.g., http://advantageonlineshopping.com)">
+                        <div role="status" aria-live="polite" style="margin-top:10px; color:#075985; background:#ecfeff; border-left:4px solid #38bdf8; padding:10px 12px; border-radius:6px; font-size:13px;">
+                            <strong style="margin-right:8px;">ℹ️ Info:</strong> Close the application after recording, then click Stop to view the test case.
                         </div>
                     </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
-                            📁 Upload HTML File:
-                        </label>
-                        <div class="file-selection">
-                            <div class="file-input-wrapper">
-                                <button class="btn btn-small" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="document.getElementById('htmlFileInput').click()">📂 Select HTML File</button>
-                                <input type="file" id="htmlFileInput" accept=".html" onchange="handleHtmlFileSelect(event)" style="display: none;">
-                            </div>
-                            <p id="selectedHtmlFile" style="margin: 0; color: #475569; font-weight: 600; font-size: 14px; flex-grow: 1;"></p>
-                        </div>
+                    <div class="recording-controls">
+                        <button class="btn" onclick="startRecording()">⏺️ Start Recording</button>
+                        <button class="btn btn-secondary" onclick="stopRecording()">⏹️ Stop</button>
+                        <button class="btn" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);" onclick="showToast('Playing recording')">▶️ Play</button>
+                        <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="showToast('Recording paused')">⏸️ Pause</button>
                     </div>
                 </div>
 
@@ -1626,49 +1685,16 @@
                 </div>
             </div>
 
-            <!-- Recording Controls Section (Full Width) -->
-            <div class="panel">
-                <h2>
-                    <span class="panel-icon soap">⏺️</span>
-                    Recording Controls
-                </h2>
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
-                        🌐 Select Browser:
-                    </label>
-                    <select id="browserSelect" class="browser-select">
-                        <option value="chromium">Chrome</option>
-                        <option value="msedge">Edge</option>
-                        <option value="firefox">Firefox</option>
-                    </select>
-                </div>
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px;">
-                        🌍 Application URL:
-                    </label>
-                    <input type="text" id="appUrl" class="browser-select" style="width: 100%; max-width: 600px;" value="http://advantageonlineshopping.com/" placeholder="Enter application URL (e.g., http://advantageonlineshopping.com)">
-                    <div role="status" aria-live="polite" style="margin-top:10px; max-width:600px; color:#075985; background:#ecfeff; border-left:4px solid #38bdf8; padding:10px 12px; border-radius:6px; font-size:13px;">
-                        <strong style="margin-right:8px;">ℹ️ Info:</strong> Close the application after recording, then click Stop to view the test case.
-                    </div>
-                </div>
-                <div class="recording-controls">
-                    <button class="btn" onclick="startRecording()">⏺️ Start Recording</button>
-                    <button class="btn btn-secondary" onclick="stopRecording()">⏹️ Stop</button>
-                    <button class="btn" style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);" onclick="showToast('Playing recording')">▶️ Play</button>
-                    <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="showToast('Recording paused')">⏸️ Pause</button>
-                </div>
-
-                <!-- Recording Results Section -->
-                <div id="recordingResults" style="display: none; margin-top: 24px; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px solid #0ea5e9; border-radius: 12px;">
-                    <h3 style="color: #0369a1; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; justify-content: space-between;">
-                            <span style="display: flex; align-items: center; gap: 8px;">
-                            <span>⏺️</span> Recording Session Completed
-                        </span>
-                        <button class="btn btn-small" onclick="viewRecordedTests()" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%); box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);">📄 View Results</button>
-                    </h3>
-                    <div id="recordingResultsContent" style="color: #0c4a6e;">
-                        <!-- Results will be populated here -->
-                    </div>
+            <!-- Recording Results Section (Full Width) -->
+            <div id="recordingResults" style="display: none; margin-top: 24px; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px solid #0ea5e9; border-radius: 12px;">
+                <h3 style="color: #0369a1; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; justify-content: space-between;">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                        <span>⏺️</span> Recording Session Completed
+                    </span>
+                    <button class="btn btn-small" onclick="viewRecordedTests()" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%); box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);">📄 View Results</button>
+                </h3>
+                <div id="recordingResultsContent" style="color: #0c4a6e;">
+                    <!-- Results will be populated here -->
                 </div>
             </div>
         </div>
@@ -1676,11 +1702,45 @@
         <!-- Test Scenarios Page -->
         <div id="page2" class="page">
             <div class="tree-container">
-                <h2 style="margin-bottom: 20px; color: #1e293b; user-select: none;">
-                    <span style="font-size: 24px; pointer-events: none;">📋</span> <span style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; pointer-events: none;">Test Scenarios</span>
-                </h2>
+                <!-- Header with Action Buttons -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2 style="margin: 0; color: #1e293b; user-select: none;">
+                        <span style="font-size: 24px; pointer-events: none;">📋</span> <span style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; pointer-events: none;">Test Scenarios</span>
+                    </h2>
+                    
+                    <!-- Action Buttons -->
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn" onclick="runAllTestScenarios()" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%); box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);">
+                            ▶️ Run All Tests
+                        </button>
+                        <button class="btn btn-secondary" onclick="stopTestExecution()" style="background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); color: white; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);">
+                            ⏹️ Stop Execution
+                        </button>
+                        <button class="btn" onclick="showReports()" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);">
+                            📊 Show Reports
+                        </button>
+                    </div>
+                </div>
 
                 <div id="testScenariosTree"></div>
+
+                <div class="panel" id="recordedTestsPanel" style="margin-top: 24px;">
+                    <h2>
+                        <span class="panel-icon soap">⏺️</span>
+                        Recorded Tests <span id="recordedTestCount" style="font-size: 14px; color: #64748b; font-weight: 500;"></span>
+                    </h2>
+                    <div style="margin-bottom: 16px; max-width: 240px;">
+                        <label for="testTypeFilter" style="display: block; margin-bottom: 6px; color: #1e293b; font-weight: 600; font-size: 13px;">Test Type</label>
+                        <select id="testTypeFilter" class="browser-select" style="width: 100%;" onchange="filterRecordedTests()">
+                            <option value="All">All Types</option>
+                            <option value="UI">UI</option>
+                            <option value="Functional">Functional</option>
+                            <option value="Integration">Integration</option>
+                            <option value="System">System</option>
+                        </select>
+                    </div>
+                    <div id="recordedTestsContent"></div>
+                </div>
             </div>
         </div>
 
@@ -1806,21 +1866,6 @@
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="panel" style="margin-top: 32px;">
-                <h2>
-                <span class="panel-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">📌</span>
-                Quick Actions
-            </h2>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                <button class="btn" onclick="runAllTests()">Run All Tests</button>
-                <button class="btn btn-secondary" onclick="viewReports()">View Reports</button>
-                <button class="btn btn-success" onclick="openPlaywrightUI()">Open Playwright UI</button>
-                <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);" onclick="openProjectContext()">View Documentation</button>
-                <button class="btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);" onclick="openTerminal()">Open Terminal</button>
-            </div>
-        </div>
-
         <!-- Footer -->
         <footer>
             <p><strong>Playwright Sample Project</strong> - Version 1.0.0</p>
@@ -1877,103 +1922,423 @@
             tabs[pageToTabMap[pageIndex]].classList.add('active');
         }
 
-        // Test Scenarios Tree Structure Data (UI Tests only)
-        let testScenariosData = {
-            "UI Test Scenarios": [
-                {
-                    id: "TC01",
-                    name: "Valid Login",
-                    description: "Login with valid credentials and verify success",
-                    steps: [
-                        "Launch application",
-                        "Click on User icon",
-                        "Enter valid username and password",
-                        "Click Sign In button",
-                        "Validate successful login with username display",
-                        "Logout from application"
-                    ]
-                },
-                {
-                    id: "TC02",
-                    name: "Invalid Login",
-                    description: "Login with invalid credentials and verify error message",
-                    steps: [
-                        "Launch application",
-                        "Click on User icon",
-                        "Enter invalid username and password",
-                        "Click Sign In button",
-                        "Validate invalid login error message"
-                    ]
-                },
-                {
-                    id: "TC03",
-                    name: "Login from Create Account Page",
-                    description: "Navigate to create account and then login",
-                    steps: [
-                        "Launch application",
-                        "Navigate to Create Account page",
-                        "Click 'Already have an account' link",
-                        "Enter login credentials",
-                        "Validate successful login",
-                        "Logout from application"
-                    ]
-                },
-                {
-                    id: "TC01-TCN",
-                    name: "Create Account",
-                    description: "Register new user account with complete details (Data-Driven)",
-                    steps: [
-                        "Launch application",
-                        "Navigate to Create Account page",
-                        "Fill registration form (Email, Password, Confirm Password, First Name, Last Name, Phone)",
-                        "Fill address details (Country, City, Address, State, Postal Code)",
-                        "Set Allow Offers/Promotion preference",
-                        "Save registration",
-                        "Validate successful login with created username",
-                        "Logout from application"
-                    ]
-                },
-                {
-                    id: "TC01-TC02",
-                    name: "Contact Us",
-                    description: "Submit contact form and verify success message (Data-Driven)",
-                    steps: [
-                        "Launch application",
-                        "Enter contact us details (Category, Product, Email, Subject)",
-                        "Click Send Message button",
-                        "Verify success message is displayed"
-                    ]
-                },
-                {
-                    id: "DownloadTest",
-                    name: "Download PDF File",
-                    description: "Download PDF file from application and verify PDF details",
-                    steps: [
-                        "Launch application",
-                        "Navigate to Management Console (new tab)",
-                        "Close original tab",
-                        "Download AOS Backend PDF file",
-                        "Verify PDF contains 4 pages",
-                        "Verify PDF content contains 'Advantage Online Shopping (AOS)'",
-                        "Compare PDF with baseline (excluding masked text)"
-                    ]
-                },
-                {
-                    id: "ImageCompare",
-                    name: "Image Comparison Test",
-                    description: "Visual regression testing with screenshot comparison",
-                    steps: [
-                        "Navigate to Applitools Demo URL",
-                        "Capture and validate Login Section screenshot",
-                        "Capture Login Section with masked elements (logo, buttons)",
-                        "Navigate to Applitools Demo v2 URL",
-                        "Compare Login Section with masked elements",
-                        "Compare with tolerance of 0.70 (theme variations allowed)",
-                        "Compare with tolerance of 0.00 (exact match required)"
-                    ]
+        // ==================== LOCALSTORAGE PERSISTENCE ====================
+        const STORAGE_KEY = 'playwrightTestScenariosData';
+        const visibleTestScenarioTypes = ['UI', 'Functional', 'Integration', 'System', 'Regression', 'Smoke', 'Performance'];
+        
+        // Save test scenarios data to localStorage
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(testScenariosData));
+                console.log('✅ Test scenarios saved to localStorage');
+            } catch (error) {
+                console.error('❌ Error saving to localStorage:', error);
+                showToast('⚠️ Failed to save changes');
+            }
+        }
+        
+        // Load test scenarios data from localStorage
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    console.log('✅ Test scenarios loaded from localStorage');
+                    return parsed;
                 }
-            ]
+            } catch (error) {
+                console.error('❌ Error loading from localStorage:', error);
+            }
+            return null;
+        }
+        
+        // Reset to default data
+        function resetToDefaultData() {
+            if (confirm('⚠️ Are you sure you want to reset all test scenarios to default? This will delete all your custom changes.')) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
+        // ==================== END LOCALSTORAGE PERSISTENCE ====================
+
+        // Test Scenarios Tree Structure Data - 3-Level Hierarchy: Test Type → Module → Test Cases
+        // NOTE: REST API, SOAP API, and Database test types are hidden from display but data is kept for future use
+        const defaultTestScenariosData = {
+            "UI": {
+                "Login": [
+                    {
+                        id: "TC01",
+                        name: "Valid Login",
+                        description: "Login with valid credentials and verify success",
+                        steps: [
+                            "Launch application",
+                            "Click on User icon",
+                            "Enter valid username and password",
+                            "Click Sign In button",
+                            "Validate successful login with username display",
+                            "Logout from application"
+                        ]
+                    },
+                    {
+                        id: "TC02",
+                        name: "Invalid Login",
+                        description: "Login with invalid credentials and verify error message",
+                        steps: [
+                            "Launch application",
+                            "Click on User icon",
+                            "Enter invalid username and password",
+                            "Click Sign In button",
+                            "Validate invalid login error message"
+                        ]
+                    },
+                    {
+                        id: "TC03",
+                        name: "Login from Create Account Page",
+                        description: "Navigate to create account and then login",
+                        steps: [
+                            "Launch application",
+                            "Navigate to Create Account page",
+                            "Click 'Already have an account' link",
+                            "Enter login credentials",
+                            "Validate successful login",
+                            "Logout from application"
+                        ]
+                    }
+                ],
+                "Registration": [
+                    {
+                        id: "TC01-TCN",
+                        name: "Create Account",
+                        description: "Register new user account with complete details (Data-Driven)",
+                        steps: [
+                            "Launch application",
+                            "Navigate to Create Account page",
+                            "Fill registration form (Email, Password, Confirm Password, First Name, Last Name, Phone)",
+                            "Fill address details (Country, City, Address, State, Postal Code)",
+                            "Set Allow Offers/Promotion preference",
+                            "Save registration",
+                            "Validate successful login with created username",
+                            "Logout from application"
+                        ]
+                    }
+                ],
+                "Contact Us": [
+                    {
+                        id: "TC01-TC02",
+                        name: "Contact Us Form Submission",
+                        description: "Submit contact form and verify success message (Data-Driven)",
+                        steps: [
+                            "Launch application",
+                            "Enter contact us details (Category, Product, Email, Subject)",
+                            "Click Send Message button",
+                            "Verify success message is displayed"
+                        ]
+                    }
+                ],
+                "Download": [
+                    {
+                        id: "DownloadTest",
+                        name: "Download PDF File",
+                        description: "Download PDF file from application and verify PDF details",
+                        steps: [
+                            "Launch application",
+                            "Navigate to Management Console (new tab)",
+                            "Close original tab",
+                            "Download AOS Backend PDF file",
+                            "Verify PDF contains 4 pages",
+                            "Verify PDF content contains 'Advantage Online Shopping (AOS)'",
+                            "Compare PDF with baseline (excluding masked text)"
+                        ]
+                    }
+                ],
+                "Visual Testing": [
+                    {
+                        id: "ImageCompare",
+                        name: "Image Comparison Test",
+                        description: "Visual regression testing with screenshot comparison",
+                        steps: [
+                            "Navigate to Applitools Demo URL",
+                            "Capture and validate Login Section screenshot",
+                            "Capture Login Section with masked elements (logo, buttons)",
+                            "Navigate to Applitools Demo v2 URL",
+                            "Compare Login Section with masked elements",
+                            "Compare with tolerance of 0.70 (theme variations allowed)",
+                            "Compare with tolerance of 0.00 (exact match required)"
+                        ]
+                    }
+                ],
+                "SecondModule": [
+                    {
+                        id: "TC01",
+                        name: "Second Module Test Case",
+                        description: "Test case for second module functionality",
+                        steps: [
+                            "Launch application",
+                            "Navigate to second module",
+                            "Perform test actions",
+                            "Verify expected results"
+                        ]
+                    }
+                ]
+            },
+            "REST API": {
+                "User Management": [
+                    {
+                        id: "TC01",
+                        name: "Get All Users",
+                        description: "Retrieve all users from REST API and verify response",
+                        steps: [
+                            "Send GET request to fetch all users",
+                            "Verify status code is as expected",
+                            "Verify response content is not null",
+                            "Extract user ID from JSON response using JSONPath",
+                            "Store user ID for subsequent tests"
+                        ]
+                    },
+                    {
+                        id: "TC02",
+                        name: "Get Single User",
+                        description: "Retrieve specific user by ID from REST API",
+                        steps: [
+                            "Format endpoint URL with user ID",
+                            "Send GET request to fetch single user",
+                            "Verify status code is as expected",
+                            "Verify response contains correct user ID using JSONPath"
+                        ]
+                    },
+                    {
+                        id: "TC03",
+                        name: "Add New User",
+                        description: "Create new user via REST API with random data",
+                        steps: [
+                            "Generate random username (5 alphabetic characters)",
+                            "Generate random password (5 alphanumeric characters)",
+                            "Generate random phone number (10 digits)",
+                            "Prepare request body with user data",
+                            "Send POST request to create user",
+                            "Verify status code is as expected",
+                            "Extract and store user ID, password, username for next test"
+                        ]
+                    },
+                    {
+                        id: "TC04",
+                        name: "Update User",
+                        description: "Update existing user details via REST API",
+                        steps: [
+                            "Format endpoint URL with stored user ID",
+                            "Generate new random phone number",
+                            "Prepare request body with updated data",
+                            "Send PUT request to update user",
+                            "Verify status code is as expected",
+                            "Verify response contains updated information"
+                        ]
+                    }
+                ]
+            },
+            "SOAP API": {
+                "Account Services": [
+                    {
+                        id: "TC01",
+                        name: "Account Create Request",
+                        description: "Create new account via SOAP service",
+                        steps: [
+                            "Generate random username (5 alphabetic characters)",
+                            "Generate random password (1 uppercase + 4 lowercase + 3 digits)",
+                            "Generate random phone number (10 digits)",
+                            "Create email from username",
+                            "Prepare SOAP request with account data",
+                            "Send SOAP request to create account",
+                            "Verify response using XPath matches expected result",
+                            "Store username, password, email for login test"
+                        ]
+                    },
+                    {
+                        id: "TC02",
+                        name: "Account Login Request",
+                        description: "Login to account via SOAP service",
+                        steps: [
+                            "Prepare SOAP request with stored credentials",
+                            "Send SOAP login request",
+                            "Verify response using XPath matches expected result",
+                            "Extract and store authentication token from response",
+                            "Extract and store user ID from response"
+                        ]
+                    },
+                    {
+                        id: "TC03",
+                        name: "Account Logout Request",
+                        description: "Logout from account via SOAP service",
+                        steps: [
+                            "Prepare SOAP request with stored token and user ID",
+                            "Send SOAP logout request",
+                            "Verify response using XPath matches expected result",
+                            "Confirm successful logout"
+                        ]
+                    }
+                ]
+            },
+            "Database": {
+                "CRUD Operations": [
+                    {
+                        id: "TC01-TCN",
+                        name: "Database CRUD Operations",
+                        description: "Execute MSSQL queries and verify execution (Data-Driven)",
+                        steps: [
+                            "Read test data from Excel (DatabaseTest sheet)",
+                            "Initialize Database Step",
+                            "Execute MSSQL query from test data",
+                            "Verify query execution success",
+                            "Verify rows affected count matches expected result"
+                        ]
+                    }
+                ]
+            },
+            "Functional": {
+                "Product Search": [
+                    {
+                        id: "TC01",
+                        name: "Product Search Test",
+                        description: "Search for products and verify results",
+                        steps: [
+                            "Launch application",
+                            "Enter product name in search",
+                            "Click search button",
+                            "Verify search results are displayed"
+                        ]
+                    }
+                ],
+                "Shopping Cart": [
+                    {
+                        id: "TC02",
+                        name: "Add to Cart Test",
+                        description: "Add products to cart and verify cart functionality",
+                        steps: [
+                            "Launch application",
+                            "Select a product",
+                            "Add product to cart",
+                            "Verify cart count is updated",
+                            "Open cart and verify product is added"
+                        ]
+                    }
+                ]
+            },
+            "Integration": {
+                // Add your Integration test cases here organized by modules
+                // Example: "Third Party APIs": [...], "Database Integration": [...]
+            },
+            "System": {
+                // Add your System test cases here organized by modules
+                // Example: "End-to-End Workflows": [...], "System Performance": [...]
+            },
+            "Regression": {
+                // Add your Regression test cases here organized by modules
+                // Example: "Critical Features": [...], "Bug Fixes": [...]
+            },
+            "Smoke": {
+                // Add your Smoke test cases here organized by modules
+                // Example: "Core Functionality": [...], "Quick Checks": [...]
+            },
+            "Performance": {
+                // Add your Performance test cases here organized by modules
+                // Example: "Load Testing": [...], "Stress Testing": [...]
+            }
         };
+
+        function mergeScenarioData(baseData, additionalData) {
+            Object.entries(additionalData || {}).forEach(([testType, modules]) => {
+                if (!baseData[testType]) baseData[testType] = {};
+                Object.entries(modules || {}).forEach(([moduleName, testCases]) => {
+                    if (!Array.isArray(testCases)) return;
+                    if (!Array.isArray(baseData[testType][moduleName])) baseData[testType][moduleName] = [];
+                    testCases.forEach((testCase) => {
+                        const exists = baseData[testType][moduleName].some(existing =>
+                            existing.id === testCase.id || existing.name === testCase.name
+                        );
+                        if (!exists) baseData[testType][moduleName].push(testCase);
+                    });
+                });
+            });
+            return baseData;
+        }
+
+        // Keep built-in scenarios and merge user-created scenarios on top.
+        const savedScenarioData = loadFromLocalStorage();
+        let testScenariosData = mergeScenarioData(
+            JSON.parse(JSON.stringify(defaultTestScenariosData)),
+            savedScenarioData || {}
+        );
+        console.log('📊 Test Scenarios Data initialized:', Object.keys(testScenariosData).length, 'test types');
+        saveToLocalStorage();
+        function escapeHtml(value) {
+            const element = document.createElement('div');
+            element.textContent = value;
+            return element.innerHTML;
+        }
+
+        function updateDashboardFromScenarios() {
+            const summary = Object.entries(testScenariosData)
+                .filter(([type]) => visibleTestScenarioTypes.includes(type))
+                .map(([type, modules]) => {
+                    const moduleEntries = Object.entries(modules || {})
+                        .filter(([, testCases]) => Array.isArray(testCases) && testCases.length > 0);
+                    const tests = moduleEntries.flatMap(([, testCases]) => testCases);
+                    return {
+                        type,
+                        moduleCount: moduleEntries.length,
+                        tests,
+                        stepCount: tests.reduce((total, testCase) => total + (Array.isArray(testCase.steps) ? testCase.steps.length : 0), 0)
+                    };
+                })
+                .filter(({ tests }) => tests.length > 0);
+
+            const totalTests = summary.reduce((total, item) => total + item.tests.length, 0);
+            const totalModules = summary.reduce((total, item) => total + item.moduleCount, 0);
+            const totalSteps = summary.reduce((total, item) => total + item.stepCount, 0);
+            const largestType = summary.reduce((largest, item) => !largest || item.tests.length > largest.tests.length ? item : largest, null);
+
+            document.getElementById('dashboardTotalTests').textContent = totalTests;
+            document.getElementById('dashboardTestTypes').textContent = summary.length;
+            document.getElementById('dashboardModules').textContent = totalModules;
+            document.getElementById('dashboardSteps').textContent = totalSteps;
+            document.getElementById('dashboardLargestType').textContent = largestType ? largestType.type : '-';
+            document.getElementById('dashboardLargestTypeCount').textContent = `${largestType ? largestType.tests.length : 0} Tests`;
+            document.getElementById('dashboardScenarioActivity').textContent = `Test scenario catalogue: ${totalTests} test cases ready to run`;
+            document.getElementById('dashboardModuleActivity').textContent = `Organization: ${totalModules} modules across ${summary.length} active categories`;
+            document.getElementById('dashboardStepActivity').textContent = `Coverage: ${totalSteps} documented test steps`;
+            document.getElementById('dashboardTypeActivity').textContent = largestType
+                ? `Largest coverage area: ${largestType.type} with ${largestType.tests.length} test cases`
+                : 'No scenario categories are available.';
+
+            const scenarioSummary = document.getElementById('dashboardScenarioSummary');
+            scenarioSummary.innerHTML = summary.map(({ type, moduleCount, tests, stepCount }) => {
+                return `
+                    <div class="panel">
+                        <h2><span class="panel-icon ui">📋</span>${escapeHtml(type)}</h2>
+                        <p style="color: #64748b; margin-bottom: 16px;">${tests.length} test ${tests.length === 1 ? 'case' : 'cases'} across ${moduleCount} ${moduleCount === 1 ? 'module' : 'modules'} with ${stepCount} ${stepCount === 1 ? 'step' : 'steps'}</p>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <button class="btn btn-small" onclick="showPage(2)">View Tests</button>
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<div class="panel"><p style="color: #64748b;">No test scenarios available.</p></div>';
+
+            const testName = document.getElementById('testName');
+            if (testName) {
+                const selectedTest = testName.value;
+                const options = summary.flatMap(({ tests }) => tests)
+                    .map((testCase) => `<option value="${escapeHtml(testCase.name)}">${escapeHtml(testCase.name)}</option>`)
+                    .join('');
+                testName.innerHTML = `<option value="All">All Tests</option>${options}`;
+                testName.value = [...testName.options].some((option) => option.value === selectedTest) ? selectedTest : 'All';
+            }
+        }
+
+        function updateDashboardRecordedTests(count) {
+            const recordedActivity = document.getElementById('dashboardRecordedActivity');
+            if (recordedActivity) {
+                recordedActivity.textContent = `Recorded tests: ${count} ${count === 1 ? 'test' : 'tests'} available`;
+            }
+        }
 
         // API Tests Tree Structure Data (REST, SOAP, and Database)
         let apiTestsData = {
@@ -2090,56 +2455,57 @@
 
         // Load saved tests from TESTING_FRAMEWORK_CONTEXT.md via server
         async function loadSavedTests() {
+            console.log('loadSavedTests: Starting...');
             try {
-                const response = await fetch('http://localhost:3456/get-saved-tests');
+                const response = await fetch('http://localhost:3456/get-spec-test-cases');
                 const result = await response.json();
                 
-                if (result.success && result.tests.length > 0) {
-                    // Add saved tests to testScenariosData based on their type
-                    result.tests.forEach((test) => {
-                        const type = test.type.trim();
-                        let moduleName;
-                        
-                        // Map test type to module name
-                        if (type === 'UI') {
-                            moduleName = 'UI Test Scenarios';
-                        } else if (type === 'Functional') {
-                            moduleName = 'Functional Test Scenarios';
-                        } else if (type === 'Integration') {
-                            moduleName = 'Integration Test Scenarios';
-                        } else if (type === 'System') {
-                            moduleName = 'System Test Scenarios';
-                        } else if (type === 'Database') {
-                            moduleName = 'Database Test Scenarios';
-                        } else {
-                            moduleName = 'UI Test Scenarios'; // Default
-                        }
+                console.log('loadSavedTests: Response received', result);
+                
+                if (result.success && result.testCases.length > 0) {
+                    console.log(`Loading ${result.testCases.length} saved test(s) from spec files...`);
+                    
+                    // Add saved tests to testScenariosData in 3-level hierarchy: Test Type → Module → Test Cases
+                    result.testCases.forEach((test) => {
+                        const testType = test.type.trim();
+                        const moduleName = test.module.trim();
                         
                         // Create test case object
                         const testCase = {
                             id: test.name.replace(/\s+/g, '_').toUpperCase(),
                             name: test.name,
                             description: test.description,
-                            steps: test.steps.split(' • ').map(s => s.trim()).filter(s => s.length > 0)
+                            steps: test.steps.map(s => s.trim()).filter(s => s.length > 0)
                         };
                         
-                        // Check if test already exists
-                        const existingTests = testScenariosData[moduleName] || [];
-                        const exists = existingTests.some(t => t.id === testCase.id);
+                        // Ensure test type exists in data structure
+                        if (!testScenariosData[testType]) {
+                            testScenariosData[testType] = {};
+                        }
+                        
+                        // Ensure module exists within test type
+                        if (!testScenariosData[testType][moduleName]) {
+                            testScenariosData[testType][moduleName] = [];
+                        }
+                        
+                        // Check if test already exists in this module
+                        const exists = testScenariosData[testType][moduleName].some(t =>
+                            t.id === testCase.id || t.name === testCase.name
+                        );
                         
                         if (!exists) {
-                            // Add to the module
-                            if (!testScenariosData[moduleName]) {
-                                testScenariosData[moduleName] = [];
-                            }
-                            testScenariosData[moduleName].push(testCase);
+                            testScenariosData[testType][moduleName].push(testCase);
+                            console.log(`  ✓ Added: ${testType} → ${moduleName} → ${test.name}`);
                         }
                     });
                     
-                    console.log(`Loaded ${result.tests.length} saved test(s) from TESTING_FRAMEWORK_CONTEXT.md`);
+                    console.log(`✅ Loaded ${result.testCases.length} saved test(s) from spec files`);
+                } else {
+                    console.log('No saved test cases found in spec files');
                 }
             } catch (error) {
                 console.error('Error loading saved tests:', error);
+                throw error; // Re-throw to let caller handle it
             }
         }
 
@@ -2148,104 +2514,191 @@
             const container = document.getElementById('testScenariosTree');
             if (!container) return;
 
-            // Store which modules and test cases are currently expanded
+            // Store which test types, modules, and test cases are currently expanded
+            const expandedTestTypes = [];
             const expandedModules = [];
             const expandedTestCases = [];
             
+            document.querySelectorAll('.test-type-content.expanded').forEach(typeContent => {
+                const typeId = typeContent.id.replace('testTypeContent', '');
+                expandedTestTypes.push(parseInt(typeId));
+            });
+
             document.querySelectorAll('.module-content.expanded').forEach(module => {
-                const moduleId = module.id.replace('moduleContent', '');
-                expandedModules.push(parseInt(moduleId));
+                expandedModules.push(module.id);
             });
             
             document.querySelectorAll('.test-steps-container.expanded').forEach(steps => {
                 expandedTestCases.push(steps.id);
             });
 
-            // If no modules are expanded, default to expanding the first module (UI Test Scenarios)
-            if (expandedModules.length === 0) {
-                expandedModules.push(0);
+            // If no test types are expanded, default to expanding the first one (UI)
+            if (expandedTestTypes.length === 0) {
+                expandedTestTypes.push(0);
             }
 
             let html = '';
-            let moduleIndex = 0;
+            let testTypeIndex = 0;
 
-            for (const [moduleName, testCases] of Object.entries(testScenariosData)) {
+            // Visible test types (REST API, SOAP API, Database are hidden for now - data is kept for future)
+            // Level 1: Loop through Test Types (UI, REST API, SOAP API, Database)
+            for (const [testType, modules] of Object.entries(testScenariosData)) {
+                // Skip hidden test types (REST API, SOAP API, Database)
+                if (!visibleTestScenarioTypes.includes(testType)) {
+                    continue;
+                }
+                
+                // Skip if no modules or empty
+                if (!modules || Object.keys(modules).length === 0) {
+                    continue;
+                }
+                
+                // Count total test cases for this test type
+                let totalTests = 0;
+                for (const [moduleName, testCases] of Object.entries(modules)) {
+                    if (Array.isArray(testCases)) {
+                        totalTests += testCases.length;
+                    }
+                }
+
                 html += `
-                    <div class="module-row">
-                        <div class="module-header" onclick="toggleModule(${moduleIndex})">
+                    <div class="test-type-row">
+                        <div class="test-type-header" onclick="toggleTestType(${testTypeIndex})">
                             <div class="module-header-left">
-                                <span class="module-expand-icon" id="moduleIcon${moduleIndex}">▸</span>
-                                <span class="module-title">${moduleName}</span>
-                                <span class="module-count">(${testCases.length} tests)</span>
+                                <span class="module-expand-icon" id="testTypeIcon${testTypeIndex}">▸</span>
+                                <span class="module-title" style="font-weight: 700; font-size: 16px;">${testType}</span>
+                                <span class="module-count">(${totalTests} tests)</span>
+                            </div>
+                            <div class="test-type-actions" onclick="event.stopPropagation()">
+                                <button class="btn-edit" onclick="editTestType(${testTypeIndex}, '${testType}')" title="Rename test type">
+                                    ✏️ Edit
+                                </button>
+                                <button class="btn-run" onclick="runAllTestsInType(${testTypeIndex}, '${testType}')" title="Run all tests in ${testType}">
+                                    ▶️ Run
+                                </button>
                             </div>
                         </div>
-                        <div class="module-content" id="moduleContent${moduleIndex}">
+                        <div class="test-type-content" id="testTypeContent${testTypeIndex}" style="padding-left: 20px;">
                 `;
 
-                testCases.forEach((testCase, tcIndex) => {
-                    const isEditing = currentEditingTestCase === `${moduleIndex}-${tcIndex}`;
+                let moduleIndex = 0;
+                // Level 2: Loop through Modules (Login, Registration, Contact Us, etc.)
+                for (const [moduleName, testCases] of Object.entries(modules)) {
+                    // Skip if not an array or empty
+                    if (!Array.isArray(testCases) || testCases.length === 0) {
+                        continue;
+                    }
+                    
+                    const moduleId = `module${testTypeIndex}-${moduleIndex}`;
                     
                     html += `
-                        <div class="test-case-row">
-                            <div class="test-case-header" onclick="toggleTestCase(${moduleIndex}, ${tcIndex})">
-                                <div class="test-case-info">
-                                    <div class="test-case-name">
-                                        <span class="test-case-badge">${testCase.id}</span>
-                                        ${testCase.name}
-                                    </div>
-                                    <div class="test-case-desc">${testCase.description}</div>
+                        <div class="module-row">
+                            <div class="module-header" onclick="toggleModuleNested('${moduleId}')">
+                                <div class="module-header-left">
+                                    <span class="module-expand-icon" id="${moduleId}Icon">▸</span>
+                                    <span class="module-title">${moduleName}</span>
+                                    <span class="module-count">(${testCases.length} tests)</span>
                                 </div>
-                                <div class="test-case-actions" onclick="event.stopPropagation()">
-                                    ${!isEditing ? 
-                                        `<button class="btn-update" onclick="editTestCase(${moduleIndex}, ${tcIndex})">Update</button>
-                                         <button class="btn-delete-test-case" onclick="deleteTestCase(${moduleIndex}, ${tcIndex})">Delete</button>` :
-                                        `<button class="btn-save" onclick="saveTestCase(${moduleIndex}, ${tcIndex})">Save</button>
-                                         <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>`
-                                    }
+                                <div class="module-actions" onclick="event.stopPropagation()">
+                                    <button class="btn-edit" onclick="editModule(${testTypeIndex}, ${moduleIndex}, '${testType}', '${moduleName}')" title="Rename module">
+                                        ✏️ Edit
+                                    </button>
+                                    <button class="btn-run" onclick="runAllTestsInModule(${testTypeIndex}, ${moduleIndex}, '${testType}', '${moduleName}')" title="Run all tests in ${moduleName}">
+                                        ▶️ Run
+                                    </button>
                                 </div>
                             </div>
-                            <div class="test-steps-container" id="steps${moduleIndex}-${tcIndex}">
+                            <div class="module-content" id="${moduleId}Content">
                     `;
 
-                    testCase.steps.forEach((step, stepIndex) => {
+                    // Level 3: Loop through Test Cases
+                    testCases.forEach((testCase, tcIndex) => {
+                        const testCaseId = `${testTypeIndex}-${moduleIndex}-${tcIndex}`;
+                        const isEditing = currentEditingTestCase === testCaseId;
+                        
                         html += `
-                            <div class="test-step-item" id="step${moduleIndex}-${tcIndex}-${stepIndex}">
-                                <div class="step-number">${stepIndex + 1}</div>
-                                <div class="step-text" id="stepText${moduleIndex}-${tcIndex}-${stepIndex}">${step}</div>
-                                ${isEditing ? `
-                                    <div class="step-actions">
-                                        <button class="icon-btn edit" onclick="editStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Edit">✏️</button>
-                                        <button class="icon-btn delete" onclick="deleteStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Delete">🗑️</button>
+                            <div class="test-case-row">
+                                <div class="test-case-header" onclick="toggleTestCase('${testCaseId}')">
+                                    <div class="test-case-info">
+                                        <div class="test-case-name">
+                                            <span class="test-case-badge">${testCase.id}</span>
+                                            <span id="tcName${testCaseId}">${testCase.name}</span>
+                                        </div>
+                                        <div class="test-case-desc">${testCase.description}</div>
                                     </div>
-                                ` : ''}
+                                    <div class="test-case-actions" onclick="event.stopPropagation()">
+                                        <button class="icon-btn edit" onclick="editTestCaseName('${testCaseId}')" title="Edit test case name" style="margin-right: 8px; font-size: 14px; padding: 4px 8px; background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); color: white; border: none; border-radius: 6px; cursor: pointer;">✏️</button>
+                                        ${!isEditing ? 
+                                            `<button class="btn-run-test-case" onclick="runSingleTestCase('${testCaseId}', '${testType}', '${moduleName}', '${testCase.name}')">▶️ Run</button>
+                                             <button class="btn-update" onclick="editTestCase('${testCaseId}')">Update</button>
+                                             <button class="btn-delete-test-case" onclick="deleteTestCase('${testCaseId}')">Delete</button>` :
+                                            `<button class="btn-save" onclick="saveTestCase('${testCaseId}')">Save</button>
+                                             <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>`
+                                        }
+                                    </div>
+                                </div>
+                                <div class="test-steps-container" id="steps${testCaseId}">
+                        `;
+
+                        testCase.steps.forEach((step, stepIndex) => {
+                            html += `
+                                <div class="test-step-item" id="step${testCaseId}-${stepIndex}">
+                                    <div class="step-number">${stepIndex + 1}</div>
+                                    <div class="step-text" id="stepText${testCaseId}-${stepIndex}">${step}</div>
+                                    <div class="step-actions">
+                                        <button class="icon-btn run" onclick="runSingleStep('${testCaseId}', ${stepIndex}, '${testType}', '${moduleName}', '${testCase.name}')" title="Run this step">▶️</button>
+                                        <button class="icon-btn edit" onclick="editStep('${testCaseId}', ${stepIndex})" title="Edit">✏️</button>
+                                        <button class="icon-btn delete" onclick="deleteStep('${testCaseId}', ${stepIndex})" title="Delete">🗑️</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        // Always show Add Step button (even when not in edit mode)
+                        if (isEditing) {
+                            html += `<button class="btn-add-step" onclick="addTestStep('${testCaseId}')">+ Add Step</button>`;
+                        } else {
+                            html += `<button class="btn-add-step" onclick="addManualStep('${testCaseId}')">+ Add Manual Step</button>`;
+                        }
+
+                        html += `
+                                </div>
                             </div>
                         `;
                     });
 
-                    if (isEditing) {
-                        html += `<button class="btn-add-step" onclick="addTestStep(${moduleIndex}, ${tcIndex})">+ Add Step</button>`;
-                    }
-
                     html += `
                             </div>
                         </div>
                     `;
-                });
+                    moduleIndex++;
+                }
 
                 html += `
                         </div>
                     </div>
                 `;
-                moduleIndex++;
+                testTypeIndex++;
             }
 
             container.innerHTML = html;
+            updateDashboardFromScenarios();
             
+            // Restore expanded state for test types
+            expandedTestTypes.forEach(testTypeIdx => {
+                const content = document.getElementById(`testTypeContent${testTypeIdx}`);
+                const icon = document.getElementById(`testTypeIcon${testTypeIdx}`);
+                if (content && icon) {
+                    content.classList.add('expanded');
+                    icon.classList.add('expanded');
+                }
+            });
+
             // Restore expanded state for modules
-            expandedModules.forEach(moduleIdx => {
-                const content = document.getElementById(`moduleContent${moduleIdx}`);
-                const icon = document.getElementById(`moduleIcon${moduleIdx}`);
-                if (content) {
+            expandedModules.forEach(moduleId => {
+                const content = document.getElementById(`${moduleId}Content`);
+                const icon = document.getElementById(`${moduleId}Icon`);
+                if (content && icon) {
                     content.classList.add('expanded');
                     icon.classList.add('expanded');
                 }
@@ -2263,10 +2716,10 @@
         // In-memory backup for edits so Cancel can restore original steps
         const editBackups = {};
 
-        // Toggle module expand/collapse
-        function toggleModule(moduleIndex) {
-            const content = document.getElementById(`moduleContent${moduleIndex}`);
-            const icon = document.getElementById(`moduleIcon${moduleIndex}`);
+        // Toggle Test Type expand/collapse (Level 1: UI, REST API, SOAP API, Database)
+        function toggleTestType(testTypeIndex) {
+            const content = document.getElementById(`testTypeContent${testTypeIndex}`);
+            const icon = document.getElementById(`testTypeIcon${testTypeIndex}`);
             
             if (content.classList.contains('expanded')) {
                 content.classList.remove('expanded');
@@ -2277,9 +2730,25 @@
             }
         }
 
-        // Toggle test case expand/collapse
-        function toggleTestCase(moduleIndex, tcIndex) {
-            const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
+        // Toggle Module expand/collapse (Level 2: Login, Registration, Contact Us, etc.)
+        function toggleModuleNested(moduleId) {
+            const content = document.getElementById(`${moduleId}Content`);
+            const icon = document.getElementById(`${moduleId}Icon`);
+            
+            if (content && icon) {
+                if (content.classList.contains('expanded')) {
+                    content.classList.remove('expanded');
+                    icon.classList.remove('expanded');
+                } else {
+                    content.classList.add('expanded');
+                    icon.classList.add('expanded');
+                }
+            }
+        }
+
+        // Toggle test case expand/collapse (Level 3: Individual test cases)
+        function toggleTestCase(testCaseId) {
+            const stepsContainer = document.getElementById(`steps${testCaseId}`);
             
             if (stepsContainer.classList.contains('expanded')) {
                 stepsContainer.classList.remove('expanded');
@@ -2288,27 +2757,579 @@
             }
         }
 
+        // Edit Test Type - Rename test type
+        let renameContext = null; // Stores context for what is being renamed
+        
+        function editTestType(testTypeIndex, currentTestType) {
+            renameContext = {
+                type: 'testType',
+                testTypeIndex: testTypeIndex,
+                currentName: currentTestType
+            };
+            
+            document.getElementById('renameModalTitle').textContent = '✏️ Rename Test Type';
+            document.getElementById('renameLabel').textContent = `Rename "${currentTestType}" to:`;
+            document.getElementById('renameInput').value = currentTestType;
+            document.getElementById('renameModal').style.display = 'block';
+            document.getElementById('renameInput').focus();
+            document.getElementById('renameInput').select();
+        }
+
+        // Edit Module - Rename module within a test type
+        function editModule(testTypeIndex, moduleIndex, testType, currentModuleName) {
+            renameContext = {
+                type: 'module',
+                testTypeIndex: testTypeIndex,
+                moduleIndex: moduleIndex,
+                testType: testType,
+                currentName: currentModuleName
+            };
+            
+            document.getElementById('renameModalTitle').textContent = '✏️ Rename Module';
+            document.getElementById('renameLabel').textContent = `Rename "${currentModuleName}" to:`;
+            document.getElementById('renameInput').value = currentModuleName;
+            document.getElementById('renameModal').style.display = 'block';
+            document.getElementById('renameInput').focus();
+            document.getElementById('renameInput').select();
+        }
+
+        // Close rename modal
+        function closeRenameModal() {
+            document.getElementById('renameModal').style.display = 'none';
+            renameContext = null;
+        }
+
+        // Submit rename form
+        function submitRename(event) {
+            event.preventDefault();
+            
+            if (!renameContext) return;
+            
+            const newName = document.getElementById('renameInput').value.trim();
+            
+            if (newName === '') {
+                showToast('⚠️ Name cannot be empty');
+                return;
+            }
+            
+            if (newName === renameContext.currentName) {
+                showToast('ℹ️ No changes made');
+                closeRenameModal();
+                return;
+            }
+            
+            if (renameContext.type === 'testType') {
+                // Check if new name already exists
+                if (testScenariosData.hasOwnProperty(newName)) {
+                    showToast('⚠️ A test type with this name already exists');
+                    return;
+                }
+                
+                // Rename the test type in the data structure - FIX: Properly preserve all data
+                const testTypes = Object.keys(testScenariosData);
+                const newData = {};
+                
+                // Loop through all test types and either rename or keep the same
+                testTypes.forEach((key) => {
+                    if (key === renameContext.currentName) {
+                        // This is the one we're renaming - use new name
+                        newData[newName] = testScenariosData[key];
+                    } else {
+                        // Keep all other test types as-is
+                        newData[key] = testScenariosData[key];
+                    }
+                });
+                
+                // Clear old data and assign new structure
+                Object.keys(testScenariosData).forEach(key => delete testScenariosData[key]);
+                Object.assign(testScenariosData, newData);
+                
+                showToast(`✅ Test type renamed to "${newName}"`);
+                
+            } else if (renameContext.type === 'module') {
+                // Check if new name already exists in this test type
+                if (testScenariosData[renameContext.testType].hasOwnProperty(newName)) {
+                    showToast('⚠️ A module with this name already exists in this test type');
+                    return;
+                }
+                
+                // Rename the module in the data structure - FIX: Properly preserve all data
+                const modules = Object.keys(testScenariosData[renameContext.testType]);
+                const newModules = {};
+                
+                // Loop through all modules and either rename or keep the same
+                modules.forEach((key) => {
+                    if (key === renameContext.currentName) {
+                        // This is the one we're renaming - use new name
+                        newModules[newName] = testScenariosData[renameContext.testType][key];
+                    } else {
+                        // Keep all other modules as-is
+                        newModules[key] = testScenariosData[renameContext.testType][key];
+                    }
+                });
+                
+                testScenariosData[renameContext.testType] = newModules;
+                
+                showToast(`✅ Module renamed to "${newName}"`);
+            }
+            
+            closeRenameModal();
+            saveToLocalStorage();
+            renderTestScenarios();
+        }
+
+        function monitorExecution(jobId, label) {
+            const poll = async () => {
+                try {
+                    const response = await fetch(`/api/run-status?jobId=${encodeURIComponent(jobId)}`);
+                    const data = await response.json();
+                    if (!data.success) throw new Error(data.message || 'Execution status unavailable');
+
+                    const job = data.job;
+                    if (job.status === 'queued' || job.status === 'running') {
+                        updateProgress(job.status === 'queued' ? 15 : 60, 'Tests running...', label);
+                        setTimeout(poll, 1500);
+                        return;
+                    }
+
+                    const passed = job.status === 'passed';
+                    updateProgress(100, passed ? 'Passed' : 'Failed', `${label} ${passed ? 'completed successfully' : 'completed with failures'}`);
+                    showToast(`${passed ? '✅' : '❌'} ${label} ${passed ? 'passed' : 'failed'}`);
+                    addBotMessage(`${passed ? '✅' : '❌'} <b>${label} ${passed ? 'Passed' : 'Failed'}</b>\n\nExecution finished with status: <b>${job.status}</b>.\n\n📊 Open Reports to view the Playwright HTML and Allure results.`);
+                    setTimeout(hideProgressBar, 1200);
+                } catch (error) {
+                    hideProgressBar();
+                    showToast(`❌ ${error.message}`);
+                    addBotMessage(`❌ <b>Execution status error:</b> ${error.message}`);
+                }
+            };
+            poll();
+        }
+
+        // Run all tests in a specific test type
+        function runAllTestsInType(testTypeIndex, testType) {
+            const config = getTestConfiguration();
+            const browserNames = { chrome: 'Chrome', edge: 'Edge', firefox: 'Firefox' };
+            
+            // Count total tests in this test type
+            let totalTests = 0;
+            const modules = testScenariosData[testType];
+            for (const [moduleName, testCases] of Object.entries(modules)) {
+                if (Array.isArray(testCases)) {
+                    totalTests += testCases.length;
+                }
+            }
+            
+            showToast(`🏃 Running all tests in "${testType}" (${totalTests} tests)...`);
+            addBotMessage(`🏁 <b>Running ${testType} Tests:</b>\n\n📊 Total Tests: ${totalTests}\n🔁 Retries: ${config.retries}\n⚙️ Workers: ${config.workers}\n🌐 Browser: ${browserNames[config.browser]}\n🕵️ Headless: ${config.headless}\n\n<b>Test Type:</b> ${testType}\n\nExecuting all test cases in this test type...`);
+            
+            // Show progress bar
+            showProgressBar();
+            updateProgress(10, 'Starting execution...', `Running ${testType} tests`);
+            
+            // Call API to run tests for this test type
+            fetch('/api/run-tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...config,
+                    testType: testType,
+                    testFiles: Object.keys(testScenariosData[testType] || {})
+                        .map(module => `src/tests/${module.replace(/\s+/g, '')}.spec.ts`)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('✅ Test execution started successfully!');
+                    monitorExecution(data.jobId, `${testType} tests`);
+                } else {
+                    hideProgressBar();
+                    showToast('❌ Failed to start test execution');
+                    addBotMessage(`❌ <b>Test Execution Failed</b>\n\n${data.message}`);
+                }
+            })
+            .catch(error => {
+                hideProgressBar();
+                showToast('❌ Error starting test execution');
+                addBotMessage(`❌ <b>Error:</b> ${error.message}`);
+            });
+        }
+
+        // Run all tests in a specific module
+        function runAllTestsInModule(testTypeIndex, moduleIndex, testType, moduleName) {
+            const config = getTestConfiguration();
+            const browserNames = { chrome: 'Chrome', edge: 'Edge', firefox: 'Firefox' };
+            
+            // Get test cases in this module
+            const testCases = testScenariosData[testType][moduleName];
+            const totalTests = testCases.length;
+            
+            showToast(`🏃 Running all tests in "${moduleName}" (${totalTests} tests)...`);
+            addBotMessage(`🏁 <b>Running ${moduleName} Tests:</b>\n\n📊 Total Tests: ${totalTests}\n🔁 Retries: ${config.retries}\n⚙️ Workers: ${config.workers}\n🌐 Browser: ${browserNames[config.browser]}\n🕵️ Headless: ${config.headless}\n\n<b>Test Type:</b> ${testType}\n<b>Module:</b> ${moduleName}\n\nExecuting all test cases in this module...`);
+            
+            // Show progress bar
+            showProgressBar();
+            updateProgress(10, 'Starting execution...', `Running ${moduleName} tests`);
+            
+            // Call API to run tests for this module
+            fetch('/api/run-tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...config,
+                    testType: testType,
+                    moduleName: moduleName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('✅ Test execution started successfully!');
+                    monitorExecution(data.jobId, `${moduleName} tests`);
+                } else {
+                    hideProgressBar();
+                    showToast('❌ Failed to start test execution');
+                    addBotMessage(`❌ <b>Test Execution Failed</b>\n\n${data.message}`);
+                }
+            })
+            .catch(error => {
+                hideProgressBar();
+                showToast('❌ Error starting test execution');
+                addBotMessage(`❌ <b>Error:</b> ${error.message}`);
+            });
+        }
+
+        // Run a single test case
+        function runSingleTestCase(testCaseId, testType, moduleName, testName) {
+            const config = getTestConfiguration();
+            const singleScenarioConfig = { ...config, retries: '0' };
+            const browserNames = { chrome: 'Chrome', edge: 'Edge', firefox: 'Firefox' };
+            
+            // Parse the testCaseId to get the test case details
+            const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
+            const testCase = testScenariosData[testType][moduleName][tcIdx];
+            
+            showToast(`🏃 Running test: "${testName}"...`);
+            addBotMessage(`🏁 <b>Running Single Test Case:</b>\n\n📝 Test Name: ${testName}\n📋 Description: ${testCase.description}\n🔁 Retries: 0 (single attempt)\n⚙️ Workers: ${singleScenarioConfig.workers}\n🌐 Browser: ${browserNames[singleScenarioConfig.browser]}\n🕵️ Headless: ${singleScenarioConfig.headless}\n\n<b>Test Type:</b> ${testType}\n<b>Module:</b> ${moduleName}\n\nExecuting test case with ${testCase.steps.length} steps...`);
+            
+            // Show progress bar
+            showProgressBar();
+            updateProgress(10, 'Starting execution...', `Running ${testName}`);
+            
+            // Call API to run this specific test case
+            fetch('/api/run-tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...singleScenarioConfig,
+                    testType: testType,
+                    moduleName: moduleName,
+                    testCaseId: testCase.id,
+                    testCaseName: testName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('✅ Test execution started!');
+                    monitorExecution(data.jobId, testName);
+                } else {
+                    hideProgressBar();
+                    showToast('❌ Failed to start test execution');
+                    addBotMessage(`❌ <b>Test Execution Failed</b>\n\n${data.message}`);
+                }
+            })
+            .catch(error => {
+                hideProgressBar();
+                showToast('❌ Error starting test execution');
+                addBotMessage(`❌ <b>Error:</b> ${error.message}`);
+            });
+        }
+
+        // Run a single step from a test case
+        function runSingleStep(testCaseId, stepIndex, testType, moduleName, testName) {
+            const config = getTestConfiguration();
+            const browserNames = { chrome: 'Chrome', edge: 'Edge', firefox: 'Firefox' };
+            
+            // Parse the testCaseId to get the test case details
+            const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
+            const testCase = testScenariosData[testType][moduleName][tcIdx];
+            const stepText = testCase.steps[stepIndex];
+            
+            showToast(`🏃 Running step ${stepIndex + 1}: "${stepText.substring(0, 50)}${stepText.length > 50 ? '...' : ''}"...`);
+            addBotMessage(`🏁 <b>Running Single Step:</b>\n\n📝 Test Case: ${testName}\n🔢 Step #${stepIndex + 1}\n📋 Step: ${stepText}\n\n🔁 Retries: ${config.retries}\n⚙️ Workers: ${config.workers}\n🌐 Browser: ${browserNames[config.browser]}\n🕵️ Headless: ${config.headless}\n\n<b>Test Type:</b> ${testType}\n<b>Module:</b> ${moduleName}\n\nExecuting single step...`);
+            
+            // Show progress bar
+            showProgressBar();
+            updateProgress(10, 'Starting execution...', `Running step ${stepIndex + 1}`);
+            
+            // Call API to run this specific step
+            fetch('/api/run-tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...config,
+                    testType: testType,
+                    moduleName: moduleName,
+                    testCaseId: testCase.id,
+                    testCaseName: testName,
+                    stepIndex: stepIndex,
+                    stepText: stepText,
+                    singleStep: true
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(`Step ${stepIndex + 1} execution started:`, data.message);
+                    monitorExecution(data.jobId, `Step ${stepIndex + 1} of ${testName}`);
+                } else {
+                    hideProgressBar();
+                    showToast('❌ Failed to start step execution');
+                    console.error('Step execution failed:', data.message);
+                }
+            })
+            .catch(error => {
+                hideProgressBar();
+                showToast('❌ Error starting step execution');
+                console.error('Error running step:', error);
+            });
+        }
+
+        // Add manual step with inline input (works like recorded steps)
+        function addManualStep(testCaseId) {
+            const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
+            const testTypes = Object.keys(testScenariosData);
+            const testType = testTypes[testTypeIdx];
+            const modules = Object.keys(testScenariosData[testType]);
+            const moduleName = modules[modIdx];
+            const testCase = testScenariosData[testType][moduleName][tcIdx];
+            
+            // Expand the test case steps container if not already expanded
+            const stepsContainer = document.getElementById(`steps${testCaseId}`);
+            if (!stepsContainer.classList.contains('expanded')) {
+                stepsContainer.classList.add('expanded');
+            }
+            
+            // Create a temporary step with an input field
+            const stepIndex = testCase.steps.length;
+            const tempStepId = `temp-step-${testCaseId}`;
+            
+            // Add a placeholder step
+            testCase.steps.push('');
+            renderTestScenarios();
+            
+            // Keep expanded state
+            const testTypeContent = document.getElementById(`testTypeContent${testTypeIdx}`);
+            const testTypeIcon = document.getElementById(`testTypeIcon${testTypeIdx}`);
+            const moduleId = `module${testTypeIdx}-${modIdx}`;
+            const moduleContent = document.getElementById(`${moduleId}Content`);
+            const moduleIcon = document.getElementById(`${moduleId}Icon`);
+            const stepsContainerNew = document.getElementById(`steps${testCaseId}`);
+            
+            if (testTypeContent) {
+                testTypeContent.classList.add('expanded');
+                testTypeIcon.classList.add('expanded');
+            }
+            if (moduleContent) {
+                moduleContent.classList.add('expanded');
+                moduleIcon.classList.add('expanded');
+            }
+            if (stepsContainerNew) {
+                stepsContainerNew.classList.add('expanded');
+            }
+            
+            // Convert the last step to an editable input
+            setTimeout(() => {
+                const stepTextElement = document.getElementById(`stepText${testCaseId}-${stepIndex}`);
+                if (stepTextElement) {
+                    stepTextElement.innerHTML = `
+                        <input type="text" class="step-text-editable" placeholder="Enter step description (e.g., Click Login button)" id="newStepInput${testCaseId}-${stepIndex}" style="width: 100%;">
+                        <button class="icon-btn check" onclick="saveNewManualStep('${testCaseId}', ${stepIndex})" title="Save">✔️</button>
+                        <button class="icon-btn delete" onclick="cancelNewManualStep('${testCaseId}', ${stepIndex})" title="Cancel">❌</button>
+                    `;
+                    document.getElementById(`newStepInput${testCaseId}-${stepIndex}`).focus();
+                }
+            }, 100);
+        }
+
+        // Save newly added manual step
+        function saveNewManualStep(testCaseId, stepIndex) {
+            const inputElement = document.getElementById(`newStepInput${testCaseId}-${stepIndex}`);
+            const newStepText = inputElement.value.trim();
+            
+            if (newStepText === '') {
+                showToast('⚠️ Step description cannot be empty');
+                inputElement.focus();
+                return;
+            }
+            
+            const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
+            const testTypes = Object.keys(testScenariosData);
+            const testType = testTypes[testTypeIdx];
+            const modules = Object.keys(testScenariosData[testType]);
+            const moduleName = modules[modIdx];
+            
+            // Save the step text
+            testScenariosData[testType][moduleName][tcIdx].steps[stepIndex] = newStepText;
+            
+            saveToLocalStorage();
+            renderTestScenarios();
+            
+            // Keep expanded state
+            const testTypeContent = document.getElementById(`testTypeContent${testTypeIdx}`);
+            const testTypeIcon = document.getElementById(`testTypeIcon${testTypeIdx}`);
+            const moduleId = `module${testTypeIdx}-${modIdx}`;
+            const moduleContent = document.getElementById(`${moduleId}Content`);
+            const moduleIcon = document.getElementById(`${moduleId}Icon`);
+            const stepsContainer = document.getElementById(`steps${testCaseId}`);
+            
+            if (testTypeContent) {
+                testTypeContent.classList.add('expanded');
+                testTypeIcon.classList.add('expanded');
+            }
+            if (moduleContent) {
+                moduleContent.classList.add('expanded');
+                moduleIcon.classList.add('expanded');
+            }
+            if (stepsContainer) {
+                stepsContainer.classList.add('expanded');
+            }
+            
+            showToast('✅ Manual step added successfully');
+        }
+
+        // Cancel adding a manual step
+        function cancelNewManualStep(testCaseId, stepIndex) {
+            const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
+            const testTypes = Object.keys(testScenariosData);
+            const testType = testTypes[testTypeIdx];
+            const modules = Object.keys(testScenariosData[testType]);
+            const moduleName = modules[modIdx];
+            
+            // Remove the empty step
+            testScenariosData[testType][moduleName][tcIdx].steps.splice(stepIndex, 1);
+            
+            saveToLocalStorage();
+            renderTestScenarios();
+            
+            // Keep expanded state
+            const testTypeContent = document.getElementById(`testTypeContent${testTypeIdx}`);
+            const testTypeIcon = document.getElementById(`testTypeIcon${testTypeIdx}`);
+            const moduleId = `module${testTypeIdx}-${modIdx}`;
+            const moduleContent = document.getElementById(`${moduleId}Content`);
+            const moduleIcon = document.getElementById(`${moduleId}Icon`);
+            const stepsContainer = document.getElementById(`steps${testCaseId}`);
+            
+            if (testTypeContent) {
+                testTypeContent.classList.add('expanded');
+                testTypeIcon.classList.add('expanded');
+            }
+            if (moduleContent) {
+                moduleContent.classList.add('expanded');
+                moduleIcon.classList.add('expanded');
+            }
+            if (stepsContainer) {
+                stepsContainer.classList.add('expanded');
+            }
+            
+            showToast('ℹ️ Cancelled adding step');
+        }
+
+        // Edit test case name inline
+        function editTestCaseName(testCaseId) {
+            const nameElement = document.getElementById(`tcName${testCaseId}`);
+            if (!nameElement) return;
+            
+            const currentName = nameElement.textContent;
+            
+            // Replace with input field
+            nameElement.innerHTML = `<input type="text" id="tcNameInput${testCaseId}" value="${currentName}" style="padding: 4px 8px; border: 2px solid #6366f1; border-radius: 4px; font-size: 14px; font-weight: 600; min-width: 200px;" onkeypress="if(event.key==='Enter') saveTestCaseName('${testCaseId}')" />
+            <button class="btn-save" onclick="saveTestCaseName('${testCaseId}')" style="margin-left: 5px; padding: 4px 10px; font-size: 12px;">Save</button>
+            <button class="btn-cancel" onclick="cancelTestCaseNameEdit('${testCaseId}', '${currentName.replace(/'/g, "\\'")}')" style="margin-left: 5px; padding: 4px 10px; font-size: 12px;">Cancel</button>`;
+            
+            // Focus on input
+            document.getElementById(`tcNameInput${testCaseId}`).focus();
+        }
+
+        // Save test case name
+        function saveTestCaseName(testCaseId) {
+            const inputElement = document.getElementById(`tcNameInput${testCaseId}`);
+            if (!inputElement) return;
+            
+            const newName = inputElement.value.trim();
+            if (!newName) {
+                showToast('❌ Test case name cannot be empty');
+                return;
+            }
+            
+            // Parse the testCaseId: "testTypeIndex-moduleIndex-tcIndex"
+            const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
+            const testTypes = Object.keys(testScenariosData);
+            const testType = testTypes[testTypeIdx];
+            const modules = Object.keys(testScenariosData[testType]);
+            const moduleName = modules[modIdx];
+            const testCase = testScenariosData[testType][moduleName][tcIdx];
+            
+            // Update the test case name
+            testCase.name = newName;
+            
+            // Re-render to show the updated name
+            renderTestScenarios();
+            showToast('✅ Test case name updated successfully');
+        }
+
+        // Cancel test case name edit
+        function cancelTestCaseNameEdit(testCaseId, originalName) {
+            const nameElement = document.getElementById(`tcName${testCaseId}`);
+            if (nameElement) {
+                nameElement.textContent = originalName;
+            }
+            renderTestScenarios();
+        }
+
         // Edit test case (enable edit mode)
-        function editTestCase(moduleIndex, tcIndex) {
+        function editTestCase(testCaseId) {
             if (currentEditingTestCase) {
                 showToast('⚠️ Please save or cancel the current edit first');
                 return;
             }
             
+            // Parse the testCaseId: "testTypeIndex-moduleIndex-tcIndex"
+            const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
+            const testTypes = Object.keys(testScenariosData);
+            const testType = testTypes[testTypeIdx];
+            const modules = Object.keys(testScenariosData[testType]);
+            const moduleName = modules[modIdx];
+            const testCase = testScenariosData[testType][moduleName][tcIdx];
+            
             // Backup original steps for this test case so Cancel can restore them
-            const modules = Object.keys(testScenariosData);
-            const moduleName = modules[moduleIndex];
-            const testCase = testScenariosData[moduleName][tcIndex];
-            editBackups[`${moduleIndex}-${tcIndex}`] = Array.isArray(testCase.steps) ? testCase.steps.slice() : [];
+            editBackups[testCaseId] = Array.isArray(testCase.steps) ? testCase.steps.slice() : [];
 
-            currentEditingTestCase = `${moduleIndex}-${tcIndex}`;
+            currentEditingTestCase = testCaseId;
             renderTestScenarios();
             
-            // Auto-expand the module and test case
-            const moduleContent = document.getElementById(`moduleContent${moduleIndex}`);
-            const moduleIcon = document.getElementById(`moduleIcon${moduleIndex}`);
-            const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
+            // Auto-expand the test type, module, and test case
+            const testTypeContent = document.getElementById(`testTypeContent${testTypeIdx}`);
+            const testTypeIcon = document.getElementById(`testTypeIcon${testTypeIdx}`);
+            const moduleId = `module${testTypeIdx}-${modIdx}`;
+            const moduleContent = document.getElementById(`${moduleId}Content`);
+            const moduleIcon = document.getElementById(`${moduleId}Icon`);
+            const stepsContainer = document.getElementById(`steps${testCaseId}`);
             
+            if (testTypeContent) {
+                testTypeContent.classList.add('expanded');
+                testTypeIcon.classList.add('expanded');
+            }
             if (moduleContent) {
                 moduleContent.classList.add('expanded');
                 moduleIcon.classList.add('expanded');
@@ -2321,11 +3342,11 @@
         }
 
         // Save test case changes
-        function saveTestCase(moduleIndex, tcIndex) {
+        function saveTestCase(testCaseId) {
             // Commit: remove backup and exit edit mode
-            const key = `${moduleIndex}-${tcIndex}`;
-            if (editBackups[key]) delete editBackups[key];
+            if (editBackups[testCaseId]) delete editBackups[testCaseId];
             currentEditingTestCase = null;
+            saveToLocalStorage();
             renderTestScenarios();
             showToast('✅ Test case saved successfully!');
         }
@@ -2334,13 +3355,15 @@
         function cancelEdit() {
             // Restore steps from backup if available
             if (currentEditingTestCase) {
-                const [moduleIndex, tcIndex] = currentEditingTestCase.split('-').map(n => parseInt(n, 10));
-                const key = `${moduleIndex}-${tcIndex}`;
-                if (editBackups[key]) {
-                    const modules = Object.keys(testScenariosData);
-                    const moduleName = modules[moduleIndex];
-                    testScenariosData[moduleName][tcIndex].steps = editBackups[key].slice();
-                    delete editBackups[key];
+                const [testTypeIdx, modIdx, tcIdx] = currentEditingTestCase.split('-').map(Number);
+                if (editBackups[currentEditingTestCase]) {
+                    const testTypes = Object.keys(testScenariosData);
+                    const testType = testTypes[testTypeIdx];
+                    const modules = Object.keys(testScenariosData[testType]);
+                    const moduleName = modules[modIdx];
+                    testScenariosData[testType][moduleName][tcIdx].steps = editBackups[currentEditingTestCase].slice();
+                    delete editBackups[currentEditingTestCase];
+                    saveToLocalStorage();
                 }
             }
             currentEditingTestCase = null;
@@ -2349,20 +3372,31 @@
         }
 
         // Add new test step
-        function addTestStep(moduleIndex, tcIndex) {
-            const modules = Object.keys(testScenariosData);
-            const moduleName = modules[moduleIndex];
-            const testCase = testScenariosData[moduleName][tcIndex];
+        function addTestStep(testCaseId) {
+            const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
+            const testTypes = Object.keys(testScenariosData);
+            const testType = testTypes[testTypeIdx];
+            const modules = Object.keys(testScenariosData[testType]);
+            const moduleName = modules[modIdx];
+            const testCase = testScenariosData[testType][moduleName][tcIdx];
             
             testCase.steps.push('New test step - click edit to modify');
+            saveToLocalStorage();
             renderTestScenarios();
             
             // Keep edit mode and expanded state
-            currentEditingTestCase = `${moduleIndex}-${tcIndex}`;
-            const moduleContent = document.getElementById(`moduleContent${moduleIndex}`);
-            const moduleIcon = document.getElementById(`moduleIcon${moduleIndex}`);
-            const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
+            currentEditingTestCase = testCaseId;
+            const testTypeContent = document.getElementById(`testTypeContent${testTypeIdx}`);
+            const testTypeIcon = document.getElementById(`testTypeIcon${testTypeIdx}`);
+            const moduleId = `module${testTypeIdx}-${modIdx}`;
+            const moduleContent = document.getElementById(`${moduleId}Content`);
+            const moduleIcon = document.getElementById(`${moduleId}Icon`);
+            const stepsContainer = document.getElementById(`steps${testCaseId}`);
             
+            if (testTypeContent) {
+                testTypeContent.classList.add('expanded');
+                testTypeIcon.classList.add('expanded');
+            }
             if (moduleContent) {
                 moduleContent.classList.add('expanded');
                 moduleIcon.classList.add('expanded');
@@ -2375,77 +3409,90 @@
         }
 
         // Edit a test step (inline editing)
-        function editStep(moduleIndex, tcIndex, stepIndex) {
-            const stepTextElement = document.getElementById(`stepText${moduleIndex}-${tcIndex}-${stepIndex}`);
+        function editStep(testCaseId, stepIndex) {
+            const stepTextElement = document.getElementById(`stepText${testCaseId}-${stepIndex}`);
             const currentText = stepTextElement.textContent;
             
             stepTextElement.innerHTML = `
-                <input type="text" class="step-text-editable" value="${currentText}" id="editInput${moduleIndex}-${tcIndex}-${stepIndex}">
-                <button class="icon-btn check" onclick="saveStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Save">✔️</button>
+                <input type="text" class="step-text-editable" value="${currentText}" id="editInput${testCaseId}-${stepIndex}">
+                <button class="icon-btn check" onclick="saveStep('${testCaseId}', ${stepIndex})" title="Save">✔️</button>
             `;
             
-            document.getElementById(`editInput${moduleIndex}-${tcIndex}-${stepIndex}`).focus();
+            document.getElementById(`editInput${testCaseId}-${stepIndex}`).focus();
         }
 
         // Save edited step
-        function saveStep(moduleIndex, tcIndex, stepIndex) {
-            const inputElement = document.getElementById(`editInput${moduleIndex}-${tcIndex}-${stepIndex}`);
+        function saveStep(testCaseId, stepIndex) {
+            const inputElement = document.getElementById(`editInput${testCaseId}-${stepIndex}`);
             const newText = inputElement.value;
             
-            const modules = Object.keys(testScenariosData);
-            const moduleName = modules[moduleIndex];
+            const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
+            const testTypes = Object.keys(testScenariosData);
+            const testType = testTypes[testTypeIdx];
+            const modules = Object.keys(testScenariosData[testType]);
+            const moduleName = modules[modIdx];
+            
             // Strip any leading numbering like "1. " from saved step text
             const cleaned = newText.replace(/^\s*\d+\.\s*/, '');
-            testScenariosData[moduleName][tcIndex].steps[stepIndex] = cleaned;
+            testScenariosData[testType][moduleName][tcIdx].steps[stepIndex] = cleaned;
             
+            saveToLocalStorage();
             renderTestScenarios();
             
             // Restore edit mode
-            currentEditingTestCase = `${moduleIndex}-${tcIndex}`;
-            const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
+            currentEditingTestCase = testCaseId;
+            const stepsContainer = document.getElementById(`steps${testCaseId}`);
             stepsContainer.classList.add('expanded');
             
             showToast('✅ Step updated');
         }
 
         // Delete a test step
-        function deleteStep(moduleIndex, tcIndex, stepIndex) {
+        function deleteStep(testCaseId, stepIndex) {
             if (!confirm('Are you sure you want to delete this step?')) {
                 return;
             }
             
-            const modules = Object.keys(testScenariosData);
-            const moduleName = modules[moduleIndex];
-            testScenariosData[moduleName][tcIndex].steps.splice(stepIndex, 1);
+            const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
+            const testTypes = Object.keys(testScenariosData);
+            const testType = testTypes[testTypeIdx];
+            const modules = Object.keys(testScenariosData[testType]);
+            const moduleName = modules[modIdx];
+            testScenariosData[testType][moduleName][tcIdx].steps.splice(stepIndex, 1);
             
+            saveToLocalStorage();
             renderTestScenarios();
             
             // Restore edit mode
-            currentEditingTestCase = `${moduleIndex}-${tcIndex}`;
-            const stepsContainer = document.getElementById(`steps${moduleIndex}-${tcIndex}`);
+            currentEditingTestCase = testCaseId;
+            const stepsContainer = document.getElementById(`steps${testCaseId}`);
             stepsContainer.classList.add('expanded');
             
             showToast('🗑️ Step deleted');
         }
 
         // Delete entire test case
-        function deleteTestCase(moduleIndex, tcIndex) {
-            const modules = Object.keys(testScenariosData);
-            const moduleName = modules[moduleIndex];
-            const testCase = testScenariosData[moduleName][tcIndex];
+        function deleteTestCase(testCaseId) {
+            const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
+            const testTypes = Object.keys(testScenariosData);
+            const testType = testTypes[testTypeIdx];
+            const modules = Object.keys(testScenariosData[testType]);
+            const moduleName = modules[modIdx];
+            const testCase = testScenariosData[testType][moduleName][tcIdx];
             
             if (!confirm(`Are you sure you want to delete the test case "${testCase.name}" (${testCase.id})?\n\nThis will remove the entire test case including all its steps.`)) {
                 return;
             }
             
             // Remove the test case from the array
-            testScenariosData[moduleName].splice(tcIndex, 1);
+            testScenariosData[testType][moduleName].splice(tcIdx, 1);
             
             // Clear edit mode if this test case was being edited
-            if (currentEditingTestCase === `${moduleIndex}-${tcIndex}`) {
+            if (currentEditingTestCase === testCaseId) {
                 currentEditingTestCase = null;
             }
             
+            saveToLocalStorage();
             renderTestScenarios();
             showToast(`🗑️ Test case "${testCase.name}" deleted successfully`);
         }
@@ -2706,6 +3753,100 @@
             browserName: ''
         };
 
+        // Run all test scenarios
+        function runAllTestScenarios() {
+            const config = getTestConfiguration();
+            const browserNames = { chrome: 'Chrome', edge: 'Edge', firefox: 'Firefox' };
+            
+            // Count total visible test cases
+            let totalTests = 0;
+            const visibleTestTypes = ['UI', 'Functional', 'Integration', 'System', 'Regression', 'Smoke', 'Performance'];
+            
+            visibleTestTypes.forEach(testType => {
+                if (testScenariosData[testType]) {
+                    Object.values(testScenariosData[testType]).forEach(testCases => {
+                        if (Array.isArray(testCases)) {
+                            totalTests += testCases.length;
+                        }
+                    });
+                }
+            });
+            
+            showToast(`🏃 Running all ${totalTests} test scenarios...`);
+            addBotMessage(`🏁 <b>Running All Test Scenarios:</b>\n\n📊 Total Tests: ${totalTests}\n🔁 Retries: ${config.retries}\n⚙️ Workers: ${config.workers}\n🌐 Browser: ${browserNames[config.browser]}\n🕵️ Headless: ${config.headless}\n\n<b>Executing all visible test scenarios...</b>\n\nTests are being executed in parallel. Check the reports page for detailed results.`);
+            
+            // Show progress bar
+            showProgressBar();
+            updateProgress(10, 'Starting test execution...', `Running ${totalTests} tests`);
+            
+            // Override testName to 'All' to run all tests
+            const testConfig = {
+                ...config,
+                testName: 'All'
+            };
+            
+            // Call API to run all tests
+            fetch('/api/run-tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(testConfig)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('✅ Test execution started successfully!');
+                    monitorExecution(data.jobId, `${totalTests} test scenarios`);
+                } else {
+                    hideProgressBar();
+                    showToast('❌ Test execution failed');
+                    addBotMessage(`❌ <b>Test Execution Failed</b>\n\n${data.message || 'Unknown error occurred'}`);
+                }
+            })
+            .catch(error => {
+                hideProgressBar();
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage(`❌ <b>Error executing tests:</b>\n\n${error.message}\n\nMake sure the dashboard server is running.`);
+            });
+        }
+
+        // Stop test execution
+        function stopTestExecution() {
+            showToast('⏹️ Stopping test execution...');
+            addBotMessage(`⏹️ <b>Stopping Test Execution</b>\n\nSending stop signal to the test runner...\n\nTests will stop after the current test case completes.`);
+            
+            // Call API to stop tests
+            fetch('/api/stop-tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    hideProgressBar();
+                    showToast('✅ Test execution stopped');
+                    addBotMessage(`✅ <b>Test Execution Stopped</b>\n\nTests have been stopped successfully.\n\n<b>Partial results may be available in the reports.</b>`);
+                } else {
+                    showToast('⚠️ Could not stop tests');
+                    addBotMessage(`⚠️ <b>Could not stop tests</b>\n\n${data.message || 'No running tests found'}`);
+                }
+            })
+            .catch(error => {
+                showToast(`❌ Error: ${error.message}`);
+                addBotMessage(`❌ <b>Error stopping tests:</b>\n\n${error.message}`);
+            });
+        }
+
+        // Show reports page
+        function showReports() {
+            showToast('📊 Opening Reports...');
+            showPage(3); // Navigate to Reports page (index 3)
+            addBotMessage(`📊 <b>Navigating to Reports Page</b>\n\nYou can now view:\n📈 Test execution results\n📊 Pass/Fail statistics\n⏱️ Execution times\n📝 Detailed logs\n🎯 Performance metrics`);
+        }
+
         // Recording controls
         async function startRecording() {
             const browser = document.getElementById('browserSelect').value;
@@ -2888,6 +4029,24 @@
             document.getElementById('testCaseModal').classList.add('show');
         }
 
+        // Toggle custom spec file input field
+        function toggleCustomSpecFileInput() {
+            const dropdown = document.getElementById('specFileSelect');
+            const customGroup = document.getElementById('customSpecFileGroup');
+            const customInput = document.getElementById('customSpecFileName');
+            
+            if (dropdown.value === '') {
+                // Show custom input field
+                customGroup.style.display = 'block';
+                customInput.required = true;
+            } else {
+                // Hide custom input field
+                customGroup.style.display = 'none';
+                customInput.required = false;
+                customInput.value = '';
+            }
+        }
+
         // Load existing spec files for dropdown
         async function loadSpecFiles() {
             try {
@@ -2896,8 +4055,8 @@
                 
                 if (result.success) {
                     const dropdown = document.getElementById('specFileSelect');
-                    // Clear existing options except the first one
-                    dropdown.innerHTML = '<option value="">-- Create New Spec File --</option>';
+                    // Clear existing options except the first two
+                    dropdown.innerHTML = '<option value="">-- Create New Spec File --</option><option value="_AUTO_">Auto-generate from Module Name</option>';
                     
                     // Add existing files
                     result.files.forEach(file => {
@@ -3164,6 +4323,8 @@
             document.getElementById('testCaseDescription').value = '';
             document.getElementById('testCaseType').value = '';
             document.getElementById('specFileSelect').value = '';
+            document.getElementById('customSpecFileName').value = '';
+            document.getElementById('customSpecFileGroup').style.display = 'none';
             document.getElementById('testCaseSteps').value = '';
             document.getElementById('playwrightCode').value = '';
         }
@@ -3176,7 +4337,8 @@
             const testCaseName = document.getElementById('testCaseName').value.trim();
             const description = document.getElementById('testCaseDescription').value.trim();
             const testCaseType = document.getElementById('testCaseType').value.trim();
-            const specFile = document.getElementById('specFileSelect').value.trim();
+            let specFile = document.getElementById('specFileSelect').value.trim();
+            const customSpecFileName = document.getElementById('customSpecFileName').value.trim();
             const stepsText = document.getElementById('testCaseSteps').value.trim();
             const playwrightCode = document.getElementById('playwrightCode').value.trim();
             
@@ -3186,11 +4348,31 @@
                 return;
             }
             
+            // Handle custom spec file name
+            if (specFile === '' && customSpecFileName) {
+                // User selected "Create New Spec File" and entered a custom name
+                specFile = customSpecFileName;
+                // Ensure .spec.ts extension
+                if (!specFile.endsWith('.spec.ts')) {
+                    specFile += '.spec.ts';
+                }
+            } else if (specFile === '_AUTO_') {
+                // Auto-generate from module name
+                specFile = '';
+            } else if (specFile === '' && !customSpecFileName) {
+                showToast('❌ Please enter a spec file name or select "Auto-generate from Module Name"!');
+                return;
+            }
+            
             // Convert steps to arrow format
             const steps = stepsText.split('\n')
                 .map(s => s.trim())
                 .filter(s => s.length > 0)
                 .join(' • ');
+            
+            // Get browser and URL from recording session or use defaults
+            const browserName = (recordingSession && recordingSession.browserName) ? recordingSession.browserName : 'Chrome';
+            const appUrl = (recordingSession && recordingSession.url) ? recordingSession.url : 'Not specified';
             
             const testCaseData = {
                 moduleName: moduleName,
@@ -3200,12 +4382,14 @@
                 specFile: specFile,
                 steps: steps,
                 playwrightCode: playwrightCode,
-                browser: recordingSession.browserName,
-                url: recordingSession.url,
+                browser: browserName,
+                url: appUrl,
                 timestamp: new Date().toISOString()
             };
             
             showToast('💾 Saving test case...');
+            
+            console.log('Saving test case with data:', testCaseData);
             
             try {
                 const response = await fetch('http://localhost:3456/save-testcase', {
@@ -3214,27 +4398,61 @@
                     body: JSON.stringify(testCaseData)
                 });
                 
+                console.log('Response status:', response.status);
                 const result = await response.json();
+                console.log('Response result:', result);
                 
                 if (result.success) {
-                    showToast('✅ Test case saved to TESTING_FRAMEWORK_CONTEXT.md!');
+                    showToast('✅ Test case saved successfully!');
                     
-                    // Add test to testScenariosData dynamically
-                    const newTestCase = {
+                    console.log('Reloading saved tests...');
+                    // Merge saved spec scenarios without deleting the built-in catalogue.
+                    try {
+                        // Reload from spec files
+                        await loadSavedTests();
+                        console.log('✅ Test data reloaded successfully');
+                    } catch (loadError) {
+                        console.error('Error reloading tests (non-fatal):', loadError);
+                        // Continue even if reload fails
+                    }
+
+                    // Keep the just-saved scenario visible even when the browser has stale cached data.
+                    if (!testScenariosData[testCaseType]) {
+                        testScenariosData[testCaseType] = {};
+                    }
+                    if (!testScenariosData[testCaseType][moduleName]) {
+                        testScenariosData[testCaseType][moduleName] = [];
+                    }
+                    const savedTestCase = {
                         id: testCaseName.replace(/\s+/g, '_').toUpperCase(),
                         name: testCaseName,
-                        description: description,
-                        steps: steps.split(' • ').map(s => s.trim()).map(s => s.replace(/^\s*\d+\.\s*/, '')).filter(s => s.length > 0)
+                        description,
+                        steps: steps.split(' • ').map(step => step.trim()).filter(Boolean)
                     };
-                    
-                    // Add to test scenarios data
-                    if (!testScenariosData[moduleName]) {
-                        testScenariosData[moduleName] = [];
+                    if (!testScenariosData[testCaseType][moduleName].some(test => test.id === savedTestCase.id)) {
+                        testScenariosData[testCaseType][moduleName].push(savedTestCase);
                     }
-                    testScenariosData[moduleName].push(newTestCase);
+                    saveToLocalStorage();
                     
+                    console.log('Re-rendering test scenarios...');
                     // Re-render Test Scenarios page
-                    renderTestScenarios();
+                    try {
+                        renderTestScenarios();
+                        console.log('✅ Test scenarios page refreshed');
+                        showPage(2);
+                        requestAnimationFrame(() => {
+                            const savedName = Array.from(document.querySelectorAll('.test-case-name span[id^="tcName"]'))
+                                .find(element => element.textContent.trim() === testCaseName);
+                            if (savedName) {
+                                const savedRow = savedName.closest('.test-case-row');
+                                savedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                savedRow.style.outline = '3px solid #10b981';
+                            }
+                        });
+                    } catch (renderError) {
+                        console.error('Error rendering test scenarios (non-fatal):', renderError);
+                        // Continue even if render fails
+                    }
                     
                     // Display results above chatbot
                     const resultsDiv = document.getElementById('recordingResults');
@@ -3251,10 +4469,11 @@
                                 </div>
                                 <div style="display: grid; gap: 8px; font-size: 14px;">
                                     <div><b>Type:</b> <span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">${testCaseType}</span></div>
-                                    <div><b>Browser:</b> ${recordingSession.browserName}</div>
-                                    <div><b>URL:</b> ${recordingSession.url}</div>
+                                    <div><b>Module:</b> ${moduleName}</div>
+                                    <div><b>Browser:</b> ${browserName}</div>
+                                    <div><b>URL:</b> ${appUrl}</div>
                                     <div><b>Steps:</b> ${steps}</div>
-                                    <div><b>Saved to:</b> TESTING_FRAMEWORK_CONTEXT.md & src/tests/${result.testFileName}</div>
+                                    <div><b>Saved to:</b> src/tests/${result.testFileName}</div>
                                     ${result.pageObjectDetails ? `
                                     <div style="margin-top: 8px; padding: 10px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px;">
                                         <b>🎨 Page Object Model:</b>
@@ -3266,7 +4485,7 @@
                                     ` : ''}
                                     <div style="margin-top: 8px; padding: 12px; background: #f0f9ff; border-radius: 6px; color: #0369a1;">
                                         ✅ <b>Test case saved successfully!</b><br>
-                                        ➕ Added to <b>${moduleName}</b> in Test Scenarios page<br>
+                                        ➕ Added to <b>${testCaseType} → ${moduleName}</b> in Test Scenarios page<br>
                                         📁 Test file ${result.isNewFile ? 'created' : 'updated'}: <code>${result.testFileName}</code>
                                     </div>
                                 </div>
@@ -3279,15 +4498,23 @@
                     // Scroll to results
                     resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     
-                    addBotMessage(`✅ <b>Test case saved successfully!</b>\n\n<b>${testCaseName}</b>: ${description}\n\nYour test case has been added to:\n📁 Module: <b>${moduleName}</b> in Test Scenarios page\n📊 Type: ${testCaseType}\n📝 Test file ${result.isNewFile ? 'created' : 'updated'}: <code>src/tests/${result.testFileName}</code>\n📄 Documentation: TESTING_FRAMEWORK_CONTEXT.md\n🎯 Page Elements extracted from code\n🌐 Browser: ${recordingSession.browserName}\n🔗 URL: ${recordingSession.url}${result.pageObjectDetails ? `\n\n<b>🎨 Page Object Model Generated:</b>${result.pageObjectDetails.created.length > 0 ? `\n✨ Created: ${result.pageObjectDetails.created.join(', ')}` : ''}${result.pageObjectDetails.updated.length > 0 ? `\n🔄 Updated: ${result.pageObjectDetails.updated.join(', ')}` : ''}${result.pageObjectDetails.addedLocators.length > 0 ? `\n📍 Locators: ${result.pageObjectDetails.addedLocators.length} added` : ''}${result.pageObjectDetails.addedMethods.length > 0 ? `\n⚙️ Methods: ${result.pageObjectDetails.addedMethods.length} added` : ''}` : ''}\n\n➡️ Navigate to <b>Test Scenarios</b> page to view your test!`);
+                    addBotMessage(`✅ <b>Test case saved successfully!</b>\n\n<b>${testCaseName}</b>: ${description}\n\nYour test case has been added to:\n📁 Test Type: <b>${testCaseType}</b>\n📂 Module: <b>${moduleName}</b> in Test Scenarios page\n📝 Test file ${result.isNewFile ? 'created' : 'updated'}: <code>src/tests/${result.testFileName}</code>\n🎯 Page Elements extracted from code\n🌐 Browser: ${browserName}\n🔗 URL: ${appUrl}${result.pageObjectDetails ? `\n\n<b>🎨 Page Object Model Generated:</b>${result.pageObjectDetails.created.length > 0 ? `\n✨ Created: ${result.pageObjectDetails.created.join(', ')}` : ''}${result.pageObjectDetails.updated.length > 0 ? `\n🔄 Updated: ${result.pageObjectDetails.updated.join(', ')}` : ''}${result.pageObjectDetails.addedLocators.length > 0 ? `\n📍 Locators: ${result.pageObjectDetails.addedLocators.length} added` : ''}${result.pageObjectDetails.addedMethods.length > 0 ? `\n⚙️ Methods: ${result.pageObjectDetails.addedMethods.length} added` : ''}` : ''}\n\n➡️ Navigate to <b>Test Scenarios</b> page to view your test!`);
                     
+                    console.log('Closing modal...');
                     // Close modal and reset recording session
                     closeTestCaseModal();
-                    recordingSession.isRecording = false;
+                    console.log('Modal closed successfully');
+                    
+                    if (recordingSession) {
+                        recordingSession.isRecording = false;
+                        console.log('Recording session reset');
+                    }
                 } else {
+                    console.error('Save failed:', result.message);
                     throw new Error(result.message || 'Failed to save test case');
                 }
             } catch (error) {
+                console.error('Error saving test case:', error);
                 showToast(`❌ Error: ${error.message}`);
                 addBotMessage(`❌ <b>Could not save test case.</b>\n\nError: ${error.message}\n\nMake sure the dashboard server is running.`);
             }
@@ -3312,6 +4539,10 @@
         async function loadRecordedTests() {
             const recordedTestsContent = document.getElementById('recordedTestsContent');
             const recordedTestCount = document.getElementById('recordedTestCount');
+
+            if (!recordedTestsContent || !recordedTestCount) {
+                return;
+            }
             
             // Show loading state
             recordedTestsContent.innerHTML = '<div style="text-align: center; padding: 40px; color: #94a3b8;"><p>Loading recorded test scenarios...</p></div>';
@@ -3327,6 +4558,7 @@
                 const recordedTests = parseRecordedTests(content);
                 
                 if (recordedTests.length === 0) {
+                    updateDashboardRecordedTests(0);
                     recordedTestsContent.innerHTML = `
                         <div style="text-align: center; padding: 40px; color: #94a3b8;">
                             <p style="font-size: 16px; margin-bottom: 8px;">No recorded test scenarios found</p>
@@ -3339,6 +4571,7 @@
                 
                 // Update count
                 recordedTestCount.textContent = `(${recordedTests.length} tests)`;
+                updateDashboardRecordedTests(recordedTests.length);
                 
                 // Store all tests globally for filtering
                 window.allRecordedTests = recordedTests;
@@ -4566,7 +5799,8 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
                 workers: document.getElementById('parallelThreads')?.value || '2',
                 browser: document.getElementById('browserType')?.value || 'chromium',
                 headless: document.getElementById('headlessMode')?.value || 'false',
-                testName: document.getElementById('testName')?.value || 'All'
+                testName: document.getElementById('testName')?.value || 'All',
+                baseUrl: document.getElementById('appUrl')?.value || ''
             };
         }
 
@@ -4840,10 +6074,16 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
                 </div>
                 <div class="form-group">
                     <label>� Spec File (Optional):</label>
-                    <select id="specFileSelect" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                    <select id="specFileSelect" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;" onchange="toggleCustomSpecFileInput()">
                         <option value="">-- Create New Spec File --</option>
+                        <option value="_AUTO_">Auto-generate from Module Name</option>
                     </select>
-                    <small style="color: #64748b; display: block; margin-top: 4px;">Select an existing file to append, or leave blank to create a new file based on Module Name</small>
+                    <small style="color: #64748b; display: block; margin-top: 4px;">Select an existing file to append, or create a new spec file</small>
+                </div>
+                <div class="form-group" id="customSpecFileGroup" style="display: none;">
+                    <label>📝 New Spec File Name:</label>
+                    <input type="text" id="customSpecFileName" placeholder="e.g., LoginTest.spec.ts or CustomTest.spec.ts" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                    <small style="color: #64748b; display: block; margin-top: 4px;">Enter the name for your new spec file (will be created in src/tests/ folder)</small>
                 </div>
                 <div class="form-group">
                     <label>�📋 Paste Generated Playwright Code:</label>
@@ -4866,6 +6106,26 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
                 <div class="modal-actions">
                     <button type="button" class="btn btn-cancel" onclick="closeTestCaseModal()">Cancel</button>
                     <button type="submit" class="btn">💾 Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rename Modal for Test Types and Modules -->
+    <div id="renameModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 id="renameModalTitle">✏️ Rename</h2>
+                <button class="close-btn" onclick="closeRenameModal()">&times;</button>
+            </div>
+            <form onsubmit="submitRename(event)">
+                <div class="form-group">
+                    <label id="renameLabel">New Name:</label>
+                    <input type="text" id="renameInput" placeholder="Enter new name" required>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeRenameModal()">Cancel</button>
+                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">Save</button>
                 </div>
             </form>
         </div>

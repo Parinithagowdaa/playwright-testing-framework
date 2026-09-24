@@ -49,6 +49,19 @@ export default class HomeSteps {
      */
     public async validateLogin(userName: string) {
         await test.step(`Verify that user is successfully logged in as ${userName}`, async () => {
+            const loggedInUser = this.page.locator(HomePage.LOGGED_IN_USER).first();
+            const signInError = this.page.locator(HomePage.SIGN_IN_ERROR_MESSAGE).first();
+
+            await Promise.race([
+                loggedInUser.waitFor({ state: "visible" }),
+                signInError.waitFor({ state: "visible" }),
+            ]);
+
+            if (await signInError.isVisible()) {
+                const errorMessage = (await signInError.textContent())?.trim() || "Login was not successful.";
+                throw new Error(`Login failed for '${userName}': ${errorMessage}`);
+            }
+
             const user = await this.ui.element(HomePage.LOGGED_IN_USER, HomePageConstants.USER_NAME).getTextContent();
             await Assert.assertEquals(user, userName, HomePageConstants.USER_NAME);
         });        

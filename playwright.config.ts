@@ -46,8 +46,8 @@ const config: PlaywrightTestConfig = {
       suiteTitle: false,
       environmentInfo: {
         OS: process.platform.toUpperCase(),
-        BROWSER: process.env.BROWSER.toUpperCase(),
-        BASE_URL: process.env.BASE_URL,
+        BROWSER: (process.env.BROWSER || 'chrome').toUpperCase(),
+        BASE_URL: process.env.BASE_URL || '',
       },
     }],
     ['html', { open: 'never', outputFolder: "./test-results/report" }],
@@ -58,7 +58,7 @@ const config: PlaywrightTestConfig = {
   projects: [  
     {
       name: "local",
-      testMatch: `*${process.env.TEST_NAME.trim()}*`,
+      testMatch: `*${(process.env.TEST_NAME || '').trim()}*`,
     },
     {
       name: "suite",

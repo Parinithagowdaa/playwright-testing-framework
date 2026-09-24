@@ -1,15 +1,105 @@
 const http = require('http');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 const { autoRunTest } = require('./auto-test-runner');
+
+function readEnvironmentValue(name) {
+    if (process.env[name]) return process.env[name];
+    const envPath = path.join(__dirname, '.env');
+    if (!fs.existsSync(envPath)) return '';
+    const line = fs.readFileSync(envPath, 'utf8')
+        .split(/\r?\n/)
+        .find((entry) => entry.trim().startsWith(`${name}=`));
+    return line ? line.slice(line.indexOf('=') + 1).trim().replace(/^['"]|['"]$/g, '') : '';
+}
 
 const PORT = 3456;
 const ACTION_TIMEOUT_SECONDS = Number.parseInt(process.env.ACTION_TIMEOUT || '1', 10) * 60;
 
 // Global variable to track running test process
 let runningTestProcess = null;
+const executionJobs = new Map();
+let nextExecutionJobId = 1;
+
+function createExecutionJob(config, executionType, testFile, grep) {
+    const jobId = String(nextExecutionJobId++);
+    const job = {
+        jobId,
+        executionType,
+        status: 'queued',
+        success: null,
+        startedAt: new Date().toISOString(),
+        finishedAt: null,
+        output: '',
+        testFile,
+        grep: grep || null,
+    };
+    executionJobs.set(jobId, job);
+
+    const environment = {
+        ...process.env,
+        RETRIES: String(config.retries ?? (readEnvironmentValue('RETRIES') || 0)),
+        BROWSER: String(config.browser || readEnvironmentValue('BROWSER') || 'chrome'),
+        PARALLEL_THREAD: String(config.workers ?? (readEnvironmentValue('PARALLEL_THREAD') || 1)),
+        HEADLESS: String(config.headless ?? (readEnvironmentValue('HEADLESS') || 'false')),
+        ACTION_TIMEOUT: String(readEnvironmentValue('ACTION_TIMEOUT') || 1),
+        NAVIGATION_TIMEOUT: String(readEnvironmentValue('NAVIGATION_TIMEOUT') || 2),
+        TEST_TIMEOUT: String(readEnvironmentValue('TEST_TIMEOUT') || 20),
+        BROWSER_LAUNCH_TIMEOUT: String(readEnvironmentValue('BROWSER_LAUNCH_TIMEOUT') || 0),
+        BASE_URL: String(config.baseUrl || readEnvironmentValue('BASE_URL')),
+    };
+    const args = ['./node_modules/@playwright/test/cli.js', 'test'];
+    if (Array.isArray(config.testFiles) && config.testFiles.length > 0) {
+        args.push(...config.testFiles);
+    } else if (testFile) {
+        args.push(testFile);
+    }
+    if (grep) args.push('--grep', grep);
+    args.push('--project=suite');
+
+    const child = spawn(process.execPath, args, {
+        cwd: __dirname,
+        env: environment,
+        windowsHide: true,
+    });
+    runningTestProcess = child;
+    job.status = 'running';
+
+    const appendOutput = (data) => {
+        job.output = (job.output + data.toString()).slice(-20000);
+    };
+    child.stdout.on('data', appendOutput);
+    child.stderr.on('data', appendOutput);
+    child.on('close', (code, signal) => {
+        job.status = signal ? 'stopped' : (code === 0 ? 'passed' : 'failed');
+        job.success = code === 0;
+        job.exitCode = code;
+        job.finishedAt = new Date().toISOString();
+        if (runningTestProcess === child) runningTestProcess = null;
+    });
+    child.on('error', (error) => {
+        appendOutput(error.message);
+        job.status = 'failed';
+        job.success = false;
+        job.finishedAt = new Date().toISOString();
+        if (runningTestProcess === child) runningTestProcess = null;
+    });
+
+    return job;
+}
+
+function resolveSpecFile(moduleName) {
+    const testsDir = path.join(__dirname, 'src', 'tests');
+    const normalizedName = String(moduleName).replace(/\s+/g, '').toLowerCase();
+    const files = fs.readdirSync(testsDir).filter((file) => file.endsWith('.spec.ts'));
+    const match = files.find((file) => {
+        const baseName = file.replace('.spec.ts', '').toLowerCase();
+        return baseName === normalizedName || baseName.startsWith(normalizedName);
+    });
+    return match ? `src/tests/${match}` : null;
+}
 
 // Function to extract elements from Playwright code
 function extractElementsFromCode(code) {
@@ -181,7 +271,8 @@ function createOrUpdateSpecFile(testCaseData, moduleName, testCaseType, testsDir
         // Use existing selected file
         testFileName = specFile;
         testFilePath = path.join(testsDir, testFileName);
-        isNewFile = false;
+        // Check if file actually exists, even if user selected it
+        isNewFile = !fs.existsSync(testFilePath);
     } else {
         // Create new file based on module name
         testFileName = moduleName.replace(/\s+/g, '') + '.spec.ts';
@@ -1321,37 +1412,40 @@ const server = http.createServer((req, res) => {
                 }
 
                 // Save codegen output to a file for later retrieval
-                const codegenFile = 'playwright-latest-codegen.spec.ts';
-                const command = `npx playwright codegen --output=${codegenFile} --browser=${browser} "${url}"`;
+                const codegenFile = path.join(__dirname, 'playwright-latest-codegen.spec.ts');
+                const command = `npx playwright codegen --output=${path.basename(codegenFile)} --browser=${browser} "${url}"`;
                 
                 console.log(`🎬 Launching Playwright Codegen...`);
                 console.log(`   Browser: ${browser}`);
                 console.log(`   URL: ${url}`);
                 console.log(`   Command: ${command}\n`);
 
-                // Use exec with windowsVerbatimArguments to properly launch Playwright codegen
-                // This ensures the browser and inspector windows launch correctly
-                const playwrightProcess = exec(command, {
-                    windowsHide: false,
-                    detached: false,
-                }, (error, stdout, stderr) => {
-                    if (error) {
-                        console.error(`❌ Error launching Playwright: ${error.message}`);
-                    }
-                    if (stdout) {
-                        console.log(`stdout: ${stdout}`);
-                    }
-                    if (stderr) {
-                        console.error(`stderr: ${stderr}`);
-                    }
+                // Launch Playwright directly from the same Node installation as the dashboard.
+                // This avoids npx/cmd PATH issues when the dashboard is started from Edge.
+                const playwrightCli = path.join(__dirname, 'node_modules', '@playwright', 'test', 'cli.js');
+                const playwrightProcess = spawn(process.execPath, [
+                    playwrightCli,
+                    'codegen',
+                    `--output=${codegenFile}`,
+                    `--browser=${browser}`,
+                    url
+                ], {
+                    cwd: __dirname,
+                    detached: true,
+                    stdio: 'ignore',
+                    windowsHide: false
                 });
 
-                console.log(`✅ Playwright codegen command executed (PID: ${playwrightProcess.pid})`);
+                // Detach so parent doesn't wait for child to exit
+                playwrightProcess.unref();
 
+                console.log(`✅ Playwright codegen launched - browser opening now (PID: ${playwrightProcess.pid})`);
+
+                // Respond immediately without waiting for browser
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({
                     success: true,
-                    message: `Launching ${browser} with ${url}`,
+                    message: `Browser launching - only browser and Playwright Inspector will appear`,
                     command,
                     pid: playwrightProcess.pid,
                 }));
@@ -1364,7 +1458,7 @@ const server = http.createServer((req, res) => {
         console.log(`📄 Opening Playwright HTML Report...`);
 
         // Check if playwright-report directory exists
-        const reportPath = path.join(process.cwd(), 'playwright-report');
+        const reportPath = path.join(process.cwd(), 'test-results', 'report');
         if (!fs.existsSync(reportPath)) {
             console.log(`⚠️  No HTML report found. Run tests first.`);
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -1375,7 +1469,7 @@ const server = http.createServer((req, res) => {
             return;
         }
 
-        const command = `npx playwright show-report`;
+        const command = `npx playwright show-report test-results/report`;
         exec(command, (error) => {
             if (error) {
                 console.error(`Error: ${error.message}`);
@@ -1582,6 +1676,67 @@ const server = http.createServer((req, res) => {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, files: [] }));
         }
+    } else if (req.url === '/get-spec-test-cases' && req.method === 'GET') {
+        // Get all test cases from spec files with their metadata
+        try {
+            const testsDir = path.join(process.cwd(), 'src', 'tests');
+            
+            if (!fs.existsSync(testsDir)) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, testCases: [] }));
+                return;
+            }
+            
+            const files = fs.readdirSync(testsDir).filter(file => file.endsWith('.spec.ts'));
+            const testCases = [];
+            
+            files.forEach(file => {
+                const filePath = path.join(testsDir, file);
+                const content = fs.readFileSync(filePath, 'utf8');
+                
+                // Extract test cases from file using comment metadata
+                const testRegex = /\/\*\*[\s\S]*?\*\s*Test Case:\s*(.+?)\s*\*\s*Description:\s*(.+?)\s*\*\s*Module:\s*(.+?)\s*\*\s*Type:\s*(.+?)\s*\*[\s\S]*?\*\//g;
+                let match;
+                
+                while ((match = testRegex.exec(content)) !== null) {
+                    const testName = match[1].trim();
+                    const description = match[2].trim();
+                    const moduleName = match[3].trim();
+                    const testType = match[4].trim();
+                    
+                    // Extract steps from the test function
+                    const testFunctionRegex = new RegExp(`test\\(['"](.*?)['"],[\\s\\S]*?{([\\s\\S]*?)}\\s*\\);`, 'g');
+                    const testMatch = testFunctionRegex.exec(content.substring(match.index));
+                    
+                    let steps = [];
+                    if (testMatch && testMatch[2]) {
+                        const testBody = testMatch[2];
+                        // Extract await statements as steps
+                        const awaitRegex = /await\s+(.+?);/g;
+                        let awaitMatch;
+                        while ((awaitMatch = awaitRegex.exec(testBody)) !== null) {
+                            steps.push(awaitMatch[1].trim());
+                        }
+                    }
+                    
+                    testCases.push({
+                        name: testName,
+                        description: description,
+                        module: moduleName,
+                        type: testType,
+                        steps: steps,
+                        file: file
+                    });
+                }
+            });
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, testCases: testCases }));
+        } catch (error) {
+            console.error('Error loading test cases from spec files:', error);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, testCases: [], error: error.message }));
+        }
     } else if (req.url === '/' || req.url === '/index.html') {
         // Serve the dashboard.html file
         const dashboardPath = path.join(__dirname, 'dashboard.html');
@@ -1662,6 +1817,23 @@ const server = http.createServer((req, res) => {
                 message: 'No tests are currently running.' 
             }));
         }
+    } else if (req.url.startsWith('/api/run-status') && req.method === 'GET') {
+        const query = new URL(req.url, `http://${req.headers.host || 'localhost'}`).searchParams;
+        const job = executionJobs.get(query.get('jobId'));
+        if (!job) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: 'Execution job not found.' }));
+            return;
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            job,
+            reports: {
+                html: '/open-html-report',
+                allure: '/open-allure-report',
+            },
+        }));
     } else if (req.url === '/api/run-tests' && req.method === 'POST') {
         // Run tests with provided configuration
         let body = '';
@@ -1672,79 +1844,45 @@ const server = http.createServer((req, res) => {
         req.on('end', () => {
             try {
                 const config = JSON.parse(body);
-                const { retries, workers, browser, headless, testName } = config;
-                
-                console.log(`\n🚀 Starting test execution with configuration:`);
-                console.log(`   Retries: ${retries}`);
-                console.log(`   Parallel Threads: ${workers}`);
-                console.log(`   Browser: ${browser}`);
-                console.log(`   Headless: ${headless}`);
-                console.log(`   Test Name: ${testName || 'All Tests'}\n`);
-                
-                // Build command based on configuration (using cmd.exe to avoid PowerShell execution policy issues)
-                let command = '';
-                
-                if (testName && testName !== 'All') {
-                    // Scenario 1: Specific test selected
-                    command = `cmd.exe /c "set RETRIES=${retries} && set BROWSER=${browser} && set PARALLEL_THREAD=${workers} && set HEADLESS=${headless} && set TEST_NAME=${testName} && npm run local:test"`;
-                } else {
-                    // Scenario 2: All tests
-                    command = `cmd.exe /c "set RETRIES=${retries} && set BROWSER=${browser} && set PARALLEL_THREAD=${workers} && set HEADLESS=${headless} && npm test"`;
+                const { testType, moduleName, testCaseId, testCaseName, testName } = config;
+                const testFile = moduleName ? resolveSpecFile(moduleName) : null;
+                const grep = testCaseId || testCaseName || (testName && testName !== 'All' ? testName : null);
+                const executionType = testCaseName
+                    ? `Single Test Case: ${testCaseName}`
+                    : (moduleName ? `Module Tests: ${testType} - ${moduleName}` : (testType ? `Test Type: ${testType}` : 'All Tests'));
+
+                if (moduleName && !testFile) {
+                    res.writeHead(404, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, message: `No spec file found for module "${moduleName}".` }));
+                    return;
                 }
-                
-                console.log(`Executing command: ${command}\n`);
-                
-                // Execute the test command
-                runningTestProcess = exec(command, { 
-                    maxBuffer: 10 * 1024 * 1024,
-                    cwd: __dirname
-                }, (error, stdout, stderr) => {
-                    if (error) {
-                        console.error(`\n❌ Test execution error: ${error.message}`);
+
+                if (Array.isArray(config.testFiles) && config.testFiles.length > 0) {
+                    config.testFiles = config.testFiles
+                        .map((file) => resolveSpecFile(file.replace(/^src[\\/]+tests[\\/]+/, '').replace('.spec.ts', '')))
+                        .filter(Boolean);
+                    if (config.testFiles.length === 0) {
+                        res.writeHead(404, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: false, message: 'No spec files found for this test type.' }));
                         return;
                     }
-                    
-                    if (stderr) {
-                        console.error(`\nTest stderr: ${stderr}`);
-                    }
-                    
-                    console.log(`\n✅ Test execution completed`);
-                    console.log(stdout);
-                    
-                    // After tests complete, automatically generate Allure report
-                    console.log(`\n📊 Generating Allure report...`);
-                    
-                    const allureResultsPath = path.join(process.cwd(), 'allure-results');
-                    if (fs.existsSync(allureResultsPath)) {
-                        const allureCommand = `cmd.exe /c "allure serve allure-results"`;
-                        exec(allureCommand, (allureError) => {
-                            if (allureError) {
-                                console.error(`Error generating Allure report: ${allureError.message}`);
-                            } else {
-                                console.log(`✅ Allure report opened in browser`);
-                            }
-                        });
-                    } else {
-                        console.log(`⚠️  No Allure results found`);
-                    }
-                    
-                    // Clear the running process reference
-                    runningTestProcess = null;
-                });
-                
-                // Stream test output to console
-                runningTestProcess.stdout.on('data', (data) => {
-                    console.log(data.toString());
-                });
-                
-                runningTestProcess.stderr.on('data', (data) => {
-                    console.error(data.toString());
-                });
+                }
+
+                if (runningTestProcess) {
+                    res.writeHead(409, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, message: 'A test execution is already running.' }));
+                    return;
+                }
+
+                const job = createExecutionJob(config, executionType, testFile, grep);
+                console.log(`🚀 Started ${executionType} (job ${job.jobId})`);
                 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ 
                     success: true, 
-                    message: 'Test execution started. Check server console for progress.' 
+                    jobId: job.jobId,
+                    executionType,
+                    message: `Test execution started: ${executionType}.` 
                 }));
                 
             } catch (error) {
