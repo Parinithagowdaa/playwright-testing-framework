@@ -9,3 +9,7 @@ node_modules
 # Auto-generated files
 playwright-latest-codegen.spec.ts
 TESTING_FRAMEWORK_CONTEXT.md
+
+screenshots/
+_pw_capture_runner.cjs
+_capture_screenshots_tmp.spec.ts

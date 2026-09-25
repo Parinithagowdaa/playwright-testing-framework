@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -437,7 +437,14 @@
             align-items: center;
         }
 
-        .btn-update, .btn-save, .btn-cancel, .btn-delete-test-case, .btn-run-test-case {
+        .test-case-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #6366f1;
+        }
+
+        .btn-update, .btn-save, .btn-cancel, .btn-delete-test-case, .btn-run, .btn-capture-screenshots, .btn-run-test-case {
             padding: 6px 16px;
             border: none;
             border-radius: 6px;
@@ -445,6 +452,39 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-run {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+        }
+
+        .btn-run:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-run-test-case {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+        }
+
+        .btn-run-test-case:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-run-test-case {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+        }
+
+        .btn-run-test-case:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
         }
 
         .btn-run-test-case {
@@ -474,6 +514,16 @@
 
         .btn-delete-test-case:hover {
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-capture-screenshots {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            color: white;
+        }
+
+        .btn-capture-screenshots:hover {
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
             transform: translateY(-2px);
         }
 
@@ -538,6 +588,10 @@
             background: rgba(16, 185, 129, 1);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-icon {
+            font-size: 14px;
         }
 
         .test-steps-container {
@@ -1422,6 +1476,266 @@
         .btn-cancel:hover {
             background: #cbd5e1;
         }
+
+        /* Assertion Modal Styles */
+        .assertion-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .assertion-modal.show {
+            display: flex;
+        }
+
+        .assertion-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .assertion-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 2px solid #e2e8f0;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+        }
+
+        .assertion-modal-header h2 {
+            font-size: 20px;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .assertion-status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .assertion-status-badge.pass {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .assertion-status-badge.fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .assertion-tabs {
+            display: flex;
+            gap: 4px;
+            padding: 16px 24px 0 24px;
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .assertion-tab {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .assertion-tab:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+        }
+
+        .assertion-tab.active {
+            background: white;
+            color: #6366f1;
+            border-bottom: 2px solid #6366f1;
+        }
+
+        .assertion-tab-icon {
+            font-size: 16px;
+        }
+
+        .assertion-tab-content {
+            display: none;
+            padding: 24px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .assertion-tab-content.active {
+            display: block;
+        }
+
+        .assertion-snapshot-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .assertion-snapshot-image {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .assertion-snapshot-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 16px;
+            border: 2px dashed #cbd5e1;
+        }
+
+        .assertion-text-container {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #6366f1;
+        }
+
+        .assertion-text-row {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .assertion-text-row:last-child {
+            border-bottom: none;
+        }
+
+        .assertion-text-label {
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .assertion-text-value {
+            color: #1e293b;
+            word-break: break-word;
+        }
+
+        .assertion-code-container {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .assertion-code-container code {
+            color: #e2e8f0;
+        }
+
+        .assertion-modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 20px 24px;
+            border-top: 2px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .btn-assertion-action {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-download:hover {
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-copy:hover {
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-close-modal {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        .btn-close-modal:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-view-details {
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-view-details:hover {
+            box-shadow: 0 3px 8px rgba(99, 102, 241, 0.35);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -2065,7 +2379,18 @@
                             "Compare with tolerance of 0.70 (theme variations allowed)",
                             "Compare with tolerance of 0.00 (exact match required)"
                         ]
-                    }
+                    },
+                {
+                    id: "PRODUCTS",
+                    name: "Products",
+                    description: "Products - Newly recorded test",
+                    steps: [
+                        "Navigate to http://advantageonlineshopping.com/#/",
+                        "Click on SEE OFFER button",
+                        "Click on ADD TO CART button",
+                        "Click on CHECKOUT ($449.99) button"
+                    ]
+                }
                 ],
                 "SecondModule": [
                     {
@@ -2453,7 +2778,163 @@
         let currentEditingTestCase = null;
         let currentEditingApiTestCase = null;
 
+        // Assertion Data Storage
+        // Key format: "moduleIndex-tcIndex-stepIndex" for UI tests, "api-moduleIndex-tcIndex-stepIndex" for API tests
+        // Assertions are generated dynamically when viewing steps or capturing screenshots
+        let assertionData = {};
+
+        // Current assertion being viewed
+        let currentAssertion = null;
+
         // Load saved tests from TESTING_FRAMEWORK_CONTEXT.md via server
+        // Load test updates from backend
+        async function loadTestUpdates() {
+            try {
+                const response = await fetch('http://localhost:3456/api/get-test-updates');
+                const result = await response.json();
+                
+                console.log('📥 Load test updates result:', result);
+                
+                if (result.success && result.updates && Object.keys(result.updates).length > 0) {
+                    console.log('📥 Found updates for:', Object.keys(result.updates));
+                    
+                    // Apply updates to testScenariosData
+                    Object.keys(result.updates).forEach(testId => {
+                        const update = result.updates[testId];
+                        console.log(`📥 Applying update for test ID: ${testId}`, update);
+                        
+                        let found = false;
+                        // Find and update the test in testScenariosData
+                        Object.keys(testScenariosData).forEach(module => {
+                            const testIndex = testScenariosData[module].findIndex(t => t.id === testId);
+                            if (testIndex !== -1) {
+                                console.log(`✅ Found test in module "${module}" at index ${testIndex}`);
+                                console.log('   Old steps:', testScenariosData[module][testIndex].steps);
+                                console.log('   New steps:', update.steps);
+                                
+                                testScenariosData[module][testIndex].steps = update.steps.slice();
+                                if (update.description) {
+                                    testScenariosData[module][testIndex].description = update.description;
+                                }
+                                found = true;
+                            }
+                        });
+                        
+                        if (!found) {
+                            console.warn(`⚠️ Could not find test with ID: ${testId}`);
+                        }
+                    });
+                    console.log(`✅ Applied ${Object.keys(result.updates).length} test update(s)`);
+                } else {
+                    console.log('ℹ️ No test updates found');
+                }
+            } catch (error) {
+                console.error('Error loading test updates:', error);
+            }
+        }
+        
+        // Get deleted test IDs from localStorage
+        function getDeletedTestIds() {
+            const deleted = localStorage.getItem('deletedTestIds');
+            return deleted ? JSON.parse(deleted) : [];
+        }
+        
+        // Add a test ID to deleted list
+        function markTestAsDeleted(testId) {
+            const deleted = getDeletedTestIds();
+            if (!deleted.includes(testId)) {
+                deleted.push(testId);
+                localStorage.setItem('deletedTestIds', JSON.stringify(deleted));
+            }
+        }
+        
+        // Remove deleted tests from testScenariosData
+        function filterDeletedTests() {
+            const deletedIds = getDeletedTestIds();
+            if (deletedIds.length === 0) return;
+            
+            Object.keys(testScenariosData).forEach(moduleName => {
+                testScenariosData[moduleName] = testScenariosData[moduleName].filter(
+                    test => !deletedIds.includes(test.id)
+                );
+            });
+            console.log(`Filtered out ${deletedIds.length} deleted test(s)`);
+        }
+        
+        async function loadSavedTests() {
+            console.log('loadSavedTests: Starting...');
+            try {
+                const response = await fetch('http://localhost:3456/api/get-test-updates');
+                const result = await response.json();
+                
+                console.log('📥 Load test updates result:', result);
+                
+                if (result.success && result.updates && Object.keys(result.updates).length > 0) {
+                    console.log('📥 Found updates for:', Object.keys(result.updates));
+                    
+                    // Apply updates to testScenariosData
+                    Object.keys(result.updates).forEach(testId => {
+                        const update = result.updates[testId];
+                        console.log(`📥 Applying update for test ID: ${testId}`, update);
+                        
+                        let found = false;
+                        // Find and update the test in testScenariosData
+                        Object.keys(testScenariosData).forEach(module => {
+                            const testIndex = testScenariosData[module].findIndex(t => t.id === testId);
+                            if (testIndex !== -1) {
+                                console.log(`✅ Found test in module "${module}" at index ${testIndex}`);
+                                console.log('   Old steps:', testScenariosData[module][testIndex].steps);
+                                console.log('   New steps:', update.steps);
+                                
+                                testScenariosData[module][testIndex].steps = update.steps.slice();
+                                if (update.description) {
+                                    testScenariosData[module][testIndex].description = update.description;
+                                }
+                                found = true;
+                            }
+                        });
+                        
+                        if (!found) {
+                            console.warn(`⚠️ Could not find test with ID: ${testId}`);
+                        }
+                    });
+                    console.log(`✅ Applied ${Object.keys(result.updates).length} test update(s)`);
+                } else {
+                    console.log('ℹ️ No test updates found');
+                }
+            } catch (error) {
+                console.error('Error loading test updates:', error);
+            }
+        }
+        
+        // Get deleted test IDs from localStorage
+        function getDeletedTestIds() {
+            const deleted = localStorage.getItem('deletedTestIds');
+            return deleted ? JSON.parse(deleted) : [];
+        }
+        
+        // Add a test ID to deleted list
+        function markTestAsDeleted(testId) {
+            const deleted = getDeletedTestIds();
+            if (!deleted.includes(testId)) {
+                deleted.push(testId);
+                localStorage.setItem('deletedTestIds', JSON.stringify(deleted));
+            }
+        }
+        
+        // Remove deleted tests from testScenariosData
+        function filterDeletedTests() {
+            const deletedIds = getDeletedTestIds();
+            if (deletedIds.length === 0) return;
+            
+            Object.keys(testScenariosData).forEach(moduleName => {
+                testScenariosData[moduleName] = testScenariosData[moduleName].filter(
+                    test => !deletedIds.includes(test.id)
+                );
+            });
+            console.log(`Filtered out ${deletedIds.length} deleted test(s)`);
+        }
+        
         async function loadSavedTests() {
             console.log('loadSavedTests: Starting...');
             try {
@@ -2629,9 +3110,19 @@
                                     <div class="test-case-actions" onclick="event.stopPropagation()">
                                         <button class="icon-btn edit" onclick="editTestCaseName('${testCaseId}')" title="Edit test case name" style="margin-right: 8px; font-size: 14px; padding: 4px 8px; background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); color: white; border: none; border-radius: 6px; cursor: pointer;">✏️</button>
                                         ${!isEditing ? 
-                                            `<button class="btn-run-test-case" onclick="runSingleTestCase('${testCaseId}', '${testType}', '${moduleName}', '${testCase.name}')">▶️ Run</button>
-                                             <button class="btn-update" onclick="editTestCase('${testCaseId}')">Update</button>
-                                             <button class="btn-delete-test-case" onclick="deleteTestCase('${testCaseId}')">Delete</button>` :
+                                            `<button class="btn-run" onclick="runTestCase(${moduleIndex}, ${tcIndex})">
+                                            <span class="btn-icon">▶</span>Run
+                                         </button>
+                                         <button class="btn-run-test-case" onclick="runSingleTestCase('${testCaseId}', '${testType}', '${moduleName}', '${testCase.name}')">▶️ Run</button>
+                                             <button class="btn-update" onclick="editTestCase('${testCaseId}')">
+                                            <span class="btn-icon">✏</span>Update
+                                         </button>
+                                             <button class="btn-delete-test-case" onclick="deleteTestCase('${testCaseId}')">
+                                            <span class="btn-icon">🗑</span>Delete
+                                         </button>
+                                         <button class="btn-capture-screenshots" id="captureBtn${testCaseId}" onclick="captureScreenshotsForTest('${testCaseId}', this)">
+                                            <span class="btn-icon">📸</span>Capture Screenshots
+                                         </button>` :
                                             `<button class="btn-save" onclick="saveTestCase('${testCaseId}')">Save</button>
                                              <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>`
                                         }
@@ -2645,10 +3136,15 @@
                                 <div class="test-step-item" id="step${testCaseId}-${stepIndex}">
                                     <div class="step-number">${stepIndex + 1}</div>
                                     <div class="step-text" id="stepText${testCaseId}-${stepIndex}">${step}</div>
+                                ${!isEditing ? `
+                                    <button class="btn-view-details" onclick="viewAssertion('${testCaseId}', ${stepIndex}); event.stopPropagation();">
+                                        🔍 View Details
+                                    </button>
+                                ` : ''}
                                     <div class="step-actions">
                                         <button class="icon-btn run" onclick="runSingleStep('${testCaseId}', ${stepIndex}, '${testType}', '${moduleName}', '${testCase.name}')" title="Run this step">▶️</button>
-                                        <button class="icon-btn edit" onclick="editStep('${testCaseId}', ${stepIndex})" title="Edit">✏️</button>
-                                        <button class="icon-btn delete" onclick="deleteStep('${testCaseId}', ${stepIndex})" title="Delete">🗑️</button>
+                                        <button class="icon-btn edit" onclick="editStep('${testCaseId}', ${stepIndex}); event.stopPropagation();" title="Edit">✏️</button>
+                                        <button class="icon-btn delete" onclick="deleteStep('${testCaseId}', ${stepIndex}); event.stopPropagation();" title="Delete">🗑️</button>
                                     </div>
                                 </div>
                             `;
@@ -3342,13 +3838,53 @@
         }
 
         // Save test case changes
-        function saveTestCase(testCaseId) {
-            // Commit: remove backup and exit edit mode
-            if (editBackups[testCaseId]) delete editBackups[testCaseId];
-            currentEditingTestCase = null;
-            saveToLocalStorage();
+        async function saveTestCase(testCaseId) {
+            const modules = Object.keys(testScenariosData);
+            const moduleName = modules[moduleIndex];
+            const testCase = testScenariosData[moduleName][tcIndex];
+            
+            console.log('💾 Saving test case:', {
+                id: testCase.id,
+                name: testCase.name,
+                stepsCount: testCase.steps.length,
+                steps: testCase.steps
+            });
+            
+            try {
+                showToast('💾 Saving test case updates...');
+                
+                // Call backend API to persist the changes
+                const response = await fetch('http://localhost:3456/api/update-testcase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        moduleName: moduleName,
+                        testCaseId: testCase.id,
+                        testCaseName: testCase.name,
+                        description: testCase.description,
+                        steps: testCase.steps
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('💾 Save result:', result);
+                
+                if (result.success) {
+                    // Commit: remove backup and exit edit mode
+                            if (editBackups[testCaseId]) delete editBackups[testCaseId];
+                    currentEditingTestCase = null;
+                    saveToLocalStorage();
             renderTestScenarios();
-            showToast('✅ Test case saved successfully!');
+                    showToast('✅ Test case saved permanently!');
+                } else {
+                    showToast(`❌ Failed to save: ${result.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error saving test case:', error);
+                showToast(`❌ Error saving test case: ${error.message}`);
+            }
         }
 
         // Cancel edit mode
@@ -3381,6 +3917,16 @@
             const testCase = testScenariosData[testType][moduleName][tcIdx];
             
             testCase.steps.push('New test step - click edit to modify');
+            
+            // Generate assertion data for the new step
+            const newStepIndex = testCase.steps.length - 1;
+            const key = `${moduleIndex}-${tcIndex}-${newStepIndex}`;
+            assertionData[key] = generateStepAssertionData(
+                testCase.steps[newStepIndex], 
+                newStepIndex + 1, 
+                testCase.name
+            );
+            
             saveToLocalStorage();
             renderTestScenarios();
             
@@ -3405,7 +3951,7 @@
                 stepsContainer.classList.add('expanded');
             }
             
-            showToast('✅ New step added');
+            showToast('✅ New step added with assertion data');
         }
 
         // Edit a test step (inline editing)
@@ -3432,9 +3978,20 @@
             const modules = Object.keys(testScenariosData[testType]);
             const moduleName = modules[modIdx];
             
+            const testCase = testScenariosData[testType][moduleName][tcIdx];
+            
             // Strip any leading numbering like "1. " from saved step text
             const cleaned = newText.replace(/^\s*\d+\.\s*/, '');
-            testScenariosData[testType][moduleName][tcIdx].steps[stepIndex] = cleaned;
+            testCase.steps[stepIndex] = cleaned;
+            
+            // Regenerate assertion data for the updated step
+            const key = `${testTypeIdx}-${modIdx}-${tcIdx}-${stepIndex}`;
+            assertionData[key] = generateStepAssertionData(
+                cleaned,
+                stepIndex + 1,
+                testCase.name
+            );
+            console.log(`✅ Regenerated assertion data for updated step: ${cleaned.substring(0, 50)}...`);
             
             saveToLocalStorage();
             renderTestScenarios();
@@ -3444,7 +4001,7 @@
             const stepsContainer = document.getElementById(`steps${testCaseId}`);
             stepsContainer.classList.add('expanded');
             
-            showToast('✅ Step updated');
+            showToast('✅ Step and assertion data updated');
         }
 
         // Delete a test step
@@ -3458,7 +4015,24 @@
             const testType = testTypes[testTypeIdx];
             const modules = Object.keys(testScenariosData[testType]);
             const moduleName = modules[modIdx];
-            testScenariosData[testType][moduleName][tcIdx].steps.splice(stepIndex, 1);
+            const testCase = testScenariosData[testType][moduleName][tcIdx];
+            testCase.steps.splice(stepIndex, 1);
+            
+            // Remove assertion data for deleted step and reindex remaining steps
+            const baseKey = `${moduleIndex}-${tcIndex}`;
+            for (let i = stepIndex; i < testCase.steps.length + 1; i++) {
+                const currentKey = `${baseKey}-${i}`;
+                const nextKey = `${baseKey}-${i + 1}`;
+                
+                if (i === stepIndex) {
+                    // Delete the removed step's assertion data
+                    delete assertionData[currentKey];
+                } else if (assertionData[nextKey]) {
+                    // Shift assertion data for subsequent steps
+                    assertionData[currentKey] = assertionData[nextKey];
+                    delete assertionData[nextKey];
+                }
+            }
             
             saveToLocalStorage();
             renderTestScenarios();
@@ -3472,7 +4046,7 @@
         }
 
         // Delete entire test case
-        function deleteTestCase(testCaseId) {
+        async function deleteTestCase(testCaseId) {
             const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
             const testTypes = Object.keys(testScenariosData);
             const testType = testTypes[testTypeIdx];
@@ -3484,18 +4058,628 @@
                 return;
             }
             
-            // Remove the test case from the array
-            testScenariosData[testType][moduleName].splice(tcIdx, 1);
+            try {
+                // Show loading toast
+                showToast('🗑️ Deleting test case...');
+                
+                // Call backend API to delete from spec file
+                const response = await fetch('/api/delete-testcase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        moduleName: moduleName,
+                        testCaseId: testCase.id,
+                        testCaseName: testCase.name
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Mark test as deleted in localStorage
+                    markTestAsDeleted(testCase.id);
+                    
+                    // Remove the test case from the in-memory array
+                    testScenariosData[testType][moduleName].splice(tcIdx, 1);
+                    
+                    // Clear edit mode if this test case was being edited
+                    if (currentEditingTestCase === testCaseId) {
+                        currentEditingTestCase = null;
+                    }
+                    
+                    saveToLocalStorage();
+            renderTestScenarios();
+                    showToast(`✅ Test case "${testCase.name}" deleted permanently`);
+                } else {
+                    showToast(`❌ Failed to delete test case: ${result.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error deleting test case:', error);
+                showToast(`❌ Error deleting test case: ${error.message}`);
+            }
+        }
+
+        // Global object to track selected test cases for batch execution
+        // Run a single test case
+        function runTestCase(moduleIndex, tcIndex) {
+            const modules = Object.keys(testScenariosData);
+            const moduleName = modules[moduleIndex];
+            const testCase = testScenariosData[moduleName][tcIndex];
             
-            // Clear edit mode if this test case was being edited
-            if (currentEditingTestCase === testCaseId) {
-                currentEditingTestCase = null;
+            if (!testCase) {
+                showToast('❌ Test case not found');
+                return;
             }
             
-            saveToLocalStorage();
-            renderTestScenarios();
-            showToast(`🗑️ Test case "${testCase.name}" deleted successfully`);
+            showToast(`▶️ Running test: ${testCase.name} (${testCase.id})`);
+            addBotMessage(`🏁 <b>Running Test:</b> ${testCase.name} (${testCase.id})\n\n<b>Description:</b> ${testCase.description}\n\n<b>Steps:</b>\n${testCase.steps.map((step, i) => `${i + 1}. ${step}`).join('\n')}\n\nTest execution initiated...`);
+            
+            // Call API to run specific test
+            const config = getTestConfiguration();
+            fetch('http://localhost:3456/api/run-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...config,
+                    moduleName: moduleName,
+                    testCaseId: testCase.id,
+                    testCaseName: testCase.name
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Test execution started:', data.message);
+                    showToast(`✅ Test "${testCase.name}" execution started`);
+                    addBotMessage(`✅ <b>Test Execution Started!</b>\n\nTest: ${testCase.name}\n\nCheck the terminal running dashboard-server.js to see test output.`);
+                } else {
+                    showToast(`❌ Failed to run test: ${data.error || 'Unknown error'}`);
+                    addBotMessage(`❌ <b>Test Execution Failed:</b> ${data.error || 'Unknown error'}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error running test:', error);
+                showToast(`❌ Error running test: ${error.message}`);
+                addBotMessage(`❌ <b>Error:</b> ${error.message}\n\nMake sure dashboard-server.js is running:\n<code>node dashboard-server.js</code>`);
+            });
         }
+
+        // Build a Playwright trace-style snapshot that matches the generated code
+        function generateSnapshotHtml(stepText, stepNumber, assertionType, expected, code) {
+            // Extract the assertion line(s) from the generated code
+            const codeLines = (code || '').split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            const actionLine  = codeLines.find(l => !l.startsWith('//')) || codeLines[0] || '';
+            const assertLines = codeLines.filter(l => l.includes('expect(') || l.startsWith('await expect'));
+            const commentLine = codeLines.find(l => l.startsWith('//')) || `// Step ${stepNumber}: ${stepText}`;
+
+            // Derive locator + matcher from the first expect() call
+            let locator = '', matcher = '', expectedVal = expected || '';
+            const expectMatch = assertLines[0] && assertLines[0].match(/expect\((.+?)\)\.(\w+)\(([^)]*)\)/);
+            if (expectMatch) {
+                locator     = expectMatch[1];
+                matcher     = expectMatch[2];
+                expectedVal = expectMatch[3].replace(/^['"`]|['"`]$/g, '') || expected || '—';
+            }
+
+            // Color-code by assertion type
+            const typeColors = {
+                'URL Assertion':        ['#3b82f6','#dbeafe','#1d4ed8'],
+                'Element Visibility':   ['#8b5cf6','#ede9fe','#5b21b6'],
+                'Input Value Assertion':['#10b981','#dcfce7','#065f46'],
+                'Selection Assertion':  ['#f59e0b','#fef3c7','#92400e'],
+                'Custom Assertion':     ['#06b6d4','#cffafe','#0e7490'],
+                'File Upload Assertion':['#ec4899','#fce7f3','#9d174d'],
+                'Step Completion':      ['#6366f1','#ede9fe','#3730a3'],
+            };
+            const [accentColor, bgColor, textColor] = typeColors[assertionType] || ['#6366f1','#ede9fe','#3730a3'];
+
+            // Build assert rows for each expect() line
+            const assertRows = assertLines.map(line => {
+                const m = line.match(/expect\((.+?)\)\.(\w+)\(([^)]*)\)/);
+                if (!m) return `<div style="color:#86efac;font-size:12px;font-family:monospace;padding:2px 0;">${escapeHtml(line)}</div>`;
+                const loc = m[1], fn = m[2], arg = m[3].replace(/^['"`]|['"`]$/g,'') || '—';
+                return `
+                    <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #334155;">
+                        <span style="color:#4ade80;font-size:11px;margin-top:2px;flex-shrink:0;">✓</span>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-family:monospace;font-size:12px;color:#e2e8f0;word-break:break-all;">
+                                <span style="color:#7dd3fc;">expect</span>(<span style="color:#fcd34d;">${escapeHtml(loc)}</span>).<span style="color:#86efac;">${fn}</span>(<span style="color:#fca5a5;">${escapeHtml(arg)}</span>)
+                            </div>
+                            <div style="font-size:11px;color:#94a3b8;margin-top:3px;">
+                                Expected&nbsp;&nbsp;<span style="color:#86efac;">${escapeHtml(arg || '—')}</span>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            return `
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;">
+
+                    <!-- Header: step info -->
+                    <div style="background:${bgColor};padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid ${accentColor}33;">
+                        <div style="background:${accentColor};color:white;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;white-space:nowrap;">
+                            STEP ${stepNumber}
+                        </div>
+                        <div style="font-size:13px;font-weight:600;color:${textColor};flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(stepText)}</div>
+                        <div style="background:#10b981;color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700;white-space:nowrap;">✓ PASS</div>
+                    </div>
+
+                    <!-- Action row: the recorded line -->
+                    <div style="background:#f8fafc;padding:10px 14px;border-bottom:1px solid #e2e8f0;">
+                        <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Recorded Action</div>
+                        <div style="background:#1e293b;border-radius:6px;padding:10px 12px;font-family:monospace;font-size:12px;color:#e2e8f0;word-break:break-all;">
+                            <span style="color:#64748b;">${escapeHtml(commentLine)}</span>
+                            ${actionLine ? `<br><span style="color:#93c5fd;">await </span><span style="color:#e2e8f0;">${escapeHtml(actionLine.replace(/^await\s*/,''))}</span>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Assertions section (matches the Code tab exactly) -->
+                    <div style="background:#0f172a;padding:12px 14px;">
+                        <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Assertion Output</div>
+                        ${assertRows || `<div style="color:#64748b;font-size:12px;font-family:monospace;">// No explicit assertion for this step</div>`}
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="background:#f1f5f9;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#64748b;">
+                        <span>${assertionType}</span>
+                        <span style="color:#10b981;font-weight:600;">Captured ${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </div>`;
+        }
+
+        // Generate assertion data for a single step from its text description
+        function generateStepAssertionData(stepText, stepNumber, testCaseName) {
+            const lower = stepText.toLowerCase();
+            let assertionType, expected, actual, code;
+
+            // 1. Launch/Open application
+            if (/^launch|^open\s+(?!dashboard)/i.test(stepText)) {
+                assertionType = 'Application Launch';
+                expected = 'Application opened and home page loaded';
+                actual = 'Page is ready and interactive';
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.goto('https://www.advantageonlineshopping.com/');\nawait expect(page).toHaveTitle(/Advantage/i);\nawait expect(page.locator('body')).toBeVisible();`;
+
+            // 2. Navigate to specific page/section
+            } else if (/navigate|go to|open\s+(?:to\s+)?(?:the\s+)?/i.test(lower)) {
+                let pageMatch = stepText.match(/navigate\s+to\s+(.*?)(?:\s+\(|$)/i) || 
+                               stepText.match(/go\s+to\s+(.*?)(?:\s+\(|$)/i) ||
+                               stepText.match(/open\s+(.*?)(?:\s+\(|$)/i);
+                const pageName = pageMatch ? pageMatch[1].trim() : 'page';
+                const isNewTab = /new\s+tab|new\s+window/i.test(stepText);
+                
+                assertionType = 'Navigation';
+                expected = isNewTab ? `${pageName} opened in new tab` : `Navigated to ${pageName}`;
+                actual = 'Target page loaded successfully';
+                code = `// Step ${stepNumber}: ${stepText}\n${isNewTab ? '// New tab handling\nconst [newPage] = await Promise.all([\n  context.waitForEvent(\'page\'),\n  page.click(\'selector-for-link\')\n]);\nawait newPage.waitForLoadState();' : 'await page.click(\'text=' + pageName + '\');\nawait page.waitForLoadState();'}\nawait expect(page).toHaveURL(/.*/);\nawait expect(page.locator('body')).toBeVisible();`;
+
+            // 3. Click button/link/element
+            } else if (/^click/i.test(stepText)) {
+                let elementMatch = stepText.match(/click\s+(?:on\s+)?['"](.+?)['"]|click\s+(?:on\s+)?(?:the\s+)?(.+?)(?:\s+button|\s+link|\s+icon|$)/i);
+                const element = elementMatch ? (elementMatch[1] || elementMatch[2]).trim() : 'element';
+                
+                assertionType = 'Button/Link Click';
+                expected = `Clicked on "${element}"`;
+                actual = `"${element}" is clickable and action performed`;
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.click('text=${element}');\n// OR: await page.getByRole('button', { name: '${element}' }).click();\nawait page.waitForLoadState('networkidle');`;
+
+            // 4. Enter/Fill input fields  
+            } else if (/enter|type|fill|input/i.test(lower)) {
+                const valueMatch = stepText.match(/['"]([^'"]+)['"]/);
+                const value = valueMatch ? valueMatch[1] : 'value';
+                const fieldMatch = stepText.match(/(?:in(?:to)?|on|for)\s+(?:the\s+)?(.+?)(?:\s+field|\s+box|$)/i);
+                const field = fieldMatch ? fieldMatch[1].trim() : 'field';
+                
+                assertionType = 'Input Field';
+                expected = `Entered "${value}" in ${field}`;
+                actual = 'Field populated with correct value';
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.fill('[placeholder*="${field}" i], [name*="${field}" i]', '${value}');\n// OR: await page.getByLabel('${field}').fill('${value}');\nawait expect(page.locator('[name*="${field}" i]')).toHaveValue('${value}');`;
+
+            // 5. Select from dropdown
+            } else if (/select|choose/i.test(lower) && !(/account/i.test(lower))) {
+                const valueMatch = stepText.match(/['"]([^'"]+)['"]/);
+                const value = valueMatch ? valueMatch[1] : 'option';
+                
+                assertionType = 'Dropdown Selection';
+                expected = `Selected "${value}" from dropdown`;
+                actual = 'Option selected successfully';
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.selectOption('select', '${value}');\n// OR: await page.locator('select').selectOption({ label: '${value}' });\nawait expect(page.locator('select')).toHaveValue('${value}');`;
+
+            // 6. Verify/Validate/Check assertions
+            } else if (/verify|validate|check\s+(?:that|if)|assert|confirm/i.test(lower)) {
+                const contentMatch = stepText.match(/(?:verify|validate|check|assert|confirm)\s+(?:that\s+)?(.+?)(?:\s+is\s+|\s+contains?\s+|$)/i);
+                const condition = contentMatch ? contentMatch[1].trim() : stepText;
+                
+                // Special cases
+                if (/success|display|appear|visible/i.test(lower)) {
+                    assertionType = 'Element Visibility';
+                    expected = `${condition} is displayed`;
+                    actual = 'Element is visible on page';
+                    code = `// Step ${stepNumber}: ${stepText}\nawait expect(page.locator('[class*="success" i]')).toBeVisible();\n// OR verify specific text:\nawait expect(page.locator('body')).toContainText('success', { ignoreCase: true });`;
+                } else if (/pdf|page|file/i.test(lower)) {
+                    const numberMatch = stepText.match(/(\d+)/);
+                    const number = numberMatch ? numberMatch[1] : 'N';
+                    assertionType = 'PDF/File Verification';
+                    expected = condition;
+                    actual = 'PDF validation successful';
+                    code = `// Step ${stepNumber}: ${stepText}\n// PDF verification requires custom logic\nconst pdfPath = './downloads/file.pdf';\nconst pdfContent = fs.readFileSync(pdfPath);\n// Assert: expect(pdfContent).toBeDefined();`;
+                } else {
+                    assertionType = 'Custom Assertion';
+                    expected = condition;
+                    actual = 'Condition verified';
+                    code = `// Step ${stepNumber}: ${stepText}\nawait expect(page.locator('selector')).toBeVisible();\n// Replace 'selector' with actual element`;
+                }
+
+            // 7. Download operations
+            } else if (/download/i.test(lower)) {
+                const fileMatch = stepText.match(/download\s+(.+?)(?:\s+file|$)/i);
+                const fileName = fileMatch ? fileMatch[1].trim() : 'file';
+                
+                assertionType = 'File Download';
+                expected = `Downloaded ${fileName}`;
+                actual = 'File downloaded successfully';
+                code = `// Step ${stepNumber}: ${stepText}\nconst [download] = await Promise.all([\n  page.waitForEvent('download'),\n  page.click('text=${fileName}')\n]);\nconst path = await download.path();\nexpect(path).toBeTruthy();\nawait download.saveAs('./downloads/' + download.suggestedFilename());`;
+
+            // 8. Close tab/window
+            } else if (/close/i.test(lower) && /tab|window/i.test(lower)) {
+                assertionType = 'Tab/Window Close';
+                expected = 'Tab/window closed';
+                actual = 'Tab closed successfully';
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.close();\n// Then switch focus to remaining page if needed`;
+
+            // 9. Logout
+            } else if (/logout|sign\s*out|log\s*out/i.test(lower)) {
+                assertionType = 'User Logout';
+                expected = 'User logged out successfully';
+                actual = 'Logged out and redirected to home page';
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.click('[id*="logout" i], text=Logout');\nawait expect(page).toHaveURL(/.*/);\nawait expect(page.locator('text=Sign in')).toBeVisible();`;
+
+            // 10. Login operations
+            } else if (/login|sign\s*in|log\s*in/i.test(lower)) {
+                assertionType = 'User Login';
+                expected = 'User logged in successfully';
+                actual = 'Login successful and redirected';
+                code = `// Step ${stepNumber}: ${stepText}\n// Enter credentials and click login\nawait page.fill('[name="username"]', 'testuser');\nawait page.fill('[name="password"]', 'password123');\nawait page.click('button[type="submit"]');\nawait expect(page.locator('text=Welcome')).toBeVisible();`;
+
+            // 11. Compare/Upload files
+            } else if (/compare/i.test(lower) && /pdf|file|image|baseline/i.test(lower)) {
+                assertionType = 'File Comparison';
+                expected = stepText;
+                actual = 'Files compared successfully';
+                code = `// Step ${stepNumber}: ${stepText}\n// Custom file comparison logic required\nconst actual = fs.readFileSync('./actual.pdf');\nconst expected = fs.readFileSync('./expected.pdf');\n// Use comparison library`;
+
+            } else if (/upload|attach/i.test(lower)) {
+                assertionType = 'File Upload';
+                expected = 'File uploaded successfully';
+                actual = 'File attached to upload field';
+                code = `// Step ${stepNumber}: ${stepText}\nawait page.setInputFiles('input[type="file"]', './files/document.pdf');\nawait expect(page.locator('input[type="file"]')).toHaveValue(/.*document.*/);`;
+
+            // 12. Default - generic step
+            } else {
+                assertionType = 'Step Execution';
+                expected = stepText;
+                actual = 'Step completed';
+                code = `// Step ${stepNumber}: ${stepText}\n// TODO: Add specific assertions for this step\nawait expect(page.locator('body')).toBeVisible();`;
+            }
+
+            return {
+                testCase: testCaseName,
+                stepNumber: stepNumber,
+                stepDescription: stepText,
+                assertionType: assertionType,
+                expected: expected,
+                actual: actual,
+                status: 'Generated',
+                timestamp: new Date().toLocaleString(),
+                screenshot: null,
+                code: code,
+                snapshotHtml: generateSnapshotHtml(stepText, stepNumber, assertionType, expected, code)
+            };
+        }
+
+        // Capture screenshots for a specific test case.
+        // Calls /api/capture-screenshots and WAITS for the backend to finish running the
+        // Playwright test before returning — the response contains screenshot URLs directly.
+        async function captureScreenshotsForTest(testCaseId, btn) {
+            const [testTypeIdx, modIdx, tcIdx] = testCaseId.split('-').map(Number);
+            const testTypes = Object.keys(testScenariosData);
+            const testType = testTypes[testTypeIdx];
+            const modules = Object.keys(testScenariosData[testType] || {});
+            const moduleName = modules[modIdx];
+            const testCase = testScenariosData[testType]?.[moduleName]?.[tcIdx];
+
+            if (!testCase) { showToast('❌ Test case not found'); return; }
+
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn-icon">⏳</span>Capturing...'; }
+
+            // Generate assertion text + code immediately so View Details buttons appear
+            testCase.steps.forEach((step, stepIndex) => {
+                const key = `${testCaseId}-${stepIndex}`;
+                assertionData[key] = generateStepAssertionData(step, stepIndex + 1, testCase.name);
+            });
+            renderTestScenarios();
+            showToast(`📸 Running Playwright test — please wait (may take up to 2 min)...`);
+
+            const BASE = 'http://localhost:3456';
+            let realScreenshotsCaptured = 0;
+
+            try {
+                // Single request — backend waits for test to complete, returns screenshot URLs
+                const resp = await fetch(`${BASE}/api/capture-screenshots`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    // 3-minute timeout to wait for Playwright test to complete
+                    signal: AbortSignal.timeout ? AbortSignal.timeout(180000) : undefined,
+                    body: JSON.stringify({
+                        moduleName:   moduleName,
+                        testCaseId:   testCase.id,
+                        testCaseName: testCase.name,
+                        steps:        testCase.steps
+                    })
+                });
+
+                if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
+                const data = await resp.json();
+                const shots = data.screenshots || [];
+
+                // Track which screenshot URLs have already been assigned to avoid duplicates
+                const usedScreenshots = new Set();
+
+                shots.forEach((s) => {
+                    const si  = s.stepIndex !== undefined ? s.stepIndex : 0;
+                    const key = `${testCaseId}-${si}`;
+                    
+                    // Extract base URL without cache-buster to check for duplicates
+                    const baseUrl = s.url.split('?')[0];
+                    
+                    if (assertionData[key] && !usedScreenshots.has(baseUrl)) {
+                        // Add cache-buster so browser fetches fresh image
+                        assertionData[key].screenshot = `${BASE}${s.url}?t=${Date.now()}`;
+                        assertionData[key].status     = 'Captured';
+                        usedScreenshots.add(baseUrl);
+                        realScreenshotsCaptured++;
+                        console.log(`✓ Screenshot matched: Step ${si + 1} - ${assertionData[key].stepDescription.substring(0, 40)}...`);
+                    } else if (assertionData[key] && usedScreenshots.has(baseUrl)) {
+                        console.log(`⏭️  Skipping duplicate screenshot for step ${si + 1}: ${baseUrl.split('/').pop()}`);
+                    } else {
+                        console.warn(`⚠️ No assertion data found for step ${si} (key: ${key})`);
+                    }
+                });
+
+            } catch (err) {
+                console.info('Screenshot backend error:', err.message);
+                showToast('⚠️ Backend error — make sure dashboard-server.js is running');
+            }
+
+            if (btn) { btn.disabled = false; btn.innerHTML = '<span class="btn-icon">📸</span>Capture Screenshots'; }
+            renderTestScenarios();
+
+            // If the assertion modal is currently open for one of these steps, refresh it live
+            if (currentAssertion && realScreenshotsCaptured > 0) {
+                const openKey = Object.keys(assertionData).find(k => assertionData[k] === currentAssertion);
+                if (openKey) {
+                    // Re-trigger viewAssertion for the currently open step
+                    const parts = openKey.split('-');
+                    if (parts[0] === 'api' && parts.length === 4) {
+                        viewAssertion(Number(parts[1]), Number(parts[2]), Number(parts[3]), true);
+                    } else if (parts.length === 4) {
+                        viewAssertion(`${parts[0]}-${parts[1]}-${parts[2]}`, Number(parts[3]));
+                    }
+                }
+            }
+
+            if (realScreenshotsCaptured > 0) {
+                showToast(`✅ ${realScreenshotsCaptured} screenshot(s) captured for "${testCase.name}"`);
+                addBotMessage(`✅ <b>Screenshots Captured!</b>\n\nLoaded <b>${realScreenshotsCaptured}</b> real Playwright screenshot(s) for: <b>${testCase.name}</b>\n\nClick <b>🔍 View Details</b> on each step to view the screenshot.`);
+            } else {
+                showToast(`ℹ️ Assertion data ready — no screenshots returned from backend`);
+                addBotMessage(`⚠️ <b>No screenshots found.</b>\n\nThe test ran but screenshots were not saved.\n\n<b>Check:</b>\n1. <code>node dashboard-server.js</code> is running\n2. The test spec file exists and runs successfully`);
+            }
+        }
+
+        // View assertion details for a specific step
+        // Test Scenarios calls pass a testCaseId string ("${testTypeIdx}-${modIdx}-${tcIdx}"); API Tests
+        // calls pass numeric (moduleIndex, tcIndex) since apiTestsData has no Test Type level.
+        function viewAssertion(idOrModuleIndex, tcIndexOrStepIndex, stepIndexArg, isApiTest = false) {
+            const isTestCaseIdCall = typeof idOrModuleIndex === 'string';
+            const stepIndex = isTestCaseIdCall ? tcIndexOrStepIndex : stepIndexArg;
+            const key = isApiTest
+                ? `api-${idOrModuleIndex}-${tcIndexOrStepIndex}-${stepIndexArg}`
+                : (isTestCaseIdCall ? `${idOrModuleIndex}-${stepIndex}` : `${idOrModuleIndex}-${tcIndexOrStepIndex}-${stepIndexArg}`);
+            let assertion = assertionData[key];
+            
+            // If assertion doesn't exist, generate it dynamically from the test step
+            if (!assertion) {
+                let testCase;
+                if (isApiTest) {
+                    const modules = Object.keys(apiTestsData);
+                    const moduleName = modules[idOrModuleIndex];
+                    testCase = apiTestsData[moduleName]?.[tcIndexOrStepIndex];
+                } else if (isTestCaseIdCall) {
+                    const [testTypeIdx, modIdx, tcIdx] = idOrModuleIndex.split('-').map(Number);
+                    const testTypes = Object.keys(testScenariosData);
+                    const testType = testTypes[testTypeIdx];
+                    const modules = Object.keys(testScenariosData[testType] || {});
+                    const moduleName = modules[modIdx];
+                    testCase = testScenariosData[testType]?.[moduleName]?.[tcIdx];
+                } else {
+                    const modules = Object.keys(testScenariosData);
+                    const moduleName = modules[idOrModuleIndex];
+                    testCase = testScenariosData[moduleName]?.[tcIndexOrStepIndex];
+                }
+                
+                if (!testCase || !testCase.steps[stepIndex]) {
+                    showToast('❌ Test step not found');
+                    return;
+                }
+                
+                const stepText = testCase.steps[stepIndex];
+                const testCaseName = testCase.name || testCase.id;
+                
+                // Generate assertion data on the fly
+                assertion = generateStepAssertionData(stepText, stepIndex + 1, testCaseName);
+                assertionData[key] = assertion; // Cache it for future use
+                
+                console.log(`Generated assertion data for step ${stepIndex + 1}: ${stepText.substring(0, 50)}...`);
+            }
+            
+            currentAssertion = assertion;
+            
+            // Populate modal with assertion data
+            document.getElementById('assertionStatusBadge').textContent = assertion.status;
+            document.getElementById('assertionStatusBadge').className = `assertion-status-badge ${assertion.status.toLowerCase()}`;
+            
+            // Text tab
+            document.getElementById('assertionTextTestCase').textContent = assertion.testCase;
+            document.getElementById('assertionTextStepNumber').textContent = assertion.stepNumber;
+            document.getElementById('assertionTextStepDesc').textContent = assertion.stepDescription;
+            document.getElementById('assertionTextType').textContent = assertion.assertionType;
+            document.getElementById('assertionTextExpected').textContent = assertion.expected;
+            document.getElementById('assertionTextActual').textContent = assertion.actual;
+            document.getElementById('assertionTextStatus').textContent = assertion.status;
+            document.getElementById('assertionTextTimestamp').textContent = assertion.timestamp;
+            
+            // Snapshot tab
+            const snapshotContainer = document.getElementById('assertionSnapshotImageContainer');
+            document.getElementById('assertionSnapshotStep').textContent = assertion.stepDescription;
+
+            // Validate screenshot exists and is for the correct step
+            const hasValidScreenshot = assertion.screenshot && 
+                                      assertion.screenshot !== 'null' && 
+                                      assertion.screenshot !== '' &&
+                                      assertion.status === 'Captured';
+
+            if (hasValidScreenshot) {
+                // Real screenshot from Playwright trace — display it
+                const src = assertion.screenshot;
+                snapshotContainer.innerHTML = `
+                    <div style="border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 4px 16px rgba(0,0,0,0.10);">
+                        <div style="background:#1e293b;padding:8px 12px;display:flex;align-items:center;gap:6px;">
+                            <div style="width:10px;height:10px;border-radius:50%;background:#ef4444;"></div>
+                            <div style="width:10px;height:10px;border-radius:50%;background:#f59e0b;"></div>
+                            <div style="width:10px;height:10px;border-radius:50%;background:#10b981;"></div>
+                            <div style="flex:1;background:#0f172a;border-radius:4px;padding:3px 10px;font-size:11px;color:#94a3b8;margin:0 8px;font-family:monospace;">
+                                ${assertion.stepDescription.substring(0, 50)}${assertion.stepDescription.length > 50 ? '...' : ''}
+                            </div>
+                            <span style="background:#10b981;color:white;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;">✓ CAPTURED</span>
+                        </div>
+                        <img src="${src}" alt="Screenshot for: ${assertion.stepDescription}"
+                             style="width:100%;display:block;max-height:400px;object-fit:contain;background:#f8fafc;"
+                             onerror="this.parentElement.innerHTML='<div style=\\'padding:40px 20px;text-align:center;\\'><div style=\\'font-size:48px;margin-bottom:12px;\\'>⚠️</div><div style=\\'color:#ef4444;font-weight:600;margin-bottom:8px;\\'>Screenshot not found</div><div style=\\'font-size:13px;color:#64748b;\\'>The screenshot file may have been moved or deleted.<br>Click <strong>📸 Capture Screenshots</strong> to re-capture.</div></div>'">
+                        <div style="background:#f8fafc;padding:8px 12px;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#64748b;">
+                            <span>📊 ${assertion.assertionType}</span>
+                            <span style="color:#10b981;font-weight:600;">🕐 ${assertion.timestamp}</span>
+                        </div>
+                    </div>`;
+            } else {
+                // No real screenshot yet — show clear placeholder
+                snapshotContainer.innerHTML = `
+                    <div class="assertion-snapshot-placeholder" style="padding:40px 20px;text-align:center;color:#64748b;">
+                        <div style="font-size:48px;margin-bottom:12px;">📸</div>
+                        <div style="font-size:15px;font-weight:600;color:#374151;margin-bottom:8px;">No screenshot captured yet</div>
+                        <div style="font-size:13px;">Click <strong>📸 Capture Screenshots</strong> on the test case<br>to take real browser screenshots from Playwright</div>
+                    </div>
+                `;
+            }
+            
+            // Code tab
+            document.getElementById('assertionCodeContent').innerHTML = `<code>${escapeHtml(assertion.code)}</code>`;
+            
+            // Show modal
+            document.getElementById('assertionModal').classList.add('show');
+            
+            // Reset to first tab
+            switchAssertionTab('snapshot');
+        }
+
+        // Close assertion modal
+        function closeAssertionModal() {
+            document.getElementById('assertionModal').classList.remove('show');
+            currentAssertion = null;
+        }
+
+        // Switch between assertion tabs
+        function switchAssertionTab(tabName) {
+            // Remove active class from all tabs and content
+            document.querySelectorAll('.assertion-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.assertion-tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab and content
+            document.querySelector(`.assertion-tab[onclick*="${tabName}"]`).classList.add('active');
+            document.getElementById(`assertionTab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.add('active');
+        }
+
+        // Download assertion data
+        function downloadAssertion() {
+            if (!currentAssertion) {
+                showToast('❌ No assertion data to download');
+                return;
+            }
+            
+            const data = {
+                testCase: currentAssertion.testCase,
+                stepNumber: currentAssertion.stepNumber,
+                stepDescription: currentAssertion.stepDescription,
+                assertionType: currentAssertion.assertionType,
+                expected: currentAssertion.expected,
+                actual: currentAssertion.actual,
+                status: currentAssertion.status,
+                timestamp: currentAssertion.timestamp,
+                code: currentAssertion.code
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `assertion-${currentAssertion.testCase}-step${currentAssertion.stepNumber}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('✅ Assertion data downloaded');
+        }
+
+        // Copy assertion code to clipboard
+        function copyAssertionCode() {
+            if (!currentAssertion) {
+                showToast('❌ No assertion code to copy');
+                return;
+            }
+            
+            navigator.clipboard.writeText(currentAssertion.code)
+                .then(() => {
+                    showToast('✅ Assertion code copied to clipboard');
+                })
+                .catch(err => {
+                    console.error('Failed to copy:', err);
+                    showToast('❌ Failed to copy code');
+                });
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            const assertionModal = document.getElementById('assertionModal');
+            if (event.target === assertionModal) {
+                closeAssertionModal();
+            }
+        });
 
         // Render API Tests Tree (same structure as Test Scenarios)
         function renderApiTests() {
@@ -3548,10 +4732,15 @@
                             <div class="test-step-item" id="apiStep${moduleIndex}-${tcIndex}-${stepIndex}">
                                 <div class="step-number">${stepIndex + 1}</div>
                                 <div class="step-text" id="apiStepText${moduleIndex}-${tcIndex}-${stepIndex}">${step}</div>
+                                ${!isEditing ? `
+                                    <button class="btn-view-details" onclick="viewAssertion(${moduleIndex}, ${tcIndex}, ${stepIndex}, true); event.stopPropagation();">
+                                        🔍 View Details
+                                    </button>
+                                ` : ''}
                                 ${isEditing ? `
                                     <div class="step-actions">
-                                        <button class="icon-btn edit" onclick="editApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Edit">✏️</button>
-                                        <button class="icon-btn delete" onclick="deleteApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex})" title="Delete">🗑️</button>
+                                        <button class="icon-btn edit" onclick="editApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex}); event.stopPropagation();" title="Edit">✏️</button>
+                                        <button class="icon-btn delete" onclick="deleteApiStep(${moduleIndex}, ${tcIndex}, ${stepIndex}); event.stopPropagation();" title="Delete">🗑️</button>
                                     </div>
                                 ` : ''}
                             </div>
@@ -3617,10 +4806,42 @@
             showToast('ℹ️ Edit mode enabled. Add, edit, or delete steps.');
         }
 
-        function saveApiTestCase(moduleIndex, tcIndex) {
-            currentEditingApiTestCase = null;
-            renderApiTests();
-            showToast('✅ Test case saved successfully!');
+        async function saveApiTestCase(moduleIndex, tcIndex) {
+            const modules = Object.keys(apiTestsData);
+            const moduleName = modules[moduleIndex];
+            const testCase = apiTestsData[moduleName][tcIndex];
+            
+            try {
+                showToast('💾 Saving test case updates...');
+                
+                // Call backend API to persist the changes
+                const response = await fetch('http://localhost:3456/api/update-testcase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        moduleName: moduleName,
+                        testCaseId: testCase.id,
+                        testCaseName: testCase.name,
+                        description: testCase.description || testCase.endpoint,
+                        steps: testCase.steps
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentEditingApiTestCase = null;
+                    renderApiTests();
+                    showToast('✅ Test case saved permanently!');
+                } else {
+                    showToast(`❌ Failed to save: ${result.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error saving API test case:', error);
+                showToast(`❌ Error saving test case: ${error.message}`);
+            }
         }
 
         function cancelApiEdit() {
@@ -3710,12 +4931,98 @@
             showToast(`✅ Test case "${testCase.name}" deleted successfully`);
         }
 
+        // Restore previously captured screenshots into assertionData from the server's
+        // persisted metadata.json files — called on every page load so screenshots
+        // are always available without needing to re-capture.
+        async function loadSavedScreenshots() {
+            try {
+                const resp = await fetch('http://localhost:3456/api/all-screenshots');
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const metaList = data.metadata || [];
+                if (metaList.length === 0) return;
+
+                const BASE = 'http://localhost:3456';
+                let restored = 0;
+
+                for (const meta of metaList) {
+                    // Find the matching test type + module + test case index in testScenariosData
+                    const testTypes = Object.keys(testScenariosData);
+                    for (let testTypeIdx = 0; testTypeIdx < testTypes.length; testTypeIdx++) {
+                        const modules = testScenariosData[testTypes[testTypeIdx]] || {};
+                        const moduleNames = Object.keys(modules);
+                        for (let mi = 0; mi < moduleNames.length; mi++) {
+                            const tcList = modules[moduleNames[mi]];
+                            if (!Array.isArray(tcList)) continue;
+                            for (let ti = 0; ti < tcList.length; ti++) {
+                                const tc = tcList[ti];
+                                // Match by testCaseId or testCaseName
+                                if (tc.id !== meta.testCaseId && tc.name !== meta.testCaseName) continue;
+
+                                // Found — restore screenshot URLs and generate assertion data
+                                for (const s of (meta.screenshots || [])) {
+                                    const si = s.stepIndex;
+                                    const key = `${testTypeIdx}-${mi}-${ti}-${si}`;
+                                    if (!assertionData[key]) {
+                                        const stepText = tc.steps[si] || `Step ${si + 1}`;
+                                        assertionData[key] = generateStepAssertionData(stepText, si + 1, tc.name);
+                                    }
+                                    // Strip any stale cache-buster and add a fresh one
+                                    const cleanUrl = s.url.split('?')[0];
+                                    assertionData[key].screenshot = `${BASE}${cleanUrl}?t=${Date.now()}`;
+                                    assertionData[key].status = 'Captured';
+                                    restored++;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (restored > 0) {
+                    console.log(`Restored ${restored} screenshot(s) from saved metadata`);
+                    renderTestScenarios();
+                }
+            } catch (e) {
+                // Server may not be running yet — silently ignore
+                console.debug('loadSavedScreenshots:', e.message);
+            }
+        }
+
         // Initialize test scenarios on page load
         document.addEventListener('DOMContentLoaded', async function() {
             await loadSavedTests(); // Load saved tests first
+            await loadTestUpdates(); // Apply any saved updates
+            filterDeletedTests(); // Remove deleted tests
             renderTestScenarios();
             renderApiTests();
+            
+            // Optional: Comment out this line if you want to start fresh without loading old screenshots
+            // await loadSavedScreenshots(); // Restore any previously captured screenshots
+            
+            console.log('Dashboard initialized. Use "Capture Screenshots" button to capture fresh screenshots for test steps.');
         });
+
+        // Clear all screenshot data (useful if screenshots are showing for wrong steps)
+        function clearAllScreenshots() {
+            if (!confirm('Clear all screenshot data? You will need to re-capture screenshots for all test cases.')) {
+                return;
+            }
+            
+            Object.keys(assertionData).forEach(key => {
+                if (assertionData[key]) {
+                    assertionData[key].screenshot = null;
+                    assertionData[key].status = 'Generated';
+                }
+            });
+            
+            renderTestScenarios();
+            renderApiTests();
+            showToast('✅ All screenshots cleared. Use "Capture Screenshots" button to re-capture.');
+            
+            // Request backend to clear saved metadata
+            fetch('http://localhost:3456/api/clear-screenshots', { method: 'POST' })
+                .catch(e => console.log('Backend clear request failed:', e.message));
+        }
 
         // File selection handlers
         function handleProjectContextSelect(event) {
@@ -4330,7 +5637,7 @@
         }
 
         // Save test case to TESTING_FRAMEWORK_CONTEXT.md
-        async function saveTestCase(event) {
+        async function saveNewTestCase(event) {
             event.preventDefault();
             
             const moduleName = document.getElementById('moduleName').value.trim();
@@ -6046,7 +7353,7 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
                 <h2>💾 Save Test Case</h2>
                 <button class="close-btn" onclick="closeTestCaseModal()">&times;</button>
             </div>
-            <form onsubmit="saveTestCase(event)">
+            <form onsubmit="saveNewTestCase(event)">
                 <div class="form-group">
                     <label>� Module Name:</label>
                     <input type="text" id="moduleName" placeholder="e.g., Login Module" required>
@@ -6110,6 +7417,123 @@ test('${message.substring(0, 30)}...', async ({ page }) => {
             </form>
         </div>
     </div>
+
+    <!-- Assertion Viewing Modal -->
+    <div id="assertionModal" class="assertion-modal">
+        <div class="assertion-modal-content">
+            <div class="assertion-modal-header">
+                <h2>
+                    <span>🔍 Assertion Details</span>
+                    <span id="assertionStatusBadge" class="assertion-status-badge pass">PASS</span>
+                </h2>
+                <button class="close-btn" onclick="closeAssertionModal()">&times;</button>
+            </div>
+            
+            <div class="assertion-tabs">
+                <button class="assertion-tab active" onclick="switchAssertionTab('snapshot')">
+                    <span class="assertion-tab-icon">📸</span>
+                    Snapshot
+                </button>
+                <button class="assertion-tab" onclick="switchAssertionTab('text')">
+                    <span class="assertion-tab-icon">📝</span>
+                    Text
+                </button>
+                <button class="assertion-tab" onclick="switchAssertionTab('code')">
+                    <span class="assertion-tab-icon">💻</span>
+                    Code
+                </button>
+            </div>
+            
+            <!-- Snapshot Tab -->
+            <div id="assertionTabSnapshot" class="assertion-tab-content active">
+                <div class="assertion-snapshot-container">
+                    <div id="assertionSnapshotImageContainer">
+                        <div class="assertion-snapshot-placeholder">
+                            📸 No screenshot available<br>
+                            <small style="margin-top: 8px;">Capture screenshots using the "Capture Screenshots" button</small>
+                        </div>
+                    </div>
+                    <div style="font-size: 13px; color: #64748b;">
+                        <strong>Step:</strong> <span id="assertionSnapshotStep"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Text Tab -->
+            <div id="assertionTabText" class="assertion-tab-content">
+                <div class="assertion-text-container">
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Test Case:</div>
+                        <div class="assertion-text-value" id="assertionTextTestCase"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Step Number:</div>
+                        <div class="assertion-text-value" id="assertionTextStepNumber"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Step Description:</div>
+                        <div class="assertion-text-value" id="assertionTextStepDesc"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Assertion Type:</div>
+                        <div class="assertion-text-value" id="assertionTextType"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Expected Result:</div>
+                        <div class="assertion-text-value" id="assertionTextExpected"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Actual Result:</div>
+                        <div class="assertion-text-value" id="assertionTextActual"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Status:</div>
+                        <div class="assertion-text-value" id="assertionTextStatus"></div>
+                    </div>
+                    <div class="assertion-text-row">
+                        <div class="assertion-text-label">Timestamp:</div>
+                        <div class="assertion-text-value" id="assertionTextTimestamp"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Code Tab -->
+            <div id="assertionTabCode" class="assertion-tab-content">
+                <div class="assertion-code-container">
+                    <pre id="assertionCodeContent"><code>// Playwright assertion code will be displayed here
+await expect(page.locator('#element')).toBeVisible();
+await expect(page.locator('#element')).toHaveText('Expected Text');</code></pre>
+                </div>
+            </div>
+            
+            <div class="assertion-modal-actions">
+                <button class="btn-assertion-action btn-download" onclick="downloadAssertion()">
+                    <span>⬇️</span>
+                    Download
+                </button>
+                <button class="btn-assertion-action btn-copy" onclick="copyAssertionCode()">
+                    <span>📋</span>
+                    Copy Code
+                </button>
+                <button class="btn-assertion-action btn-close-modal" onclick="closeAssertionModal()">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Playwright Copilot floating chatbot -->
+    <div id="copilot-root"></div>
+    <script src="chatbot.js"></script>
+    <script>
+        // Initialize the Playwright Copilot after the page loads
+        window.addEventListener('DOMContentLoaded', function () {
+            if (typeof PlaywrightCopilot !== 'undefined') {
+                window._pwCopilot = new PlaywrightCopilot('copilot-root');
+                window._pwCopilot.init();
+            }
+        });
+    </script>
 
     <!-- Rename Modal for Test Types and Modules -->
     <div id="renameModal" class="modal">
